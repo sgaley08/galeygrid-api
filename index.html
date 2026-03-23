@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GaleyGrid">
+<meta name="theme-color" content="#060a09">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23060a09' width='100' height='100' rx='22'/><text x='50' y='68' text-anchor='middle' font-size='52' font-weight='800' fill='%233edba0'>G</text></svg>">
+<title>GaleyGrid</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060a09;--sf:#0e1512;--sf2:#151d19;--bd:#1e2b25;--bdl:#2d3f36;--tx:#e4ece6;--txm:#8a9e90;--txd:#546058;--ac:#3edba0;--acd:#268a62;--acb:rgba(62,219,160,.07);--dn:#e85454;--wn:#e8c844;--wnb:rgba(232,200,68,.07);--f:'DM Sans',-apple-system,sans-serif;--m:'JetBrains Mono','SF Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;background:var(--bg);color:var(--tx);font-family:var(--f);-webkit-font-smoothing:antialiased;overflow-x:hidden}button{font-family:var(--f)}
+.hdr{padding:12px 16px;border-bottom:1px solid var(--bd);background:var(--sf);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:8px}.logo-i{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--ac),var(--acd));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--bg)}.logo-t{font-size:15px;font-weight:700;letter-spacing:-.02em}.logo-s{font-size:8px;color:var(--txd);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.badge{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:3px 7px;border-radius:10px;background:var(--wnb);color:var(--wn);border:1px solid rgba(232,200,68,.15)}
+.main{max-width:720px;margin:0 auto;padding:12px}
+.cfg{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:12px;margin-bottom:12px}
+.cfg-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}.cfg-row:last-child{margin-bottom:0}
+.cfg-lbl{font-size:10px;font-weight:600;color:var(--txd);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.cfg-input{background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;color:var(--tx);font-size:11px;font-family:var(--m);outline:none;flex:1;min-width:100px}
+.cfg-input:focus{border-color:var(--acd)}select.cfg-input{font-family:var(--f);cursor:pointer}
+.sts{font-size:10px;font-weight:500}.sts.ok{color:var(--ac)}.sts.no{color:var(--dn)}
+.cfg-toggle{font-size:10px;color:var(--ac);background:none;border:none;cursor:pointer;font-weight:600}
+.cfg.collapsed .cfg-row{display:none}.cfg.collapsed .cfg-row:first-child{display:flex}
+
+/* Shots */
+.shot{background:var(--sf);border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:12px}.shot.ref{border-color:var(--acd)}
+.shot-h{padding:8px 12px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+.shot-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--txm)}
+.shot-tag{font-size:9px;font-weight:600;padding:2px 6px;border-radius:6px}.shot-tag.ref{color:var(--ac);background:var(--acb)}.shot-tag.intra{color:var(--wn);background:var(--wnb)}
+.src-tag{font-size:8px;font-weight:600;padding:2px 5px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;margin-left:4px}
+.src-tag.photo{color:var(--wn);background:var(--wnb)}.src-tag.dicom{color:var(--ac);background:var(--acb)}
+
+.dz{padding:24px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:120px;cursor:pointer;transition:.15s}
+.dz:hover,.dz.on{background:var(--acb)}
+.dz-ic{width:32px;height:32px;border-radius:8px;border:2px dashed var(--bdl);display:flex;align-items:center;justify-content:center;margin-bottom:6px;font-size:15px;color:var(--txd)}
+.dz-txt{font-size:11px;color:var(--txm);text-align:center;line-height:1.4}.dz-h{font-size:9px;color:var(--txd);margin-top:2px}
+.dz-btns{display:flex;gap:6px;margin-top:8px}
+.dz-btn{padding:6px 11px;border-radius:7px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--bdl);background:var(--sf2);color:var(--txm);transition:.15s;-webkit-tap-highlight-color:transparent}
+.dz-btn:active{background:var(--acb);color:var(--ac);border-color:var(--acd)}
+
+/* Canvas + Zoom */
+.cw{position:relative;background:#000;touch-action:none;-webkit-user-select:none;user-select:none;overflow:hidden}
+.cw canvas{display:block;width:100%;height:auto}
+.zoom-bar{position:absolute;bottom:8px;right:8px;display:flex;gap:4px;z-index:10}
+.zoom-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--bdl);background:rgba(14,21,18,.9);color:var(--txm);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.zoom-btn:active{color:var(--ac);border-color:var(--ac)}
+.zoom-badge{position:absolute;top:8px;left:8px;font-size:10px;font-weight:700;color:var(--ac);background:rgba(14,21,18,.9);padding:3px 8px;border-radius:6px;z-index:10;pointer-events:none;display:none}
+
+.shot-act{padding:6px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.fn{font-size:9px;color:var(--txd);font-family:var(--m);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:35%}
+.rm-btn{font-size:10px;color:var(--dn);background:0;border:0;cursor:pointer;font-weight:500}
+
+/* Per-shot scale calibration */
+.scale-bar{padding:8px 12px;border-top:1px solid var(--bd);background:var(--sf2);display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:10px;color:var(--txm)}
+.scale-btn{padding:4px 10px;border-radius:6px;font-size:9px;font-weight:600;cursor:pointer;border:1px solid var(--bdl);background:var(--sf);color:var(--txm);-webkit-tap-highlight-color:transparent}
+.scale-btn.active{border-color:#FFEA3D;color:#FFEA3D;background:rgba(255,234,61,.08)}
+.scale-val{font-size:11px;font-weight:700;color:var(--ac);font-family:var(--m)}
+.scale-input{background:var(--bg);border:1px solid var(--bd);border-radius:5px;padding:3px 6px;color:var(--tx);font-size:10px;font-family:var(--m);outline:none;width:45px;text-align:center}
+.scale-select{background:var(--bg);border:1px solid var(--bd);border-radius:5px;padding:3px 6px;color:var(--tx);font-size:10px;font-family:var(--f);outline:none;cursor:pointer}
+
+/* Buttons */
+.btn{padding:9px 14px;border-radius:8px;border:none;font-size:11px;font-weight:700;cursor:pointer;transition:.2s}
+.btn-primary{background:linear-gradient(135deg,var(--ac),var(--acd));color:var(--bg)}
+.btn-primary:disabled{background:var(--bd);color:var(--txd);cursor:default;opacity:.5}
+.btn-secondary{background:var(--sf);border:1px solid var(--bd);color:var(--txm)}.btn-secondary:hover{border-color:var(--ac);color:var(--ac)}
+.btn-sm{font-size:10px;padding:6px 10px}
+.lm-hint{padding:8px 12px;background:var(--acb);border:1px solid rgba(62,219,160,.12);border-radius:8px;font-size:10px;color:var(--ac);margin-bottom:8px;line-height:1.5;text-align:center;display:none}
+.add-shot{width:100%;padding:14px;border-radius:10px;border:2px dashed var(--bdl);background:0;color:var(--txm);font-size:12px;font-weight:600;cursor:pointer;margin-bottom:12px;transition:.15s;font-family:var(--f)}
+.add-shot:hover{border-color:var(--ac);color:var(--ac);background:var(--acb)}
+
+/* Comparison */
+.cmp{background:var(--sf);border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:12px}
+.cmp-h{padding:10px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:7px}
+.cmp-dot{width:7px;height:7px;border-radius:50%;background:var(--ac)}.cmp-t{font-size:11px;font-weight:600}
+.cmp-b{padding:14px}
+.carm{padding:10px;background:var(--acb);border:1px solid rgba(62,219,160,.12);border-radius:8px;margin-bottom:8px}
+.carm-l{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--acd);margin-bottom:3px}
+.carm-v{font-size:13px;font-weight:700;color:var(--ac);line-height:1.3}
+.mets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+@media(max-width:400px){.mets{grid-template-columns:1fr}}
+.met{padding:8px;background:var(--bg);border-radius:7px;border:1px solid var(--bd)}
+.met-l{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txd);margin-bottom:2px}
+.met-v{font-size:15px;font-weight:700;color:var(--ac);font-family:var(--m)}.met-u{font-size:10px;color:var(--txm);font-weight:400;margin-left:2px}
+
+/* Legend */
+.legend{display:flex;flex-wrap:wrap;gap:5px;padding:6px 12px;background:var(--sf2);border-top:1px solid var(--bd);font-size:8px}
+.leg-i{display:flex;align-items:center;gap:3px;color:var(--txm)}.leg-d{width:6px;height:6px;border-radius:50%}
+
+.loader{text-align:center;padding:20px}.spin{width:22px;height:22px;border:3px solid var(--bd);border-top-color:var(--ac);border-radius:50%;margin:0 auto 8px;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}.loader-t{font-size:11px;color:var(--txm)}
+.err{padding:10px;background:rgba(232,84,84,.07);border:1px solid rgba(232,84,84,.18);border-radius:8px;color:var(--dn);font-size:10px;line-height:1.4;font-family:var(--m);white-space:pre-wrap;word-break:break-word;max-height:150px;overflow-y:auto;margin-bottom:10px}
+.export-box{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:12px;margin-bottom:12px}
+.export-box h3{font-size:11px;font-weight:600;color:var(--txm);margin-bottom:6px}
+.export-count{font-size:22px;font-weight:700;color:var(--ac);font-family:var(--m)}.export-sub{font-size:10px;color:var(--txd);margin-top:2px}
+.disc{padding:8px 12px;background:var(--wnb);border:1px solid rgba(232,200,68,.12);border-radius:7px;margin-bottom:10px;font-size:9px;color:var(--wn);line-height:1.5}
+</style>
+</head>
+<body>
+<div class="hdr"><div class="logo"><div class="logo-i">G</div><div><div class="logo-t">GaleyGrid</div><div class="logo-s">Intraop Analysis + Training</div></div></div><span class="badge">Prototype</span></div>
+<div class="main">
+  <div class="disc">&#9888; Research prototype — not FDA cleared. Not for clinical decisions.</div>
+  <div class="cfg" id="cfgPanel">
+    <div class="cfg-row"><span class="cfg-lbl">Model URL</span><input class="cfg-input" id="modelUrl" placeholder="https://galeygrid-api-production.up.railway.app"><span class="sts no" id="apiSts">Not set</span><button class="cfg-toggle" onclick="toggleCfg()">Hide</button></div>
+    <div class="cfg-row"><span class="cfg-lbl">Supabase URL</span><input class="cfg-input" id="sbUrl" placeholder="https://xxx.supabase.co"><span class="cfg-lbl" style="margin-left:4px">Key</span><input class="cfg-input" id="sbKey" placeholder="eyJ..."></div>
+    <div class="cfg-row"><span class="cfg-lbl">Op Side</span><select class="cfg-input" id="opSide" style="flex:0;width:80px"><option value="left">Left</option><option value="right">Right</option></select></div>
+  </div>
+
+  <!-- Case Demographics -->
+  <div class="cfg" id="demoPanel">
+    <div class="cfg-row" style="margin-bottom:4px">
+      <span style="font-size:11px;font-weight:700;color:var(--ac);letter-spacing:.03em">CASE INFO</span>
+      <span class="cfg-lbl" style="margin-left:auto">Case ID</span>
+      <input class="cfg-input" id="caseId" readonly style="flex:0;width:110px;color:var(--ac);font-weight:600;cursor:default">
+    </div>
+    <div class="cfg-row">
+      <span class="cfg-lbl">Age</span>
+      <input class="cfg-input" id="ptAge" type="number" placeholder="yrs" style="flex:0;width:55px">
+      <span class="cfg-lbl">Sex</span>
+      <select class="cfg-input" id="ptSex" style="flex:0;width:65px"><option value="">--</option><option value="M">M</option><option value="F">F</option></select>
+      <span class="cfg-lbl">Ht (in)</span>
+      <input class="cfg-input" id="ptHtIn" type="number" placeholder="68" style="flex:0;width:50px" oninput="calcBMI()">
+      <span class="cfg-lbl">Wt (lbs)</span>
+      <input class="cfg-input" id="ptWtLbs" type="number" placeholder="180" style="flex:0;width:55px" oninput="calcBMI()">
+      <span class="cfg-lbl">BMI</span>
+      <input class="cfg-input" id="ptBMI" readonly style="flex:0;width:50px;color:var(--ac);cursor:default" placeholder="--">
+    </div>
+    <div class="cfg-row">
+      <span class="cfg-lbl">Approach</span>
+      <select class="cfg-input" id="ptApproach" style="flex:0;width:110px">
+        <option value="">--</option>
+        <option value="anterior">Anterior</option>
+        <option value="anterolateral">Anterolateral</option>
+        <option value="lateral">Lateral</option>
+        <option value="posterior">Posterior</option>
+        <option value="other">Other</option>
+      </select>
+      <span class="cfg-lbl">Diagnosis</span>
+      <select class="cfg-input" id="ptDx" style="flex:0;width:100px">
+        <option value="">--</option>
+        <option value="OA">OA</option>
+        <option value="AVN">AVN</option>
+        <option value="fracture">Fracture</option>
+        <option value="revision">Revision</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="cfg-row">
+      <span class="cfg-lbl">Cup Size</span>
+      <input class="cfg-input" id="impCup" type="number" placeholder="mm" style="flex:0;width:55px">
+      <span class="cfg-lbl">Head</span>
+      <input class="cfg-input" id="impHead" type="number" placeholder="mm" style="flex:0;width:50px">
+      <span class="cfg-lbl">+/-</span>
+      <input class="cfg-input" id="impHeadOffset" placeholder="0, +4" style="flex:0;width:50px">
+      <span class="cfg-lbl">Stem</span>
+      <input class="cfg-input" id="impStem" placeholder="size" style="flex:0;width:55px">
+      <span class="cfg-lbl">Type</span>
+      <input class="cfg-input" id="impStemType" placeholder="e.g. Corail" style="flex:0;width:80px">
+    </div>
+    <div class="cfg-row">
+      <span class="cfg-lbl">Perceived LLD (mm)</span>
+      <input class="cfg-input" id="perceivedLLD" type="number" placeholder="+5 or -3" style="flex:0;width:65px">
+      <span class="cfg-lbl">+ = long, - = short</span>
+      <span class="cfg-lbl" style="margin-left:auto">Notes</span>
+      <input class="cfg-input" id="caseNotes" placeholder="Optional" style="flex:1;min-width:80px">
+    </div>
+  </div>
+  <div class="lm-hint" id="lmHint">&#9758; <strong>Tap &amp; drag</strong> landmarks to correct. Use <strong>&#9906; Scale</strong> to calibrate with any known reference (ball, caliper, or implant).
+    <br><span style="font-size:9px;color:var(--txd)">Labels use patient orientation: PtR = patient's right (viewer's left) &bull; PtL = patient's left (viewer's right)</span></div>
+  <div style="text-align:center;margin-bottom:8px"><button onclick="toggleObTrace()" id="obTraceBtn" style="padding:4px 12px;border-radius:6px;font-size:9px;font-weight:600;cursor:pointer;border:1px solid var(--bdl);background:var(--sf2);color:var(--txd);font-family:var(--f)">Obturator Trace: OFF</button></div>
+  <div id="shotList"></div>
+  <button class="add-shot" onclick="addShot()">+ Add Fluoro Shot</button>
+  <div id="cmpBox"></div>
+  <div class="err" id="errBox" style="display:none"></div>
+  <div class="export-box" id="exportBox" style="display:none">
+    <h3>Training Data</h3><div class="export-count" id="exportCount">0</div><div class="export-sub">labeled images saved</div>
+    <div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-secondary btn-sm" onclick="exportJSON()">Export JSON</button><button class="btn btn-sm" style="background:rgba(232,84,84,.1);border:1px solid rgba(232,84,84,.2);color:var(--dn)" onclick="clearLocal()">Clear</button></div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/dicom-parser@1.8.21/dist/dicomParser.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const LM_COLORS={right_teardrop:'#FF5C5C',left_teardrop:'#5C8AFF',right_lesser_trochanter:'#FF9E3D',left_lesser_trochanter:'#3DDFFF',right_ischial_tuberosity:'#FF5CDD',left_ischial_tuberosity:'#5CFFB0',symphysis_superior:'#FFFFFF',symphysis_inferior:'#CCCCCC',coccyx_superior:'#FFB8D9',coccyx_inferior:'#FF8ABF',right_obturator_center:'#FFB07B',left_obturator_center:'#7BFFCB'};
+const LM_SHORT={right_teardrop:'PtR-TD',left_teardrop:'PtL-TD',right_lesser_trochanter:'PtR-LT',left_lesser_trochanter:'PtL-LT',right_ischial_tuberosity:'PtR-IT',left_ischial_tuberosity:'PtL-IT',symphysis_superior:'Sym-S',symphysis_inferior:'Sym-I',coccyx_superior:'Coc-S',coccyx_inferior:'Coc-I',right_obturator_center:'PtR-Ob',left_obturator_center:'PtL-Ob'};
+
+// State
+// shot = {id, img:{el,b64,mt,name,w,h}, imageSource:'photo'|'dicom', landmarks:{}, analysisRaw, loading, 
+//          zoom:{s,vx,vy}, scaleCal:{active,refType,refMm,points:[],pxPerMm}}
+let shots=[];
+let dragging=null; // {idx,key}
+
+// ============================================================
+// URL Params + Config
+// ============================================================
+(function(){const p=new URLSearchParams(location.search);const m={model:'modelUrl',sb:'sbUrl',sbk:'sbKey'};let f=false;for(const[k,id]of Object.entries(m)){const v=p.get(k);if(v){$(id).value=v;localStorage.setItem('gg_'+id,v);f=true}}if(f&&history.replaceState)history.replaceState({},'',location.pathname)})();
+['modelUrl','sbUrl','sbKey'].forEach(id=>{const el=$(id),s=localStorage.getItem('gg_'+id);if(s&&!el.value)el.value=s;el.addEventListener('input',()=>{localStorage.setItem('gg_'+id,el.value);if(id==='modelUrl')updSts()})});
+function updSts(){const u=$('modelUrl').value.trim();$('apiSts').textContent=u.startsWith('http')?'Ready':'Not set';$('apiSts').className='sts '+(u.startsWith('http')?'ok':'no');if(u.startsWith('http')&&$('sbUrl').value.trim().length>5)$('cfgPanel').classList.add('collapsed')}
+function toggleCfg(){$('cfgPanel').classList.toggle('collapsed')}
+updSts();
+
+// Auto-generate case ID on page load
+function genCaseId(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous chars
+  let id='GG-';
+  for(let i=0;i<6;i++)id+=chars[Math.floor(Math.random()*chars.length)];
+  return id;
+}
+$('caseId').value=genCaseId();
+
+function calcBMI(){
+  const ht=parseFloat($('ptHtIn').value);
+  const wt=parseFloat($('ptWtLbs').value);
+  if(ht>0&&wt>0){
+    const bmi=(wt/(ht*ht)*703).toFixed(1);
+    $('ptBMI').value=bmi;
+  } else {
+    $('ptBMI').value='';
+  }
+}
+
+function getCaseDemo(){
+  return {
+    case_id:$('caseId').value,
+    age:parseInt($('ptAge').value)||null,
+    sex:$('ptSex').value||null,
+    height_in:parseFloat($('ptHtIn').value)||null,
+    weight_lbs:parseFloat($('ptWtLbs').value)||null,
+    bmi:parseFloat($('ptBMI').value)||null,
+    approach:$('ptApproach').value||null,
+    diagnosis:$('ptDx').value||null,
+    implants:{
+      cup_mm:parseFloat($('impCup').value)||null,
+      head_mm:parseFloat($('impHead').value)||null,
+      head_offset:$('impHeadOffset').value||null,
+      stem_size:$('impStem').value||null,
+      stem_type:$('impStemType').value||null,
+    },
+    perceived_lld_mm:parseFloat($('perceivedLLD').value)||null,
+    notes:$('caseNotes').value||null,
+  };
+}
+
+function fmtPx(px,idx){const p=shotPPM(idx);return p?(px/p).toFixed(1)+'mm':Math.round(px)+'px'}
+function shotPPM(idx){if(idx!=null&&shots[idx]?.scaleCal?.pxPerMm)return shots[idx].scaleCal.pxPerMm;return null}
+
+// ============================================================
+// Shots
+// ============================================================
+function addShot(){
+  shots.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),img:null,imageSource:null,dicomMeta:null,landmarks:{},analysisRaw:null,loading:false,zoom:{s:1,vx:0,vy:0},scaleCal:{active:false,refType:'ball',refMm:25,points:[],pxPerMm:null}});
+  renderShots();
+}
+
+function renderShots(){
+  const list=$('shotList');list.innerHTML='';
+  shots.forEach((shot,idx)=>{
+    const isRef=idx===0;
+    const d=document.createElement('div');d.className='shot'+(isRef?' ref':'');d.id='shot'+idx;
+    const label=isRef?'Reference AP Pelvis':'Shot '+(idx+1);
+    const tag=isRef?'<span class="shot-tag ref">Reference</span>':'<span class="shot-tag intra">Intraop #'+idx+'</span>';
+    const srcTag=shot.imageSource?`<span class="src-tag ${shot.imageSource==='dicom'?'dicom':'photo'}">${shot.imageSource}</span>`:'';
+    const dicomInfo=shot.dicomMeta?`<span style="font-size:8px;color:var(--txd);margin-left:4px">${shot.dicomMeta.pixelSpacingMm?shot.dicomMeta.pixelSpacingMm.toFixed(2)+'mm/px':'no spacing'}${shot.dicomMeta.magnification?' mag:'+shot.dicomMeta.magnification.toFixed(2)+'x':''}</span>`:'';
+    let h='<div class="shot-h"><span class="shot-lbl">'+label+'</span><div>'+tag+srcTag+dicomInfo+'</div></div>';
+
+    if(!shot.img){
+      h+=`<div class="dz" id="dz${idx}"><div class="dz-ic">&#8853;</div><div class="dz-txt">${isRef?'Upload reference AP pelvis':'Upload fluoro shot'}</div><div class="dz-h">Photo, DICOM, or live capture</div>
+        <div class="dz-btns"><button class="dz-btn" onclick="event.stopPropagation();$('fL${idx}').click()">&#128444; Library</button><button class="dz-btn" onclick="event.stopPropagation();$('fC${idx}').click()">&#128247; Camera</button></div></div>
+        <input type="file" id="fL${idx}" accept="image/*,.dcm,application/dicom" style="display:none" onchange="loadShotImg(${idx},this.files[0])">
+        <input type="file" id="fC${idx}" accept="image/*" capture="environment" style="display:none" onchange="loadShotImg(${idx},this.files[0])">`;
+    } else {
+      h+=`<div class="cw" id="cw${idx}"><canvas id="cv${idx}"></canvas><div class="zoom-badge" id="zb${idx}"></div>
+        <div class="zoom-bar"><button class="zoom-btn" onclick="zoomAt(${idx},1.4)">+</button><button class="zoom-btn" onclick="zoomAt(${idx},1/1.4)">&minus;</button><button class="zoom-btn" onclick="resetZ(${idx})" style="font-size:11px">1:1</button></div></div>`;
+      // Actions
+      h+=`<div class="shot-act"><span class="fn">${shot.img.name}</span><div style="display:flex;gap:5px;align-items:center">`;
+      if(shot.loading){h+='<span class="loader-t">Analyzing...</span>'}
+      else if(!Object.keys(shot.landmarks).length){h+=`<button class="btn btn-primary btn-sm" onclick="analyzeShot(${idx})" ${$('modelUrl').value.trim().startsWith('http')?'':'disabled'}>Analyze</button>`}
+      else{h+=`<button class="btn btn-secondary btn-sm" onclick="saveShot(${idx})">Save</button>`}
+      h+=`<button class="rm-btn" onclick="rmShot(${idx})">Remove</button></div></div>`;
+      // Scale calibration bar
+      const sc=shot.scaleCal;
+      const refType=sc.refType||'ball';
+      const refMm=sc.refMm||25;
+      h+=`<div class="scale-bar">
+        <button class="scale-btn ${sc.active?'active':''}" onclick="toggleScale(${idx})">&#9906; Scale</button>`;
+      if(sc.active){
+        h+=`<select class="scale-select" onchange="setScaleRef(${idx},this.value,'type')">
+          <option value="ball" ${refType==='ball'?'selected':''}>Ball</option>
+          <option value="caliper" ${refType==='caliper'?'selected':''}>Caliper</option>
+          <option value="head" ${refType==='head'?'selected':''}>Fem Head</option>
+          <option value="cup" ${refType==='cup'?'selected':''}>Cup</option>
+          <option value="ruler" ${refType==='ruler'?'selected':''}>Ruler</option>
+          <option value="custom" ${refType==='custom'?'selected':''}>Custom</option>
+        </select>
+        <input class="scale-input" type="number" value="${refMm}" placeholder="mm" onchange="setScaleRef(${idx},this.value,'mm')">
+        <span class="cfg-lbl">mm</span>`;
+        if(sc.points.length<2)h+=`<span>Tap <strong>${2-sc.points.length}</strong> point${sc.points.length===0?'s':''} on edges</span>`;
+      }
+      if(sc.pxPerMm)h+=`<span class="scale-val">${sc.pxPerMm.toFixed(2)} px/mm</span>`;
+      if(sc.points.length>0)h+=`<button class="scale-btn" onclick="resetScale(${idx})">Reset</button>`;
+      h+='</div>';
+      // Legend
+      if(Object.keys(shot.landmarks).length){h+=`<div class="legend">${Object.entries(LM_COLORS).map(([k,c])=>`<div class="leg-i"><div class="leg-d" style="background:${c}"></div>${LM_SHORT[k]}</div>`).join('')}</div>`}
+    }
+    d.innerHTML=h;list.appendChild(d);
+    if(shot.img)setTimeout(()=>drawShot(idx),10);
+  });
+  $('lmHint').style.display=shots.some(s=>Object.keys(s.landmarks).length||s.scaleCal.active)?'':'none';
+  updateCmp();
+}
+
+function loadShotImg(idx,file){
+  if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  const isDicom=ext==='dcm'||ext==='dicom'||file.type==='application/dicom';
+  
+  if(isDicom){
+    // Parse DICOM
+    const reader=new FileReader();
+    reader.onload=e=>{
+      try{
+        const byteArray=new Uint8Array(e.target.result);
+        const dataSet=dicomParser.parseDicom(byteArray);
+        
+        // Extract metadata
+        const rows=dataSet.uint16('x00280010');
+        const cols=dataSet.uint16('x00280011');
+        const bitsAlloc=dataSet.uint16('x00280100')||16;
+        const bitsStored=dataSet.uint16('x00280101')||bitsAlloc;
+        const pixelRep=dataSet.uint16('x00280103')||0; // 0=unsigned, 1=signed
+        const rescaleSlope=parseFloat(dataSet.string('x00281053'))||1;
+        const rescaleIntercept=parseFloat(dataSet.string('x00281052'))||0;
+        let wc=parseFloat(dataSet.string('x00281050'))||null;
+        let ww=parseFloat(dataSet.string('x00281051'))||null;
+        const photometric=dataSet.string('x00280004')||'MONOCHROME2';
+        
+        // Pixel spacing (mm) — ImagerPixelSpacing (x00181164) or PixelSpacing (x00280030)
+        let pixelSpacingStr=dataSet.string('x00181164')||dataSet.string('x00280030')||null;
+        let pixelSpacingMm=null;
+        if(pixelSpacingStr){
+          const parts=pixelSpacingStr.split('\\');
+          if(parts.length>=1)pixelSpacingMm=parseFloat(parts[0]);
+        }
+        
+        // Source-to-detector and source-to-patient distances for magnification calc
+        const sid=parseFloat(dataSet.string('x00181110'))||null; // Distance Source to Detector
+        const sod=parseFloat(dataSet.string('x00181111'))||null; // Distance Source to Patient
+        
+        if(!rows||!cols)throw new Error('Missing image dimensions in DICOM');
+        
+        // Extract pixel data
+        const pixelDataElement=dataSet.elements.x7fe00010;
+        if(!pixelDataElement)throw new Error('No pixel data found in DICOM');
+        
+        let pixelData;
+        if(bitsAlloc===16){
+          if(pixelRep===1){
+            pixelData=new Int16Array(byteArray.buffer,pixelDataElement.dataOffset,pixelDataElement.length/2);
+          } else {
+            pixelData=new Uint16Array(byteArray.buffer,pixelDataElement.dataOffset,pixelDataElement.length/2);
+          }
+        } else if(bitsAlloc===8){
+          pixelData=new Uint8Array(byteArray.buffer,pixelDataElement.dataOffset,pixelDataElement.length);
+        } else {
+          throw new Error('Unsupported bits allocated: '+bitsAlloc);
+        }
+        
+        // Apply rescale
+        let processed=new Float32Array(rows*cols);
+        for(let i=0;i<rows*cols;i++){
+          processed[i]=pixelData[i]*rescaleSlope+rescaleIntercept;
+        }
+        
+        // Auto window if not specified
+        if(!wc||!ww){
+          let mn=Infinity,mx=-Infinity;
+          for(let i=0;i<processed.length;i++){if(processed[i]<mn)mn=processed[i];if(processed[i]>mx)mx=processed[i]}
+          wc=(mn+mx)/2;ww=mx-mn;
+        }
+        
+        // Render to canvas → ImageData
+        const canvas=document.createElement('canvas');
+        canvas.width=cols;canvas.height=rows;
+        const ctx=canvas.getContext('2d');
+        const imgData=ctx.createImageData(cols,rows);
+        const low=wc-ww/2,high=wc+ww/2;
+        const invert=photometric==='MONOCHROME1';
+        
+        for(let i=0;i<rows*cols;i++){
+          let val=((processed[i]-low)/(high-low))*255;
+          val=Math.max(0,Math.min(255,Math.round(val)));
+          if(invert)val=255-val;
+          imgData.data[i*4]=val;
+          imgData.data[i*4+1]=val;
+          imgData.data[i*4+2]=val;
+          imgData.data[i*4+3]=255;
+        }
+        ctx.putImageData(imgData,0,0);
+        
+        // Resize for app use
+        const max=1000;let w=cols,h=rows;
+        const ratio=Math.min(max/w,max/h,1);
+        w=Math.round(w*ratio);h=Math.round(h*ratio);
+        const c2=document.createElement('canvas');c2.width=w;c2.height=h;
+        c2.getContext('2d').drawImage(canvas,0,0,w,h);
+        const du=c2.toDataURL('image/jpeg',.85);
+        
+        // Create Image element for drawing
+        const img=new Image();
+        img.onload=()=>{
+          shots[idx].img={el:img,b64:du.split(',')[1],mt:'image/jpeg',name:file.name,w,h};
+          shots[idx].imageSource='dicom';
+          shots[idx].dicomMeta={
+            pixelSpacingMm,
+            rows:rows,cols:cols,
+            bitsAllocated:bitsAlloc,
+            windowCenter:wc,windowWidth:ww,
+            sid,sod,
+            magnification:sid&&sod?sid/sod:null,
+          };
+          // Auto-set detector pixel spacing calibration if available
+          if(pixelSpacingMm&&sid&&sod){
+            // Correct for magnification: object_spacing = detector_spacing * (SID/SOD) is wrong
+            // Actually: object_size = detector_size * SOD/SID  (objects closer to source are magnified)
+            // So px/mm at the object = px/mm_at_detector * SID/SOD
+            // px/mm_at_detector = 1/pixelSpacingMm
+            // px/mm_at_object = (1/pixelSpacingMm) * (SID/SOD)... but this is still at detector resolution pre-resize
+            // After resize by ratio: effective_px/mm = (1/pixelSpacingMm) * ratio
+            // Marker ball or known ref needed for object-plane calibration
+          }
+          shots[idx].landmarks={};shots[idx].analysisRaw=null;
+          shots[idx].scaleCal={active:false,refType:'ball',refMm:25,points:[],pxPerMm:null};
+          renderShots();
+        };
+        img.src=du;
+        
+      }catch(err){
+        alert('DICOM parse error: '+err.message+'\n\nTry exporting as JPEG from the C-arm if this file type is unsupported.');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    // Standard image (photo/JPEG/PNG)
+    const r=new FileReader();
+    r.onload=e=>{const img=new Image();img.onload=()=>{
+      const max=1000;let w=img.naturalWidth,h=img.naturalHeight;
+      const ratio=Math.min(max/w,max/h,1);w=Math.round(w*ratio);h=Math.round(h*ratio);
+      const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+      const du=c.toDataURL('image/jpeg',.75);
+      shots[idx].img={el:img,b64:du.split(',')[1],mt:'image/jpeg',name:file.name,w,h};
+      shots[idx].imageSource='photo';
+      shots[idx].dicomMeta=null;
+      shots[idx].landmarks={};shots[idx].analysisRaw=null;
+      shots[idx].scaleCal={active:false,refType:'ball',refMm:25,points:[],pxPerMm:null};
+      renderShots();
+    };img.onerror=()=>{alert('Could not load image file.')};
+    img.src=e.target.result};r.readAsDataURL(file);
+  }
+}
+function rmShot(idx){shots.splice(idx,1);renderShots()}
+
+// ============================================================
+// Scale Calibration (per-shot)
+// ============================================================
+function toggleScale(idx){
+  const sc=shots[idx].scaleCal;
+  sc.active=!sc.active;
+  if(!sc.active){sc.points=[];sc.pxPerMm=null}
+  renderShots();
+}
+function resetScale(idx){
+  const sc=shots[idx].scaleCal;
+  sc.points=[];sc.pxPerMm=null;sc.active=true;
+  renderShots();
+}
+function setScaleRef(idx,val,field){
+  const sc=shots[idx].scaleCal;
+  if(field==='type'){
+    sc.refType=val;
+    // Auto-fill common sizes
+    const sizes={ball:25,head:36,cup:52,caliper:0,ruler:0,custom:0};
+    if(sizes[val])sc.refMm=sizes[val];
+  } else if(field==='mm'){
+    sc.refMm=parseFloat(val)||0;
+  }
+  // Recalculate if two points exist
+  if(sc.points.length===2&&sc.refMm>0){
+    const dist=Math.hypot(sc.points[1].x-sc.points[0].x,sc.points[1].y-sc.points[0].y);
+    sc.pxPerMm=dist/sc.refMm;
+    drawShot(idx);
+  }
+  renderShots();
+}
+function addScalePoint(idx,imgX,imgY){
+  const sc=shots[idx].scaleCal;
+  if(sc.points.length>=2)sc.points=[];
+  sc.points.push({x:imgX,y:imgY});
+  if(sc.points.length===2&&sc.refMm>0){
+    const dist=Math.hypot(sc.points[1].x-sc.points[0].x,sc.points[1].y-sc.points[0].y);
+    sc.pxPerMm=dist/sc.refMm;
+  }
+  drawShot(idx);renderShots();
+}
+
+// ============================================================
+// Drawing (with canvas-context zoom)
+// ============================================================
+function drawShot(idx){
+  const shot=shots[idx];if(!shot?.img)return;
+  const cv=document.getElementById('cv'+idx);if(!cv)return;
+  const ctx=cv.getContext('2d');const W=shot.img.w,H=shot.img.h;
+  cv.width=W;cv.height=H;
+  const z=shot.zoom;
+  ctx.clearRect(0,0,W,H);ctx.save();ctx.scale(z.s,z.s);ctx.translate(-z.vx,-z.vy);
+  ctx.drawImage(shot.img.el,0,0,W,H);
+  const ui=1/z.s; // inverse scale so UI elements stay constant screen size
+  // Scale calibration points
+  const scCal=shot.scaleCal;
+  if(scCal.points.length>0){
+    const sc=Math.max(W,H)/900;
+    scCal.points.forEach((pt,i)=>{
+      const col=i?'#5C8AFF':'#FF5C5C';
+      // Shadow
+      ctx.beginPath();ctx.arc(pt.x,pt.y,10*sc*ui,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.4)';ctx.fill();
+      // Dot
+      ctx.beginPath();ctx.arc(pt.x,pt.y,8*sc*ui,0,Math.PI*2);ctx.fillStyle=col;ctx.globalAlpha=.9;ctx.fill();ctx.globalAlpha=1;
+      ctx.strokeStyle='#fff';ctx.lineWidth=2*sc*ui;ctx.stroke();
+      // Drag affordance ring
+      ctx.beginPath();ctx.arc(pt.x,pt.y,12*sc*ui,0,Math.PI*2);ctx.strokeStyle=col+'55';ctx.lineWidth=1.5*ui;ctx.setLineDash([3*ui,3*ui]);ctx.stroke();ctx.setLineDash([]);
+      // Label
+      ctx.font=`bold ${Math.round(10*sc*ui)}px 'DM Sans'`;
+      ctx.fillStyle=col;ctx.fillText(i?'B':'A',pt.x+12*sc*ui,pt.y+4*sc*ui);
+    });
+    if(scCal.points.length===2){
+      const p1=scCal.points[0],p2=scCal.points[1];
+      ctx.setLineDash([6*ui,4*ui]);ctx.strokeStyle='#FFEA3D';ctx.lineWidth=2.5*ui;
+      ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();ctx.setLineDash([]);
+      const dist=Math.hypot(p2.x-p1.x,p2.y-p1.y);
+      const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2;
+      const rType=scCal.refType||'ref';const rMm=scCal.refMm||0;
+      const txt=scCal.pxPerMm?`${rMm}mm ${rType} (${Math.round(dist)}px)`:Math.round(dist)+'px';
+      ctx.font=`bold ${Math.round(12*sc*ui)}px 'JetBrains Mono'`;const tw=ctx.measureText(txt).width;
+      ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,mx-tw/2-5,my-10*sc*ui,tw+10,16*sc*ui,4*ui);
+      ctx.fillStyle='#FFEA3D';ctx.fillText(txt,mx-tw/2,my+3*sc*ui);
+    }
+  }
+  if(Object.keys(shot.landmarks).length)drawOverlay(ctx,shot.landmarks,W,H,ui,idx);
+  ctx.restore();
+  // Badge
+  const badge=document.getElementById('zb'+idx);
+  if(badge){badge.style.display=z.s>1.05?'':'none';badge.textContent=z.s.toFixed(1)+'x'}
+  setupDrag(idx);
+}
+
+// ============================================================
+// Obturator Foramen Tracer — tuner-confirmed params
+// strategy : d2 (second-derivative / inflection), FIRST peak
+// blur     : 7×7 box
+// radius   : 10% of max(imgW,imgH)
+// d2 floor : max(0.04*range, 0.8)  ← absolute floor prevents
+//            near-zero threshold on low-contrast images
+// minStart : 20% of maxRadius  ← can't trigger in noisy interior
+// ceiling  : 55% of dark→bright range
+// ============================================================
+function traceObturator(imgEl,cx,cy,imgW,imgH){
+  const tc=document.createElement('canvas');tc.width=imgW;tc.height=imgH;
+  const tctx=tc.getContext('2d');tctx.drawImage(imgEl,0,0,imgW,imgH);
+  const imgData=tctx.getImageData(0,0,imgW,imgH).data;
+
+  const brightness=(x,y)=>{
+    const ix=Math.round(x),iy=Math.round(y);
+    if(ix<0||ix>=imgW||iy<0||iy>=imgH)return 255;
+    const i=(iy*imgW+ix)*4;return(imgData[i]+imgData[i+1]+imgData[i+2])/3;
+  };
+
+  cx=Math.round(cx);cy=Math.round(cy);
+  if(cx<4||cx>=imgW-4||cy<4||cy>=imgH-4)return null;
+
+  const seedBright=brightness(cx,cy);
+  const maxRadius=Math.round(Math.max(imgW,imgH)*0.10);
+  // Must be at least 20% of the way out — prevents noise near center from triggering
+  const minStart=Math.round(maxRadius*0.20);
+  const numRays=72;
+  const rawRadii=[];
+
+  for(let i=0;i<numRays;i++){
+    const angle=(i/numRays)*Math.PI*2;
+    const ddx=Math.cos(angle),ddy=Math.sin(angle);
+
+    // 7×7 box blur while walking the ray
+    const profile=[];
+    for(let r=0;r<maxRadius;r+=1){
+      const px=cx+ddx*r,py=cy+ddy*r;
+      if(px<3||px>=imgW-3||py<3||py>=imgH-3)break;
+      let sum=0,n=0;
+      for(let sy=-3;sy<=3;sy++)for(let sx=-3;sx<=3;sx++){
+        const nx=Math.round(px)+sx,ny=Math.round(py)+sy;
+        if(nx>=0&&nx<imgW&&ny>=0&&ny<imgH){sum+=brightness(nx,ny);n++;}}
+      profile.push({r,b:n?sum/n:255});
+    }
+    if(profile.length<10){rawRadii.push(maxRadius);continue;}
+
+    // Single rolling-average smooth (window=5)
+    const sm=profile.map((p,j)=>{
+      let s=0,c=0;
+      for(let k=-2;k<=2;k++){const idx=j+k;if(idx>=0&&idx<profile.length){s+=profile[idx].b;c++;}}
+      return{r:p.r,b:s/c};
+    });
+
+    const maxBright=sm[sm.length-1].b;
+    const range=maxBright-seedBright;
+    const edgeBrightMax=seedBright+range*0.55;
+    // Absolute floor of 0.8 prevents near-zero threshold on flat/low-contrast rays
+    const d2Threshold=Math.max(0.04*range, 0.8);
+
+    // FIRST qualifying d2 peak past minStart — stops at foramen boundary
+    const step=2;
+    let edgeR=maxRadius;
+    for(let j=step*2;j<sm.length-step*2;j++){
+      if(sm[j].r<minStart)continue;       // skip noisy interior
+      if(sm[j].b>edgeBrightMax)break;     // stop once in bright bone
+      const d1b=(sm[j].b-sm[j-step].b)/step;
+      const d1a=(sm[j+step].b-sm[j].b)/step;
+      const d2=d1a-d1b;
+      if(d2>=d2Threshold&&d1a>0){edgeR=sm[j].r;break;}
+    }
+    rawRadii.push(edgeR);
+  }
+
+  // Median filter (window=5)
+  const medRadii=rawRadii.map((r,i)=>{
+    const w=[];for(let j=-2;j<=2;j++)w.push(rawRadii[(i+j+numRays)%numRays]);
+    w.sort((a,b)=>a-b);return w[2];
+  });
+
+  // Ellipse-fit correction — only on valid rays, gate ≥40%
+  const validCount=medRadii.filter(r=>r<maxRadius*0.95).length;
+  const validFrac=validCount/numRays;
+  let finalRadii;
+
+  if(validFrac>=0.40){
+    let sumR=0,sumA=0,sumB=0,n=0;
+    medRadii.forEach((r,i)=>{
+      if(r>=maxRadius*0.95)return;
+      const th=(i/numRays)*Math.PI*2;
+      sumR+=r;sumA+=r*Math.cos(2*th);sumB+=r*Math.sin(2*th);n++;
+    });
+    const r0=sumR/n,fa=(2/n)*sumA,fb=(2/n)*sumB;
+    finalRadii=medRadii.map((r,i)=>{
+      const th=(i/numRays)*Math.PI*2;
+      const rFit=r0+fa*Math.cos(2*th)+fb*Math.sin(2*th);
+      if(r>=maxRadius*0.95)return Math.max(minStart,rFit);
+      if(Math.abs(r-rFit)>16)return(r+rFit)/2;
+      return r;
+    });
+  } else {
+    finalRadii=medRadii.map((r,i)=>{
+      if(r<maxRadius*0.95)return r;
+      let lo=null,hi=null;
+      for(let j=1;j<numRays;j++){
+        if(lo===null&&medRadii[(i-j+numRays)%numRays]<maxRadius*0.95)lo=medRadii[(i-j+numRays)%numRays];
+        if(hi===null&&medRadii[(i+j)%numRays]<maxRadius*0.95)hi=medRadii[(i+j)%numRays];
+        if(lo!==null&&hi!==null)break;
+      }
+      if(lo!==null&&hi!==null)return(lo+hi)/2;
+      return lo??hi??maxRadius*0.45;
+    });
+  }
+
+  const contour=finalRadii.map((r,i)=>{
+    const angle=(i/numRays)*Math.PI*2;
+    return{x:Math.round(cx+Math.cos(angle)*r),y:Math.round(cy+Math.sin(angle)*r)};
+  });
+
+  const smoothed=contour.map((p,i)=>{
+    let sx=0,sy=0;const w=4;
+    for(let j=-w;j<=w;j++){const ni=(i+j+contour.length)%contour.length;sx+=contour[ni].x;sy+=contour[ni].y;}
+    return{x:Math.round(sx/(w*2+1)),y:Math.round(sy/(w*2+1))};
+  });
+
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity,totalArea=0;
+  for(let i=0;i<smoothed.length;i++){
+    const p=smoothed[i],next=smoothed[(i+1)%smoothed.length];
+    if(p.x<minX)minX=p.x;if(p.x>maxX)maxX=p.x;
+    if(p.y<minY)minY=p.y;if(p.y>maxY)maxY=p.y;
+    totalArea+=(p.x*next.y-next.x*p.y);
+  }
+  totalArea=Math.abs(totalArea)/2;
+  const width=maxX-minX,height=maxY-minY;
+  if(width<10||height<10)return null;
+
+  return{center:{x:cx,y:cy},area:Math.round(totalArea),width,height,
+    aspectRatio:Math.round((width/(height||1))*100)/100,
+    minX,maxX,minY,maxY,contour:smoothed,
+    validFrac:Math.round(validFrac*100)};
+}
+
+// Cache traced obturators per shot to avoid re-tracing on every draw
+let obTracerCache={};
+let obTraceEnabled=false; // default OFF while tuning
+function getObTrace(shotIdx,side){
+  const key=shotIdx+'_'+side;
+  if(obTracerCache[key])return obTracerCache[key];
+  const shot=shots[shotIdx];if(!shot?.img)return null;
+  const lm=shot.landmarks;
+  const ob=lm[side+'_obturator_center'];
+  if(!ob||ob.x==null)return null;
+  const trace=traceObturator(shot.img.el,ob.x,ob.y,shot.img.w,shot.img.h);
+  if(trace)obTracerCache[key]=trace;
+  return trace;
+}
+// Clear cache when landmarks change
+function clearObCache(shotIdx){
+  Object.keys(obTracerCache).forEach(k=>{if(k.startsWith(shotIdx+'_'))delete obTracerCache[k]});
+}
+function toggleObTrace(){
+  obTraceEnabled=!obTraceEnabled;
+  obTracerCache={}; // clear cache when toggling
+  const btn=$('obTraceBtn');
+  btn.textContent='Obturator Trace: '+(obTraceEnabled?'ON':'OFF');
+  btn.style.borderColor=obTraceEnabled?'var(--ac)':'var(--bdl)';
+  btn.style.color=obTraceEnabled?'var(--ac)':'var(--txd)';
+  btn.style.background=obTraceEnabled?'var(--acb)':'var(--sf2)';
+  redrawAll();
+}
+
+// ============================================================
+// Clinical threshold colors
+// ============================================================
+function threshColor(val,low,high){return val<low?'#3edba0':val<high?'#e8c844':'#e85454'} // green/yellow/red
+
+function drawOverlay(ctx,lm,w,h,ui,shotIdx){
+  const sc=Math.max(w,h)/900,r=Math.max(8,10*sc)*ui,fs=Math.max(11,13*sc)*ui;
+  const pts={};for(const[k,v]of Object.entries(lm)){if(v&&v.x!=null)pts[k]=v}
+  const ppm=shotPPM(shotIdx); // px per mm, null if uncalibrated
+  const fmt=px=>ppm?(px/ppm).toFixed(1)+'mm':Math.round(px)+'px';
+
+  // ========== SYMPHYSIS ==========
+  const ss=pts.symphysis_superior,si=pts.symphysis_inferior;
+  if(ss&&si){
+    dashLine(ctx,ss.x,0,ss.x,h,'rgba(255,255,255,.35)',1.5*sc*ui,10*ui,8*ui);
+    ctx.beginPath();ctx.moveTo(ss.x,ss.y);ctx.lineTo(si.x,si.y);ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=2.5*sc*ui;ctx.stroke();
+    const dY=Math.abs(si.y-ss.y);
+    const mx=(ss.x+si.x)/2+14*ui,my=(ss.y+si.y)/2;
+    ctx.font=`bold ${Math.round(fs*.85)}px 'JetBrains Mono'`;const txt='Sym H: '+fmt(dY);const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.75)';fillRR(ctx,mx-3*ui,my-fs/2-2*ui,tw+8*ui,fs+4*ui,3*ui);
+    ctx.fillStyle='#fff';ctx.fillText(txt,mx+1*ui,my+fs*.3);
+  } else if(ss){dashLine(ctx,ss.x,0,ss.x,h,'rgba(255,255,255,.3)',1.5*sc*ui,10*ui,8*ui)}
+  else if(si){dashLine(ctx,si.x,0,si.x,h,'rgba(255,255,255,.3)',1.5*sc*ui,10*ui,8*ui)}
+  const symMidX=ss&&si?(ss.x+si.x)/2:ss?ss.x:si?si.x:null;
+
+  // ========== COCCYX AXIS ==========
+  const cs=pts.coccyx_superior,ci=pts.coccyx_inferior;
+  if(cs&&ci){
+    const dx=ci.x-cs.x,dy=ci.y-cs.y,len=Math.hypot(dx,dy);
+    if(len>0){const ux=dx/len,uy=dy/len;dashLine(ctx,cs.x-ux*60,cs.y-uy*60,ci.x+ux*60,ci.y+uy*60,'rgba(255,184,217,.35)',1.5*sc*ui,10*ui,8*ui)}
+    ctx.beginPath();ctx.moveTo(cs.x,cs.y);ctx.lineTo(ci.x,ci.y);ctx.strokeStyle='rgba(255,138,191,.7)';ctx.lineWidth=2.5*sc*ui;ctx.stroke();
+    const axAng=Math.atan2(ci.x-cs.x,ci.y-cs.y)*180/Math.PI;
+    const mx=(cs.x+ci.x)/2+14*ui,my=(cs.y+ci.y)/2;
+    ctx.font=`bold ${Math.round(fs*.85)}px 'JetBrains Mono'`;const txt=axAng.toFixed(1)+'\u00B0';const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.7)';fillRR(ctx,mx-3*ui,my-fs/2-2*ui,tw+8*ui,fs+4*ui,3*ui);
+    ctx.fillStyle='#FFB8D9';ctx.fillText(txt,mx+1*ui,my+fs*.3);
+  }
+
+  // ========== TEARDROP LINE + TILT ==========
+  const ltd=pts.left_teardrop,rtd=pts.right_teardrop;
+  let tdAng=0;
+  if(ltd&&rtd){const dx=ltd.x-rtd.x,dy=ltd.y-rtd.y,len=Math.hypot(dx,dy);
+    tdAng=Math.atan2(dy,dx)*180/Math.PI;
+    if(len>0){
+    const ux=dx/len,uy=dy/len,ext=70;dashLine(ctx,rtd.x-ux*ext,rtd.y-uy*ext,ltd.x+ux*ext,ltd.y+uy*ext,'rgba(255,255,255,.65)',2*sc*ui,10*ui,7*ui);
+    const mx=(rtd.x+ltd.x)/2,my=(rtd.y+ltd.y)/2;
+    const tiltCol=threshColor(Math.abs(tdAng),2,5);
+    const txt='Tilt: '+tdAng.toFixed(1)+'\u00B0';ctx.font=`bold ${Math.round(fs*1.1)}px 'JetBrains Mono'`;const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.75)';fillRR(ctx,mx-tw/2-6*ui,my-fs*1.4-6*ui,tw+12*ui,fs*1.5+4*ui,5*ui);ctx.fillStyle=tiltCol;ctx.fillText(txt,mx-tw/2,my-10*ui)}}
+
+  // ========== ISCHIAL LINE ==========
+  const lit=pts.left_ischial_tuberosity,rit=pts.right_ischial_tuberosity;
+  if(lit&&rit){const dx=lit.x-rit.x,dy=lit.y-rit.y,len=Math.hypot(dx,dy);if(len>0){const ux=dx/len,uy=dy/len;dashLine(ctx,rit.x-ux*40,rit.y-uy*40,lit.x+ux*40,lit.y+uy*40,'rgba(180,180,255,.35)',1.5*sc*ui,7*ui,9*ui)}}
+
+  // ========== DUAL LLD — from teardrops AND ischials ==========
+  const llt=pts.left_lesser_trochanter,rlt=pts.right_lesser_trochanter;
+  let lldTD=null,lldIT=null; // signed: positive = right longer
+  
+  // LLD from teardrop line
+  if(ltd&&rtd&&(llt||rlt)){
+    let llDist=null,rlDist=null;
+    for(const[k,side]of[['left_lesser_trochanter','L'],['right_lesser_trochanter','R']]){
+      if(!pts[k])continue;const p=pts[k],col=LM_COLORS[k];
+      const pr=projPt(p.x,p.y,rtd.x,rtd.y,ltd.x,ltd.y);
+      dashLine(ctx,p.x,p.y,pr.x,pr.y,col+'bb',2*sc*ui,6*ui,4*ui);
+      ctx.beginPath();ctx.moveTo(pr.x-8*ui,pr.y);ctx.lineTo(pr.x+8*ui,pr.y);ctx.strokeStyle=col+'bb';ctx.lineWidth=2*sc*ui;ctx.stroke();
+      const dist=Math.hypot(p.x-pr.x,p.y-pr.y);
+      if(side==='L')llDist=dist;else rlDist=dist;
+      // Label each projection
+      const mx=(p.x+pr.x)/2+12*ui,my=(p.y+pr.y)/2;
+      ctx.font=`${Math.round(fs*.8)}px 'JetBrains Mono'`;const dt=fmt(dist);const dw=ctx.measureText(dt).width;
+      ctx.fillStyle='rgba(0,0,0,.7)';fillRR(ctx,mx-3*ui,my-fs/2-2*ui,dw+6*ui,fs+2*ui,3*ui);ctx.fillStyle=col;ctx.fillText(dt,mx,my+fs*.3);
+    }
+    if(llDist!=null&&rlDist!=null)lldTD=rlDist-llDist;
+  }
+
+  // LLD from ischial tuberosity line
+  if(lit&&rit&&(llt||rlt)){
+    let llDist=null,rlDist=null;
+    for(const[k,side]of[['left_lesser_trochanter','L'],['right_lesser_trochanter','R']]){
+      if(!pts[k])continue;const p=pts[k];
+      const pr=projPt(p.x,p.y,rit.x,rit.y,lit.x,lit.y);
+      // Draw lighter projection line to ischial reference
+      dashLine(ctx,p.x,p.y,pr.x,pr.y,'rgba(180,180,255,.3)',1.5*sc*ui,4*ui,6*ui);
+      const dist=Math.hypot(p.x-pr.x,p.y-pr.y);
+      if(side==='L')llDist=dist;else rlDist=dist;
+    }
+    if(llDist!=null&&rlDist!=null)lldIT=rlDist-llDist;
+  }
+
+  // ========== OBTURATOR TRACING (if enabled) ==========
+  let robTrace=null,lobTrace=null;
+  const rob=pts.right_obturator_center,lob=pts.left_obturator_center;
+  if(obTraceEnabled){
+    if(rob){robTrace=getObTrace(shotIdx,'right')}
+    if(lob){lobTrace=getObTrace(shotIdx,'left')}
+  }
+
+  // Draw traced outlines
+  for(const[trace,col] of [[robTrace,'#FFB07B'],[lobTrace,'#7BFFCB']]){
+    if(!trace||!trace.contour.length)continue;
+    // Draw smooth contour
+    ctx.beginPath();
+    ctx.moveTo(trace.contour[0].x,trace.contour[0].y);
+    for(let i=1;i<trace.contour.length;i++)ctx.lineTo(trace.contour[i].x,trace.contour[i].y);
+    ctx.closePath();
+    ctx.strokeStyle=col+'aa';ctx.lineWidth=2*sc*ui;ctx.stroke();
+    ctx.fillStyle=col+'15';ctx.fill();
+    
+    // Draw bounding box (width x height)
+    ctx.setLineDash([4*ui,4*ui]);ctx.strokeStyle=col+'44';ctx.lineWidth=1*ui;
+    ctx.strokeRect(trace.minX,trace.minY,trace.width,trace.height);
+    ctx.setLineDash([]);
+    
+    // Width/height/area/AR label
+    const lx=trace.center.x,ly=trace.maxY+16*ui;
+    ctx.font=`bold ${Math.round(fs*.75)}px 'JetBrains Mono'`;
+    const wTxt=fmt(trace.width),hTxt=fmt(trace.height);
+    const txt=`${wTxt}×${hTxt} AR:${trace.aspectRatio}`;
+    const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.75)';fillRR(ctx,lx-tw/2-4*ui,ly-2*ui,tw+8*ui,fs+4*ui,3*ui);
+    ctx.fillStyle=col;ctx.fillText(txt,lx-tw/2,ly+fs-2*ui);
+  }
+
+  // Obturator asymmetry (area-based if traced, distance-based fallback)
+  let obAsym=null,obDir='';
+  if(robTrace&&lobTrace){
+    const rA=robTrace.area,lA=lobTrace.area;
+    const ratio=Math.min(rA,lA)/Math.max(rA,lA);
+    obAsym=(1-ratio)*100;
+    obDir=rA>lA?'R larger':'L larger';
+    // Also compare aspect ratios
+    const rAR=robTrace.aspectRatio,lAR=lobTrace.aspectRatio;
+    const arDiff=Math.abs(rAR-lAR);
+    // Width comparison for Judet assessment
+    const wRatio=Math.min(robTrace.width,lobTrace.width)/Math.max(robTrace.width,lobTrace.width);
+    const wAsym=(1-wRatio)*100;
+    const hRatio=Math.min(robTrace.height,lobTrace.height)/Math.max(robTrace.height,lobTrace.height);
+    const hAsym=(1-hRatio)*100;
+  } else if(rob&&lob&&symMidX!=null){
+    const ld=Math.abs(lob.x-symMidX),rd=Math.abs(rob.x-symMidX);
+    const ratio=ld>0&&rd>0?Math.min(ld,rd)/Math.max(ld,rd):1;
+    obAsym=(1-ratio)*100;obDir=ld>rd?'L wider':'R wider';
+  }
+
+  // ========== CLINICAL SUMMARY PANEL (top-right) ==========
+  const panelX=w-10*ui,panelY=8*ui;
+  let py=panelY;const lineH=fs*1.3;
+  ctx.font=`bold ${Math.round(fs*.9)}px 'DM Sans'`;
+
+  // AP / Rotation check
+  const cocMidX=cs&&ci?(cs.x+ci.x)/2:null;
+  if(symMidX!=null&&cocMidX!=null){
+    const dx=Math.abs(cocMidX-symMidX);const isAP=ppm?dx/ppm<10:dx<30;
+    const apT=isAP?'AP: Good':'AP: Rotated';const apC=isAP?'#3edba0':'#e8c844';
+    const tw=ctx.measureText(apT).width;
+    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,lineH,4*ui);
+    ctx.fillStyle=apC;ctx.fillText(apT,panelX-tw-3*ui,py+fs-1*ui);py+=lineH+3*ui;
+  }
+
+  // Tilt
+  if(ltd&&rtd){
+    const tiltCol=threshColor(Math.abs(tdAng),2,5);
+    const txt='Tilt: '+tdAng.toFixed(1)+'\u00B0';const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,lineH,4*ui);
+    ctx.fillStyle=tiltCol;ctx.fillText(txt,panelX-tw-3*ui,py+fs-1*ui);py+=lineH+3*ui;
+  }
+
+  // LLD from teardrops
+  if(lldTD!=null){
+    const absLLD=Math.abs(lldTD);const lldCol=ppm?threshColor(absLLD/ppm,5,10):threshColor(absLLD,15,30);
+    const side=lldTD>0?'R long':'L long';
+    const txt='LLD(TD): '+fmt(absLLD)+' '+side;const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,lineH,4*ui);
+    ctx.fillStyle=lldCol;ctx.fillText(txt,panelX-tw-3*ui,py+fs-1*ui);py+=lineH+3*ui;
+  }
+
+  // LLD from ischials
+  if(lldIT!=null){
+    const absLLD=Math.abs(lldIT);const lldCol=ppm?threshColor(absLLD/ppm,5,10):threshColor(absLLD,15,30);
+    const side=lldIT>0?'R long':'L long';
+    const txt='LLD(IT): '+fmt(absLLD)+' '+side;const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,lineH,4*ui);
+    ctx.fillStyle=lldCol;ctx.fillText(txt,panelX-tw-3*ui,py+fs-1*ui);py+=lineH+3*ui;
+  }
+
+  // Rotation (obturator)
+  if(obAsym!=null&&obAsym>3){
+    const rotCol=threshColor(obAsym,5,15);
+    const txt='Rot: '+obAsym.toFixed(0)+'% '+obDir;const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,lineH,4*ui);
+    ctx.fillStyle=rotCol;ctx.fillText(txt,panelX-tw-3*ui,py+fs-1*ui);py+=lineH+3*ui;
+  }
+
+  // Obturator AR comparison
+  if(robTrace&&lobTrace){
+    const arDiff=Math.abs(robTrace.aspectRatio-lobTrace.aspectRatio);
+    if(arDiff>0.05){
+      const arCol=threshColor(arDiff,0.1,0.25);
+      const txt='AR \u0394: '+arDiff.toFixed(2)+` (R:${robTrace.aspectRatio} L:${lobTrace.aspectRatio})`;const tw=ctx.measureText(txt).width;
+      ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,lineH,4*ui);
+      ctx.fillStyle=arCol;ctx.fillText(txt,panelX-tw-3*ui,py+fs-1*ui);py+=lineH+3*ui;
+    }
+  }
+
+  // Symphysis height (inlet/outlet indicator)
+  if(ss&&si){
+    const symH=Math.abs(si.y-ss.y);
+    const txt='Sym H: '+fmt(symH);const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,lineH,4*ui);
+    ctx.fillStyle='#fff';ctx.fillText(txt,panelX-tw-3*ui,py+fs-1*ui);py+=lineH+3*ui;
+  }
+
+  // ========== ALL DOTS ==========
+  for(const[k,v]of Object.entries(pts)){
+    const col=LM_COLORS[k]||'#fff',lbl=LM_SHORT[k]||k;const isOb=k.includes('obturator');
+    if(isOb){ctx.save();ctx.translate(v.x,v.y);ctx.rotate(Math.PI/4);ctx.fillStyle=col;ctx.globalAlpha=.7;ctx.fillRect(-r*.7,-r*.7,r*1.4,r*1.4);ctx.globalAlpha=1;ctx.strokeStyle='#fff';ctx.lineWidth=1.5*sc*ui;ctx.strokeRect(-r*.7,-r*.7,r*1.4,r*1.4);ctx.restore()}
+    else{ctx.beginPath();ctx.arc(v.x,v.y,r+3*ui,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.5)';ctx.fill();
+      ctx.beginPath();ctx.arc(v.x,v.y,r,0,Math.PI*2);ctx.fillStyle=col;ctx.globalAlpha=.9;ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle='#fff';ctx.lineWidth=2*sc*ui;ctx.stroke();
+      ctx.beginPath();ctx.arc(v.x,v.y,r+6*ui,0,Math.PI*2);ctx.strokeStyle=col+'44';ctx.lineWidth=1.5*ui;ctx.setLineDash([3*ui,3*ui]);ctx.stroke();ctx.setLineDash([])}
+    ctx.font=`bold ${Math.round(fs)}px 'DM Sans'`;const tw=ctx.measureText(lbl).width;const lx=v.x+r+8*ui,ly=v.y-fs/2;
+    ctx.fillStyle='rgba(0,0,0,.75)';fillRR(ctx,lx-3*ui,ly-2*ui,tw+8*ui,fs+4*ui,4*ui);ctx.fillStyle=col;ctx.fillText(lbl,lx+1*ui,ly+fs-2*ui)}
+}
+
+function dashLine(ctx,x1,y1,x2,y2,col,lw,dl,gl){const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy);if(!len)return;const ux=dx/len,uy=dy/len;let p=0;ctx.strokeStyle=col;ctx.lineWidth=lw;while(p<len){const e=Math.min(p+dl,len);ctx.beginPath();ctx.moveTo(x1+ux*p,y1+uy*p);ctx.lineTo(x1+ux*e,y1+uy*e);ctx.stroke();p=e+gl}}
+function projPt(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1,d=dx*dx+dy*dy;if(!d)return{x:x1,y:y1};const t=((px-x1)*dx+(py-y1)*dy)/d;return{x:x1+t*dx,y:y1+t*dy}}
+function fillRR(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.fill()}
+function redrawAll(){shots.forEach((_,i)=>drawShot(i))}
+
+// ============================================================
+// Zoom/Pan
+// ============================================================
+function clampV(idx){const s=shots[idx];if(!s?.img)return;const z=s.zoom,W=s.img.w,H=s.img.h;const vw=W/z.s,vh=H/z.s;z.vx=Math.max(0,Math.min(W-vw,z.vx));z.vy=Math.max(0,Math.min(H-vh,z.vy));if(z.s<=1){z.vx=0;z.vy=0;z.s=1}}
+function zoomAt(idx,f){const z=shots[idx].zoom,W=shots[idx].img.w,H=shots[idx].img.h;const cx=z.vx+W/(2*z.s),cy=z.vy+H/(2*z.s);z.s=Math.max(1,Math.min(8,z.s*f));z.vx=cx-W/(2*z.s);z.vy=cy-H/(2*z.s);clampV(idx);drawShot(idx)}
+function resetZ(idx){shots[idx].zoom={s:1,vx:0,vy:0};drawShot(idx)}
+
+function s2i(idx,cx,cy){// screen to image coords
+  const s=shots[idx];if(!s?.img)return{x:0,y:0};const cv=document.getElementById('cv'+idx);if(!cv)return{x:0,y:0};
+  const rect=cv.getBoundingClientRect(),z=s.zoom,sx=(cx-rect.left)/rect.width,sy=(cy-rect.top)/rect.height;
+  const ix=sx*s.img.w/z.s+z.vx,iy=sy*s.img.h/z.s+z.vy;
+  return{x:Math.round(Math.max(0,Math.min(s.img.w,ix))),y:Math.round(Math.max(0,Math.min(s.img.h,iy)))}}
+
+// ============================================================
+// Drag/Touch/Pinch — dragging: {idx,key} for landmarks, {idx,scaleIdx:0|1} for scale points
+// ============================================================
+function setupDrag(idx){
+  const cw=document.getElementById('cw'+idx);if(!cw||cw._d)return;cw._d=true;
+  let pD0=0,pS0=1,pan=null,lastTap=0;
+
+  function findLM(p){const lm=shots[idx]?.landmarks;if(!lm)return null;const z=shots[idx].zoom;const hitR=Math.max(14,20/z.s);
+    for(const[k,v]of Object.entries(lm)){if(v&&v.x!=null&&v.confidence!=='not_visible'&&Math.hypot(p.x-v.x,p.y-v.y)<hitR)return k}return null}
+
+  function findScalePt(p){
+    const sc=shots[idx]?.scaleCal;if(!sc||!sc.points.length)return-1;
+    const z=shots[idx].zoom;const hitR=Math.max(16,22/z.s);
+    for(let i=0;i<sc.points.length;i++){if(Math.hypot(p.x-sc.points[i].x,p.y-sc.points[i].y)<hitR)return i}
+    return-1;
+  }
+
+  function recalcScale(){
+    const sc=shots[idx].scaleCal;
+    if(sc.points.length===2&&sc.refMm>0){
+      const dist=Math.hypot(sc.points[1].x-sc.points[0].x,sc.points[1].y-sc.points[0].y);
+      sc.pxPerMm=dist/sc.refMm;
+    }
+  }
+
+  function handleDown(p,clientX,clientY,e){
+    // 1. Check if dragging an existing scale point
+    const spi=findScalePt(p);
+    if(spi>=0){dragging={idx,scaleIdx:spi};e.preventDefault();return true}
+    // 2. Check if placing a new scale point
+    const sc=shots[idx].scaleCal;
+    if(sc.active&&sc.points.length<2){addScalePoint(idx,p.x,p.y);e.preventDefault();return true}
+    // 3. Check if dragging a landmark
+    const lm=shots[idx]?.landmarks;
+    if(lm&&Object.keys(lm).length){const k=findLM(p);if(k){dragging={idx,key:k};e.preventDefault();return true}}
+    // 4. Pan
+    pan={cx:clientX,cy:clientY};e.preventDefault();return false;
+  }
+
+  function handleMove(clientX,clientY,e){
+    if(dragging&&dragging.idx===idx){
+      e.preventDefault();const p=s2i(idx,clientX,clientY);
+      if('scaleIdx' in dragging){
+        // Dragging a scale calibration point
+        shots[idx].scaleCal.points[dragging.scaleIdx]={x:p.x,y:p.y};
+        recalcScale();
+        drawShot(idx);
+      } else {
+        // Dragging a landmark
+        shots[idx].landmarks[dragging.key].x=p.x;shots[idx].landmarks[dragging.key].y=p.y;
+        shots[idx].landmarks[dragging.key].confidence='surgeon_corrected';
+        if(dragging.key.includes('obturator'))clearObCache(idx);
+        drawShot(idx);updateCmp();
+      }
+    } else if(pan){
+      e.preventDefault();const z=shots[idx].zoom,cv=document.getElementById('cv'+idx),rect=cv.getBoundingClientRect();
+      z.vx-=(clientX-pan.cx)/rect.width*shots[idx].img.w/z.s;
+      z.vy-=(clientY-pan.cy)/rect.height*shots[idx].img.h/z.s;
+      clampV(idx);drawShot(idx);pan={cx:clientX,cy:clientY};
+    }
+  }
+
+  function handleUp(){
+    if(dragging&&dragging.idx===idx&&'scaleIdx' in dragging){dragging=null;renderShots();return}
+    if(dragging&&dragging.idx===idx)dragging=null;
+    pan=null;
+  }
+
+  // Mouse
+  cw.addEventListener('mousedown',e=>{const p=s2i(idx,e.clientX,e.clientY);handleDown(p,e.clientX,e.clientY,e)});
+  cw.addEventListener('mousemove',e=>handleMove(e.clientX,e.clientY,e));
+  cw.addEventListener('mouseup',handleUp);
+  cw.addEventListener('wheel',e=>{e.preventDefault();const z=shots[idx].zoom,p=s2i(idx,e.clientX,e.clientY),f=e.deltaY<0?1.2:1/1.2;
+    const nS=Math.max(1,Math.min(8,z.s*f));const cv=document.getElementById('cv'+idx),rect=cv.getBoundingClientRect();
+    const sx=(e.clientX-rect.left)/rect.width,sy=(e.clientY-rect.top)/rect.height;
+    z.vx=p.x-sx*shots[idx].img.w/nS;z.vy=p.y-sy*shots[idx].img.h/nS;z.s=nS;clampV(idx);drawShot(idx)},{passive:false});
+
+  // Touch
+  cw.addEventListener('touchstart',e=>{
+    if(e.touches.length===2){e.preventDefault();pD0=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);pS0=shots[idx].zoom.s;dragging=null;pan=null;return}
+    if(e.touches.length===1){
+      const now=Date.now();if(now-lastTap<300){e.preventDefault();shots[idx].zoom.s>1.5?resetZ(idx):zoomAt(idx,3);lastTap=0;return}lastTap=now;
+      const p=s2i(idx,e.touches[0].clientX,e.touches[0].clientY);
+      const grabbed=handleDown(p,e.touches[0].clientX,e.touches[0].clientY,e);
+      if(!grabbed&&shots[idx].zoom.s>1.05)e.preventDefault()}
+  },{passive:false});
+  cw.addEventListener('touchmove',e=>{
+    if(e.touches.length===2){e.preventDefault();const d=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);if(!pD0)return;
+      const z=shots[idx].zoom,nS=Math.max(1,Math.min(8,pS0*(d/pD0)));const a=e.touches[0],b=e.touches[1];
+      const mp=s2i(idx,(a.clientX+b.clientX)/2,(a.clientY+b.clientY)/2);const cv=document.getElementById('cv'+idx),rect=cv.getBoundingClientRect();
+      const sx=((a.clientX+b.clientX)/2-rect.left)/rect.width,sy=((a.clientY+b.clientY)/2-rect.top)/rect.height;
+      z.vx=mp.x-sx*shots[idx].img.w/nS;z.vy=mp.y-sy*shots[idx].img.h/nS;z.s=nS;clampV(idx);drawShot(idx);return}
+    if(e.touches.length===1)handleMove(e.touches[0].clientX,e.touches[0].clientY,e);
+  },{passive:false});
+  cw.addEventListener('touchend',()=>{handleUp();pD0=0});
+}
+
+// ============================================================
+// API
+// ============================================================
+async function analyzeShot(idx){
+  const modelUrl=$('modelUrl').value.trim();if(!modelUrl.startsWith('http'))return;
+  const shot=shots[idx];if(!shot?.img)return;shot.loading=true;renderShots();$('errBox').style.display='none';
+  try{
+    // Convert base64 image to blob for multipart upload
+    const resp=await fetch('data:image/jpeg;base64,'+shot.img.b64);
+    const blob=await resp.blob();
+    const formData=new FormData();
+    formData.append('file',blob,shot.img.name||'image.jpg');
+
+    const apiResp=await fetch(modelUrl+'/predict',{method:'POST',body:formData});
+    if(!apiResp.ok){const t=await apiResp.text();throw new Error('Model error '+apiResp.status+': '+t.slice(0,300))}
+    const data=await apiResp.json();
+
+    // Scale coordinates if image was resized
+    // Model returns coords in the image dimensions it received
+    // Our image is already resized to max 1000px, so coords should match
+    shot.landmarks=data.landmarks||{};
+    shot.analysisRaw=data;
+    clearObCache(idx);
+  }catch(err){$('errBox').textContent=err.message;$('errBox').style.display=''}finally{shot.loading=false;renderShots()}
+}
+
+// ============================================================
+// Comparison
+// ============================================================
+function calcM(lm,idx){const ltd=lm.left_teardrop,rtd=lm.right_teardrop;if(!ltd||!rtd||ltd.x==null)return null;
+  const tilt=Math.atan2(ltd.y-rtd.y,ltd.x-rtd.x)*180/Math.PI;let ll=null,lr=null;
+  const llt=lm.left_lesser_trochanter,rlt=lm.right_lesser_trochanter;
+  if(llt?.x!=null){const p=projPt(llt.x,llt.y,rtd.x,rtd.y,ltd.x,ltd.y);ll=Math.hypot(llt.x-p.x,llt.y-p.y)}
+  if(rlt?.x!=null){const p=projPt(rlt.x,rlt.y,rtd.x,rtd.y,ltd.x,ltd.y);lr=Math.hypot(rlt.x-p.x,rlt.y-p.y)}
+  return{tilt,ll,lr,diff:lr!=null&&ll!=null?lr-ll:null}}
+function updateCmp(){
+  const box=$('cmpBox');const ref=shots[0];if(!ref||!Object.keys(ref.landmarks||{}).length){box.innerHTML='';return}
+  const refM=calcM(ref.landmarks,0);if(!refM){box.innerHTML='';return}
+  let h='';shots.forEach((s,i)=>{if(!i||!Object.keys(s.landmarks||{}).length)return;const m=calcM(s.landmarks,i);if(!m)return;
+    const td=m.tilt-refM.tilt,dir=td>0?'L down':'R down';
+    const carm=`Tilt ~${Math.abs(td).toFixed(1)}\u00B0 toward ${td>0?'patient R':'patient L'}`;
+    const lldC=m.diff!=null&&refM.diff!=null?m.diff-refM.diff:null;
+    h+=`<div class="cmp"><div class="cmp-h"><div class="cmp-dot"></div><div class="cmp-t">Shot ${i+1} vs Reference</div></div><div class="cmp-b">
+      <div class="carm"><div class="carm-l">C-Arm Correction</div><div class="carm-v">${carm}</div></div>
+      <div class="mets"><div class="met"><div class="met-l">Tilt \u0394</div><div class="met-v">${Math.abs(td).toFixed(1)}\u00B0<span class="met-u">${dir}</span></div></div>
+      ${lldC!=null?`<div class="met"><div class="met-l">LLD \u0394</div><div class="met-v">${fmtPx(Math.abs(lldC),i)}<span class="met-u">${lldC>0?'R longer':'L longer'}</span></div></div>`:''}</div></div></div>`});
+  box.innerHTML=h}
+
+// ============================================================
+// Save
+// ============================================================
+async function saveShot(idx){
+  const shot=shots[idx];if(!shot?.img)return;
+  const record={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),timestamp:new Date().toISOString(),
+    case_id:$('caseId').value||null,op_side:$('opSide').value,shot_number:idx,is_reference:idx===0,
+    image_source:shot.imageSource||'photo',
+    image:{name:shot.img.name,w:shot.img.w,h:shot.img.h},
+    dicom_meta:shot.dicomMeta||null,
+    patient_demographics:getCaseDemo(),
+    scale_calibration:{px_per_mm:shot.scaleCal.pxPerMm,ref_type:shot.scaleCal.refType||null,ref_mm:shot.scaleCal.refMm||null,points:shot.scaleCal.points},
+    landmarks_original:shot.analysisRaw?.landmarks||null,
+    landmarks_corrected:{...shot.landmarks}};
+  const local=JSON.parse(localStorage.getItem('gg_training')||'[]');local.push(record);localStorage.setItem('gg_training',JSON.stringify(local));
+  const sbUrl=$('sbUrl').value.trim(),sbKey=$('sbKey').value.trim();
+  if(sbUrl&&sbKey){try{
+    // Upload image to storage
+    const blob=await(await fetch('data:image/jpeg;base64,'+shot.img.b64)).blob();const path=`galeygrid/${record.id}.jpg`;
+    const storResp=await fetch(`${sbUrl}/storage/v1/object/fluoro-images/${path}`,{method:'POST',headers:{'Authorization':`Bearer ${sbKey}`,'Content-Type':'image/jpeg','x-upsert':'true'},body:blob});
+    if(!storResp.ok){const st=await storResp.text();throw new Error('Storage error '+storResp.status+': '+st.slice(0,300))}
+    record.image.storage_path=path;
+    // Insert record to database
+    const dbResp=await fetch(`${sbUrl}/rest/v1/fluoro_training`,{method:'POST',headers:{'Authorization':`Bearer ${sbKey}`,'apikey':sbKey,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(record)});
+    if(!dbResp.ok){const dt=await dbResp.text();throw new Error('DB error '+dbResp.status+': '+dt.slice(0,300))}
+    alert('Shot '+(idx+1)+' saved to database!')
+  }catch(e){alert('Supabase error:\n'+e.message+'\n\n(Saved locally as backup)')}}else{alert('Saved locally ('+local.length+' total). Connect Supabase to sync.')}
+  $('exportBox').style.display='';$('exportCount').textContent=local.length}
+
+function exportJSON(){const d=localStorage.getItem('gg_training')||'[]';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([d],{type:'application/json'}));a.download=`galeygrid_${new Date().toISOString().slice(0,10)}.json`;a.click()}
+function clearLocal(){if(confirm('Delete all local data?')){localStorage.removeItem('gg_training');$('exportCount').textContent='0'}}
+const ex=JSON.parse(localStorage.getItem('gg_training')||'[]');if(ex.length){$('exportBox').style.display='';$('exportCount').textContent=ex.length}
+addShot();
+</script>
+</body>
+</html>
