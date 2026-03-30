@@ -73,6 +73,26 @@
 .add-shot:hover{border-color:var(--ac);color:var(--ac);background:var(--acb)}
 
 /* Comparison */
+.cmp-toggle{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--bd);margin:0 12px 6px}
+.cmp-tab{flex:1;padding:8px;text-align:center;font-size:11px;font-weight:700;cursor:pointer;background:var(--sf2);color:var(--txm);border:none;font-family:var(--f);transition:.15s}
+.cmp-tab.active{background:rgba(62,219,160,.12);color:var(--ac)}
+.cmp-tab.ref-tab.active{background:rgba(92,138,255,.12);color:#5C8AFF}
+
+/* Delta banner below canvas in comparison mode */
+.delta-bar{padding:10px 14px;background:var(--sf2);border-top:1px solid var(--bd);display:none}
+.delta-bar.visible{display:block}
+.delta-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media(max-width:400px){.delta-grid{grid-template-columns:1fr}}
+.delta-cell{text-align:center;padding:8px 4px;background:var(--bg);border-radius:8px;border:2px solid var(--bd)}
+.delta-cell.green{border-color:rgba(62,219,160,.4);background:rgba(62,219,160,.05)}
+.delta-cell.yellow{border-color:rgba(232,200,68,.4);background:rgba(232,200,68,.05)}
+.delta-cell.red{border-color:rgba(232,84,84,.4);background:rgba(232,84,84,.05)}
+.delta-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txd);margin-bottom:2px}
+.delta-val{font-size:28px;font-weight:800;font-family:var(--m);line-height:1.1}
+.delta-val.green{color:#3edba0}.delta-val.yellow{color:#e8c844}.delta-val.red{color:#e85454}
+.delta-sub{font-size:10px;font-weight:500;color:var(--txm);margin-top:2px}
+
+/* Old comparison box — keep but restyle */
 .cmp{background:var(--sf);border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:12px}
 .cmp-h{padding:10px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:7px}
 .cmp-dot{width:7px;height:7px;border-radius:50%;background:var(--ac)}.cmp-t{font-size:11px;font-weight:600}
@@ -250,11 +270,11 @@ function shotPPM(idx){if(idx!=null&&shots[idx]?.scaleCal?.pxPerMm)return shots[i
 // Shots
 // ============================================================
 function addShot(){
-  shots.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),img:null,imageSource:null,dicomMeta:null,landmarks:{},analysisRaw:null,loading:false,zoom:{s:1,vx:0,vy:0},scaleCal:{active:false,refType:'ball',refMm:25,points:[],pxPerMm:null}});
+  shots.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),img:null,imageSource:null,dicomMeta:null,landmarks:{},analysisRaw:null,loading:false,zoom:{s:1,vx:0,vy:0},scaleCal:{active:false,refType:'ball',refMm:25,points:[],pxPerMm:null},cmpView:null});
   renderShots();
 }
 
-function renderShots(){
+function renderShots(scrollTo){
   const list=$('shotList');list.innerHTML='';
   shots.forEach((shot,idx)=>{
     const isRef=idx===0;
@@ -303,12 +323,72 @@ function renderShots(){
       h+='</div>';
       // Legend
       if(Object.keys(shot.landmarks).length){h+=`<div class="legend">${Object.entries(LM_COLORS).map(([k,c])=>`<div class="leg-i"><div class="leg-d" style="background:${c}"></div>${LM_SHORT[k]}</div>`).join('')}</div>`}
+      // Comparison toggle + delta bar (non-reference shots with landmarks)
+      const refHasLM=shots[0]&&Object.keys(shots[0].landmarks||{}).length;
+      if(!isRef&&Object.keys(shot.landmarks).length&&refHasLM){
+        const cv=shot.cmpView||'current';
+        h+=`<div class="cmp-toggle">
+          <button class="cmp-tab ref-tab ${cv==='ref'?'active':''}" onclick="setCmpView(${idx},'ref')">Reference</button>
+          <button class="cmp-tab ${cv==='current'?'active':''}" onclick="setCmpView(${idx},'current')">Shot ${idx+1}</button>
+        </div>`;
+        // Delta bar
+        const refM=calcMetrics(shots[0].landmarks,0);
+        const curM=calcMetrics(shot.landmarks,idx);
+        const ppm=curM.ppm||refM.ppm;
+        const fmtD=v=>ppm?(v/ppm).toFixed(1)+'mm':Math.round(v)+'px';
+        
+        // LLD delta
+        let lldDelta=null,lldSide='';
+        if(curM.lldTD!=null&&refM.lldTD!=null){
+          lldDelta=curM.lldTD-refM.lldTD;
+          lldSide=lldDelta>0?'R lengthened':'L lengthened';
+        }
+        // Offset delta (operative side)
+        const opSide=$('opSide').value;
+        let offDelta=null,offDir='';
+        if(opSide==='left'&&curM.offsetL!=null&&refM.offsetL!=null){
+          offDelta=curM.offsetL-refM.offsetL;offDir=offDelta>0?'increased':'decreased';
+        } else if(opSide==='right'&&curM.offsetR!=null&&refM.offsetR!=null){
+          offDelta=curM.offsetR-refM.offsetR;offDir=offDelta>0?'increased':'decreased';
+        }
+        // AP
+        const apOk=curM.isAP;
+        
+        const lldAbs=lldDelta!=null?Math.abs(lldDelta):null;
+        const lldThresh=ppm?(lldAbs!=null?lldAbs/ppm:0):lldAbs||0;
+        const lldColor=lldThresh<5?'green':lldThresh<10?'yellow':'red';
+        const offAbs=offDelta!=null?Math.abs(offDelta):null;
+        const offThresh=ppm?(offAbs!=null?offAbs/ppm:0):offAbs||0;
+        const offColor=offThresh<3?'green':offThresh<6?'yellow':'red';
+        const apColor=apOk===true?'green':apOk===false?'yellow':'';
+        
+        h+=`<div class="delta-bar visible">
+          <div class="delta-grid">
+            <div class="delta-cell ${lldDelta!=null?lldColor:''}">
+              <div class="delta-label">ΔLL</div>
+              <div class="delta-val ${lldDelta!=null?lldColor:''}">${lldDelta!=null?(lldDelta>0?'+':'')+fmtD(lldDelta):'—'}</div>
+              <div class="delta-sub">${lldSide||'no data'}</div>
+            </div>
+            <div class="delta-cell ${offDelta!=null?offColor:''}">
+              <div class="delta-label">ΔOffset</div>
+              <div class="delta-val ${offDelta!=null?offColor:''}">${offDelta!=null?(offDelta>0?'+':'')+fmtD(offDelta):'—'}</div>
+              <div class="delta-sub">${offDir||'no data'}</div>
+            </div>
+            <div class="delta-cell ${apColor}">
+              <div class="delta-label">AP Check</div>
+              <div class="delta-val ${apColor}">${apOk===true?'✓':apOk===false?'✗':'—'}</div>
+              <div class="delta-sub">${apOk===true?'True AP':apOk===false?'Rotated':'no data'}</div>
+            </div>
+          </div>
+        </div>`;
+      }
     }
     d.innerHTML=h;list.appendChild(d);
     if(shot.img)setTimeout(()=>drawShot(idx),10);
   });
   $('lmHint').style.display=shots.some(s=>Object.keys(s.landmarks).length||s.scaleCal.active)?'':'none';
   updateCmp();
+  if(scrollTo!=null){setTimeout(()=>{const el=$('shot'+scrollTo);if(el)el.scrollIntoView({behavior:'auto',block:'nearest'})},20)}
 }
 
 function loadShotImg(idx,file){
@@ -432,7 +512,7 @@ function loadShotImg(idx,file){
           }
           shots[idx].landmarks={};shots[idx].analysisRaw=null;
           shots[idx].scaleCal={active:false,refType:'ball',refMm:25,points:[],pxPerMm:null};
-          renderShots();
+          renderShots(idx);
         };
         img.src=du;
         
@@ -454,7 +534,7 @@ function loadShotImg(idx,file){
       shots[idx].dicomMeta=null;
       shots[idx].landmarks={};shots[idx].analysisRaw=null;
       shots[idx].scaleCal={active:false,refType:'ball',refMm:25,points:[],pxPerMm:null};
-      renderShots();
+      renderShots(idx);
     };img.onerror=()=>{alert('Could not load image file.')};
     img.src=e.target.result};r.readAsDataURL(file);
   }
@@ -468,12 +548,12 @@ function toggleScale(idx){
   const sc=shots[idx].scaleCal;
   sc.active=!sc.active;
   if(!sc.active){sc.points=[];sc.pxPerMm=null}
-  renderShots();
+  renderShots(idx);
 }
 function resetScale(idx){
   const sc=shots[idx].scaleCal;
   sc.points=[];sc.pxPerMm=null;sc.active=true;
-  renderShots();
+  renderShots(idx);
 }
 function setScaleRef(idx,val,field){
   const sc=shots[idx].scaleCal;
@@ -491,7 +571,7 @@ function setScaleRef(idx,val,field){
     sc.pxPerMm=dist/sc.refMm;
     drawShot(idx);
   }
-  renderShots();
+  renderShots(idx);
 }
 function addScalePoint(idx,imgX,imgY){
   const sc=shots[idx].scaleCal;
@@ -501,7 +581,16 @@ function addScalePoint(idx,imgX,imgY){
     const dist=Math.hypot(sc.points[1].x-sc.points[0].x,sc.points[1].y-sc.points[0].y);
     sc.pxPerMm=dist/sc.refMm;
   }
-  drawShot(idx);renderShots();
+  drawShot(idx);renderShots(idx);
+}
+
+// ============================================================
+// Comparison View Toggle
+// ============================================================
+function setCmpView(idx,view){
+  shots[idx].cmpView=view;
+  drawShot(idx);
+  renderShots(idx);
 }
 
 // ============================================================
@@ -514,8 +603,15 @@ function drawShot(idx){
   cv.width=W;cv.height=H;
   const z=shot.zoom;
   ctx.clearRect(0,0,W,H);ctx.save();ctx.scale(z.s,z.s);ctx.translate(-z.vx,-z.vy);
-  ctx.drawImage(shot.img.el,0,0,W,H);
-  const ui=1/z.s; // inverse scale so UI elements stay constant screen size
+  
+  // If in reference compare view, draw reference image instead
+  const showingRef=shot.cmpView==='ref'&&idx>0&&shots[0]?.img;
+  if(showingRef){
+    ctx.drawImage(shots[0].img.el,0,0,W,H);
+  } else {
+    ctx.drawImage(shot.img.el,0,0,W,H);
+  }
+  const ui=1/z.s;
   // Scale calibration points
   const scCal=shot.scaleCal;
   if(scCal.points.length>0){
@@ -546,7 +642,19 @@ function drawShot(idx){
       ctx.fillStyle='#FFEA3D';ctx.fillText(txt,mx-tw/2,my+3*sc*ui);
     }
   }
-  if(Object.keys(shot.landmarks).length)drawOverlay(ctx,shot.landmarks,W,H,ui,idx);
+  // Draw landmarks — show reference landmarks when in ref view
+  const drawLM=showingRef?shots[0].landmarks:shot.landmarks;
+  const drawIdx=showingRef?0:idx;
+  if(Object.keys(drawLM).length)drawOverlay(ctx,drawLM,W,H,ui,drawIdx);
+  
+  // REFERENCE badge when showing ref image on a comparison shot
+  if(showingRef){
+    const bfs=Math.max(18,22/z.s);
+    ctx.font=`bold ${Math.round(bfs)}px 'DM Sans'`;
+    const bt='REFERENCE';const btw=ctx.measureText(bt).width;
+    ctx.fillStyle='rgba(92,138,255,.85)';fillRR(ctx,W/2/z.s-btw/2-12*ui+z.vx,12*ui+z.vy,btw+24*ui,bfs+12*ui,6*ui);
+    ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(bt,W/2/z.s+z.vx,bfs+18*ui+z.vy);ctx.textAlign='left';
+  }
   ctx.restore();
   // Badge
   const badge=document.getElementById('zb'+idx);
@@ -735,8 +843,8 @@ function drawOverlay(ctx,lm,w,h,ui,shotIdx){
     const ux=dx/len,uy=dy/len,ext=70;dashLine(ctx,rtd.x-ux*ext,rtd.y-uy*ext,ltd.x+ux*ext,ltd.y+uy*ext,'rgba(255,255,255,.65)',2*sc*ui,10*ui,7*ui);
     const mx=(rtd.x+ltd.x)/2,my=(rtd.y+ltd.y)/2;
     const tiltCol=threshColor(Math.abs(tdAng),2,5);
-    const txt='Tilt: '+tdAng.toFixed(1)+'\u00B0';ctx.font=`bold ${Math.round(fs*1.1)}px 'JetBrains Mono'`;const tw=ctx.measureText(txt).width;
-    ctx.fillStyle='rgba(0,0,0,.75)';fillRR(ctx,mx-tw/2-6*ui,my-fs*1.4-6*ui,tw+12*ui,fs*1.5+4*ui,5*ui);ctx.fillStyle=tiltCol;ctx.fillText(txt,mx-tw/2,my-10*ui)}}
+    const txt='Tilt: '+tdAng.toFixed(1)+'\u00B0';ctx.font=`bold ${Math.round(fs*1.5)}px 'JetBrains Mono'`;const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,mx-tw/2-8*ui,my-fs*2-8*ui,tw+16*ui,fs*2+6*ui,6*ui);ctx.fillStyle=tiltCol;ctx.fillText(txt,mx-tw/2,my-fs*.5-6*ui)}}
 
   // ========== ISCHIAL LINE ==========
   const lit=pts.left_ischial_tuberosity,rit=pts.right_ischial_tuberosity;
@@ -833,72 +941,73 @@ function drawOverlay(ctx,lm,w,h,ui,shotIdx){
     obAsym=(1-ratio)*100;obDir=ld>rd?'L wider':'R wider';
   }
 
-  // ========== CLINICAL SUMMARY PANEL (top-right) ==========
+  // ========== CLINICAL SUMMARY PANEL (top-right) — OR-sized ==========
+  // Font sized for visibility at 3-6 feet on an iPad
+  const bigFs=Math.max(16,20*sc)*ui; // ~2x the normal overlay font
   const panelX=w-10*ui,panelY=8*ui;
-  let py=panelY;const lineH=fs*1.3;
-  ctx.font=`bold ${Math.round(fs*.9)}px 'DM Sans'`;
-
-  // AP / Rotation check
+  let py=panelY;const lineH=bigFs*1.4;
+  
+  // AP / Rotation check — BIG
   const cocMidX=cs&&ci?(cs.x+ci.x)/2:null;
   if(symMidX!=null&&cocMidX!=null){
     const dx=Math.abs(cocMidX-symMidX);const isAP=ppm?dx/ppm<10:dx<30;
-    const apT=isAP?'AP: Good':'AP: Rotated';const apC=isAP?'#3edba0':'#e8c844';
-    const tw=ctx.measureText(apT).width;
-    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,lineH,4*ui);
-    ctx.fillStyle=apC;ctx.fillText(apT,panelX-tw-3*ui,py+fs-1*ui);py+=lineH+3*ui;
+    const apT=isAP?'AP ✓':'ROTATED';const apC=isAP?'#3edba0':'#e85454';
+    ctx.font=`bold ${Math.round(bigFs)}px 'DM Sans'`;const tw=ctx.measureText(apT).width;
+    ctx.fillStyle=isAP?'rgba(62,219,160,.2)':'rgba(232,84,84,.2)';fillRR(ctx,panelX-tw-16*ui,py,tw+20*ui,lineH,6*ui);
+    ctx.strokeStyle=apC+'66';ctx.lineWidth=1.5*ui;ctx.beginPath();
+    const bx=panelX-tw-16*ui,by=py,bw=tw+20*ui,bh=lineH,br=6*ui;
+    ctx.moveTo(bx+br,by);ctx.lineTo(bx+bw-br,by);ctx.quadraticCurveTo(bx+bw,by,bx+bw,by+br);ctx.lineTo(bx+bw,by+bh-br);ctx.quadraticCurveTo(bx+bw,by+bh,bx+bw-br,by+bh);ctx.lineTo(bx+br,by+bh);ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-br);ctx.lineTo(bx,by+br);ctx.quadraticCurveTo(bx,by,bx+br,by);ctx.stroke();
+    ctx.fillStyle=apC;ctx.fillText(apT,panelX-tw-6*ui,py+bigFs);py+=lineH+4*ui;
   }
 
-  // Tilt
+  // Tilt — BIG
   if(ltd&&rtd){
     const tiltCol=threshColor(Math.abs(tdAng),2,5);
-    const txt='Tilt: '+tdAng.toFixed(1)+'\u00B0';const tw=ctx.measureText(txt).width;
-    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,lineH,4*ui);
-    ctx.fillStyle=tiltCol;ctx.fillText(txt,panelX-tw-3*ui,py+fs-1*ui);py+=lineH+3*ui;
+    ctx.font=`bold ${Math.round(bigFs)}px 'DM Sans'`;
+    const txt=tdAng.toFixed(1)+'\u00B0 tilt';const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.85)';fillRR(ctx,panelX-tw-16*ui,py,tw+20*ui,lineH,6*ui);
+    ctx.fillStyle=tiltCol;ctx.fillText(txt,panelX-tw-6*ui,py+bigFs);py+=lineH+4*ui;
   }
 
-  // LLD from teardrops
+  // LLD (teardrop) — BIG
   if(lldTD!=null){
-    const absLLD=Math.abs(lldTD);const lldCol=ppm?threshColor(absLLD/ppm,5,10):threshColor(absLLD,15,30);
-    const side=lldTD>0?'R long':'L long';
-    const txt='LLD(TD): '+fmt(absLLD)+' '+side;const tw=ctx.measureText(txt).width;
-    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,lineH,4*ui);
-    ctx.fillStyle=lldCol;ctx.fillText(txt,panelX-tw-3*ui,py+fs-1*ui);py+=lineH+3*ui;
+    const absLLD=Math.abs(lldTD);
+    const lldMm=ppm?absLLD/ppm:null;
+    const lldCol=lldMm!=null?threshColor(lldMm,5,10):threshColor(absLLD,15,30);
+    const side=lldTD>0?'R':'L';
+    const val=ppm?lldMm.toFixed(1)+'mm':Math.round(absLLD)+'px';
+    ctx.font=`bold ${Math.round(bigFs)}px 'DM Sans'`;
+    const txt='LLD '+val+' '+side;const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.85)';fillRR(ctx,panelX-tw-16*ui,py,tw+20*ui,lineH,6*ui);
+    ctx.fillStyle=lldCol;ctx.fillText(txt,panelX-tw-6*ui,py+bigFs);py+=lineH+4*ui;
   }
 
-  // LLD from ischials
+  // LLD (ischial) — smaller secondary
   if(lldIT!=null){
     const absLLD=Math.abs(lldIT);const lldCol=ppm?threshColor(absLLD/ppm,5,10):threshColor(absLLD,15,30);
-    const side=lldIT>0?'R long':'L long';
-    const txt='LLD(IT): '+fmt(absLLD)+' '+side;const tw=ctx.measureText(txt).width;
-    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,lineH,4*ui);
-    ctx.fillStyle=lldCol;ctx.fillText(txt,panelX-tw-3*ui,py+fs-1*ui);py+=lineH+3*ui;
+    const side=lldIT>0?'R':'L';
+    ctx.font=`bold ${Math.round(fs)}px 'DM Sans'`;
+    const txt='LLD(IT) '+fmt(absLLD)+' '+side;const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,fs*1.3,4*ui);
+    ctx.fillStyle=lldCol;ctx.fillText(txt,panelX-tw-3*ui,py+fs);py+=fs*1.5+3*ui;
   }
 
-  // Rotation (obturator)
+  // Rotation (obturator) — smaller secondary
   if(obAsym!=null&&obAsym>3){
     const rotCol=threshColor(obAsym,5,15);
-    const txt='Rot: '+obAsym.toFixed(0)+'% '+obDir;const tw=ctx.measureText(txt).width;
-    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,lineH,4*ui);
-    ctx.fillStyle=rotCol;ctx.fillText(txt,panelX-tw-3*ui,py+fs-1*ui);py+=lineH+3*ui;
+    ctx.font=`bold ${Math.round(fs)}px 'DM Sans'`;
+    const txt='Rot '+obAsym.toFixed(0)+'% '+obDir;const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,fs*1.3,4*ui);
+    ctx.fillStyle=rotCol;ctx.fillText(txt,panelX-tw-3*ui,py+fs);py+=fs*1.5+3*ui;
   }
 
-  // Obturator AR comparison
-  if(robTrace&&lobTrace){
-    const arDiff=Math.abs(robTrace.aspectRatio-lobTrace.aspectRatio);
-    if(arDiff>0.05){
-      const arCol=threshColor(arDiff,0.1,0.25);
-      const txt='AR \u0394: '+arDiff.toFixed(2)+` (R:${robTrace.aspectRatio} L:${lobTrace.aspectRatio})`;const tw=ctx.measureText(txt).width;
-      ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,lineH,4*ui);
-      ctx.fillStyle=arCol;ctx.fillText(txt,panelX-tw-3*ui,py+fs-1*ui);py+=lineH+3*ui;
-    }
-  }
-
-  // Symphysis height (inlet/outlet indicator)
+  // Symphysis height — smaller secondary
   if(ss&&si){
     const symH=Math.abs(si.y-ss.y);
-    const txt='Sym H: '+fmt(symH);const tw=ctx.measureText(txt).width;
-    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,lineH,4*ui);
-    ctx.fillStyle='#fff';ctx.fillText(txt,panelX-tw-3*ui,py+fs-1*ui);py+=lineH+3*ui;
+    ctx.font=`bold ${Math.round(fs)}px 'DM Sans'`;
+    const txt='Sym H '+fmt(symH);const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,panelX-tw-10*ui,py,tw+14*ui,fs*1.3,4*ui);
+    ctx.fillStyle='#fff';ctx.fillText(txt,panelX-tw-3*ui,py+fs);py+=fs*1.5+3*ui;
   }
 
   // ========== ALL DOTS ==========
@@ -993,7 +1102,7 @@ function setupDrag(idx){
   }
 
   function handleUp(){
-    if(dragging&&dragging.idx===idx&&'scaleIdx' in dragging){dragging=null;renderShots();return}
+    if(dragging&&dragging.idx===idx&&'scaleIdx' in dragging){dragging=null;renderShots(idx);return}
     if(dragging&&dragging.idx===idx)dragging=null;
     pan=null;
   }
@@ -1032,7 +1141,7 @@ function setupDrag(idx){
 // ============================================================
 async function analyzeShot(idx){
   const modelUrl=$('modelUrl').value.trim();if(!modelUrl.startsWith('http'))return;
-  const shot=shots[idx];if(!shot?.img)return;shot.loading=true;renderShots();$('errBox').style.display='none';
+  const shot=shots[idx];if(!shot?.img)return;shot.loading=true;renderShots(idx);$('errBox').style.display='none';
   try{
     // Convert base64 image to blob for multipart upload
     const resp=await fetch('data:image/jpeg;base64,'+shot.img.b64);
@@ -1050,29 +1159,92 @@ async function analyzeShot(idx){
     shot.landmarks=data.landmarks||{};
     shot.analysisRaw=data;
     clearObCache(idx);
-  }catch(err){$('errBox').textContent=err.message;$('errBox').style.display=''}finally{shot.loading=false;renderShots()}
+  }catch(err){$('errBox').textContent=err.message;$('errBox').style.display=''}finally{shot.loading=false;renderShots(idx)}
 }
 
 // ============================================================
 // Comparison
 // ============================================================
-function calcM(lm,idx){const ltd=lm.left_teardrop,rtd=lm.right_teardrop;if(!ltd||!rtd||ltd.x==null)return null;
-  const tilt=Math.atan2(ltd.y-rtd.y,ltd.x-rtd.x)*180/Math.PI;let ll=null,lr=null;
-  const llt=lm.left_lesser_trochanter,rlt=lm.right_lesser_trochanter;
-  if(llt?.x!=null){const p=projPt(llt.x,llt.y,rtd.x,rtd.y,ltd.x,ltd.y);ll=Math.hypot(llt.x-p.x,llt.y-p.y)}
-  if(rlt?.x!=null){const p=projPt(rlt.x,rlt.y,rtd.x,rtd.y,ltd.x,ltd.y);lr=Math.hypot(rlt.x-p.x,rlt.y-p.y)}
-  return{tilt,ll,lr,diff:lr!=null&&ll!=null?lr-ll:null}}
+function calcMetrics(lm,idx){
+  const g=k=>lm[k]&&lm[k].x!=null?lm[k]:null;
+  const ltd=g('left_teardrop'),rtd=g('right_teardrop');
+  const llt=g('left_lesser_trochanter'),rlt=g('right_lesser_trochanter');
+  const lit=g('left_ischial_tuberosity'),rit=g('right_ischial_tuberosity');
+  const ss=g('symphysis_superior'),si=g('symphysis_inferior');
+  const cs=g('coccyx_superior'),ci=g('coccyx_inferior');
+  const lob=g('left_obturator_center'),rob=g('right_obturator_center');
+  const ppm=shotPPM(idx);
+  const px2mm=v=>ppm?v/ppm:null;
+  const fmtV=v=>ppm?(v/ppm).toFixed(1):Math.round(v);
+  
+  const m={tilt:null,lldTD:null,lldIT:null,offsetL:null,offsetR:null,isAP:null,obAsym:null,obDir:null,
+    ll_td:null,lr_td:null,ll_it:null,lr_it:null,symMidX:null,ppm};
+  
+  // Tilt
+  if(ltd&&rtd)m.tilt=Math.atan2(ltd.y-rtd.y,ltd.x-rtd.x)*180/Math.PI;
+  
+  // Symphysis midline
+  m.symMidX=ss&&si?(ss.x+si.x)/2:ss?ss.x:si?si.x:null;
+  
+  // AP check
+  const cocMidX=cs&&ci?(cs.x+ci.x)/2:null;
+  if(m.symMidX!=null&&cocMidX!=null){
+    const dx=Math.abs(cocMidX-m.symMidX);
+    m.isAP=ppm?dx/ppm<10:dx<30;
+  }
+  
+  // LLD from teardrop line
+  if(ltd&&rtd){
+    if(llt){const p=projPt(llt.x,llt.y,rtd.x,rtd.y,ltd.x,ltd.y);m.ll_td=Math.hypot(llt.x-p.x,llt.y-p.y)}
+    if(rlt){const p=projPt(rlt.x,rlt.y,rtd.x,rtd.y,ltd.x,ltd.y);m.lr_td=Math.hypot(rlt.x-p.x,rlt.y-p.y)}
+    if(m.ll_td!=null&&m.lr_td!=null)m.lldTD=m.lr_td-m.ll_td; // positive = R longer
+  }
+  
+  // LLD from ischial line
+  if(lit&&rit){
+    if(llt){const p=projPt(llt.x,llt.y,rit.x,rit.y,lit.x,lit.y);m.ll_it=Math.hypot(llt.x-p.x,llt.y-p.y)}
+    if(rlt){const p=projPt(rlt.x,rlt.y,rit.x,rit.y,lit.x,lit.y);m.lr_it=Math.hypot(rlt.x-p.x,rlt.y-p.y)}
+    if(m.ll_it!=null&&m.lr_it!=null)m.lldIT=m.lr_it-m.ll_it;
+  }
+  
+  // Offset — horizontal distance from each lesser trochanter to the ipsilateral teardrop
+  // This measures combined femoral + acetabular offset
+  if(ltd&&rtd){
+    // Project along perpendicular to teardrop line for true horizontal offset
+    const tdAng=Math.atan2(ltd.y-rtd.y,ltd.x-rtd.x);
+    if(llt&&ltd){
+      const dx=llt.x-ltd.x,dy=llt.y-ltd.y;
+      // Perpendicular distance from teardrop line (lateral offset)
+      m.offsetL=Math.abs(dx*Math.sin(tdAng)-dy*Math.cos(tdAng));
+    }
+    if(rlt&&rtd){
+      const dx=rlt.x-rtd.x,dy=rlt.y-rtd.y;
+      m.offsetR=Math.abs(dx*Math.sin(tdAng)-dy*Math.cos(tdAng));
+    }
+  }
+  
+  // Obturator asymmetry
+  if(rob&&lob&&m.symMidX!=null){
+    const ld=Math.abs(lob.x-m.symMidX),rd=Math.abs(rob.x-m.symMidX);
+    const ratio=ld>0&&rd>0?Math.min(ld,rd)/Math.max(ld,rd):1;
+    m.obAsym=(1-ratio)*100;m.obDir=ld>rd?'L wider':'R wider';
+  }
+  
+  return m;
+}
+
+// Legacy wrapper for existing code
+function calcM(lm,idx){const m=calcMetrics(lm,idx);if(m.tilt==null)return null;return{tilt:m.tilt,ll:m.ll_td,lr:m.lr_td,diff:m.lldTD}}
 function updateCmp(){
   const box=$('cmpBox');const ref=shots[0];if(!ref||!Object.keys(ref.landmarks||{}).length){box.innerHTML='';return}
   const refM=calcM(ref.landmarks,0);if(!refM){box.innerHTML='';return}
   let h='';shots.forEach((s,i)=>{if(!i||!Object.keys(s.landmarks||{}).length)return;const m=calcM(s.landmarks,i);if(!m)return;
-    const td=m.tilt-refM.tilt,dir=td>0?'L down':'R down';
-    const carm=`Tilt ~${Math.abs(td).toFixed(1)}\u00B0 toward ${td>0?'patient R':'patient L'}`;
-    const lldC=m.diff!=null&&refM.diff!=null?m.diff-refM.diff:null;
-    h+=`<div class="cmp"><div class="cmp-h"><div class="cmp-dot"></div><div class="cmp-t">Shot ${i+1} vs Reference</div></div><div class="cmp-b">
-      <div class="carm"><div class="carm-l">C-Arm Correction</div><div class="carm-v">${carm}</div></div>
-      <div class="mets"><div class="met"><div class="met-l">Tilt \u0394</div><div class="met-v">${Math.abs(td).toFixed(1)}\u00B0<span class="met-u">${dir}</span></div></div>
-      ${lldC!=null?`<div class="met"><div class="met-l">LLD \u0394</div><div class="met-v">${fmtPx(Math.abs(lldC),i)}<span class="met-u">${lldC>0?'R longer':'L longer'}</span></div></div>`:''}</div></div></div>`});
+    const td=m.tilt-refM.tilt;
+    if(Math.abs(td)>1){
+      const carm=`Tilt C-arm ~${Math.abs(td).toFixed(1)}\u00B0 toward ${td>0?'patient R':'patient L'}`;
+      h+=`<div class="cmp"><div class="cmp-b"><div class="carm"><div class="carm-l">Shot ${i+1} &mdash; C-Arm Correction</div><div class="carm-v">${carm}</div></div></div></div>`;
+    }
+  });
   box.innerHTML=h}
 
 // ============================================================
