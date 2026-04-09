@@ -189,7 +189,7 @@ if(params.get('sbKey'))document.getElementById('sbKey').value=params.get('sbKey'
 // State
 // ============================================================
 let lastApTime=null,lastCupTime=null,currentMode='none';
-let lastImgUrl=null,lastPollTs=null;
+let lastImgUrl=null,lastImgTs=null,lastPollTs=null;
 
 // ============================================================
 // Poll both tables, show whichever is newer
@@ -257,7 +257,7 @@ function renderApMode(row){
   document.getElementById('caseLabel').textContent=`Case ${caseId} · Shot ${row.shot_number??''}`;
 
   // Image
-  maybeUpdateImage(row.image_url,`Shot ${row.shot_number??''} · ${new Date(row.updated_at).toLocaleTimeString()}`);
+  maybeUpdateImage(row.image_url,`Shot ${row.shot_number??''} · ${new Date(row.updated_at).toLocaleTimeString()}`,row.updated_at);
 
   // Main metrics
   const lldDelta=row.lld_delta_mm;
@@ -354,7 +354,7 @@ function renderCupMode(row){
   document.getElementById('caseLabel').textContent=`Case ${caseId} · ${shotLabel}`;
 
   // Image
-  maybeUpdateImage(row.image_url,`${shotLabel} Cup · ${new Date(row.updated_at).toLocaleTimeString()}`);
+  maybeUpdateImage(row.image_url,`${shotLabel} Cup · ${new Date(row.updated_at).toLocaleTimeString()}`,row.updated_at);
 
   const inc=row.inclination_deg!=null?parseFloat(row.inclination_deg):null;
   const ant=row.anteversion_deg!=null?parseFloat(row.anteversion_deg):null;
@@ -402,20 +402,24 @@ function renderCupMode(row){
 }
 
 // ============================================================
-// Image update — only swap src when URL actually changes (cache-bust)
+// Image update — reload when URL or updated_at changes
+// Same filename path (e.g. shot1.jpg) gets re-sent each time,
+// so we must use updated_at as the cache key, not just the URL.
 // ============================================================
-function maybeUpdateImage(url,caption){
+function maybeUpdateImage(url,caption,updatedAt){
   const imgEl=document.getElementById('imgEl');
   const noImg=document.getElementById('noImg');
   const overlay=document.getElementById('imgOverlay');
   if(!url){noImg.style.display='flex';imgEl.style.display='none';return;}
   noImg.style.display='none';
   imgEl.style.display='block';
-  // Only reload if URL has changed
-  if(url!==lastImgUrl){
+  // Reload if URL changed OR if the same URL was updated (new send)
+  const ts=updatedAt||url;
+  if(url!==lastImgUrl||ts!==lastImgTs){
     lastImgUrl=url;
+    lastImgTs=ts;
     imgEl.classList.add('loading');
-    // Cache-bust by appending timestamp
+    // Always cache-bust — ensures browser fetches fresh image even if URL path is the same
     const busted=url+(url.includes('?')?'&':'?')+'t='+Date.now();
     imgEl.onload=()=>{imgEl.classList.remove('loading');};
     imgEl.onerror=()=>{imgEl.classList.remove('loading');};
