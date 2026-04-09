@@ -56,6 +56,19 @@
 
 /* Per-shot scale calibration */
 .scale-bar{padding:8px 12px;border-top:1px solid var(--bd);background:var(--sf2);display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:10px;color:var(--txm)}
+.cup-bar{padding:8px 12px;border-top:1px solid var(--bd);background:var(--sf2);display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:10px;color:var(--txm)}
+.cup-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--sf);color:var(--txm);font-size:10px;font-weight:600;cursor:pointer;font-family:var(--f)}
+.cup-btn.active{border-color:#a78bfa;background:rgba(167,139,250,.12);color:#a78bfa}
+.cup-val{font-size:11px;font-weight:700;font-family:var(--m);padding:2px 8px;border-radius:4px}
+.cup-val.ok{background:rgba(62,219,160,.12);color:var(--ac)}
+.cup-val.warn{background:rgba(232,200,68,.12);color:var(--warn)}
+.cup-panel{padding:10px 14px;border-top:2px solid #a78bfa;background:rgba(167,139,250,.05);display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.cup-metric{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:80px}
+.cup-metric-val{font-size:32px;font-weight:800;font-family:var(--m);line-height:1}
+.cup-metric-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txd)}
+.cup-metric-range{font-size:9px;color:var(--txd)}
+.cup-metric-val.ok{color:#a78bfa}
+.cup-metric-val.warn{color:var(--warn)}
 .scale-btn{padding:4px 10px;border-radius:6px;font-size:9px;font-weight:600;cursor:pointer;border:1px solid var(--bdl);background:var(--sf);color:var(--txm);-webkit-tap-highlight-color:transparent}
 .scale-btn.active{border-color:#FFEA3D;color:#FFEA3D;background:rgba(255,234,61,.08)}
 .scale-val{font-size:11px;font-weight:700;color:var(--ac);font-family:var(--m)}
@@ -117,16 +130,163 @@
 .export-box h3{font-size:11px;font-weight:600;color:var(--txm);margin-bottom:6px}
 .export-count{font-size:22px;font-weight:700;color:var(--ac);font-family:var(--m)}.export-sub{font-size:10px;color:var(--txd);margin-top:2px}
 .disc{padding:8px 12px;background:var(--wnb);border:1px solid rgba(232,200,68,.12);border-radius:7px;margin-bottom:10px;font-size:9px;color:var(--wn);line-height:1.5}
+
+/* Accuracy Wizard */
+.wiz-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.92);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.wiz-header{text-align:center;padding:12px;color:var(--ac);font-size:13px;font-weight:700;letter-spacing:.02em}
+.wiz-step{font-size:10px;color:var(--txm);margin-top:2px;font-weight:400}
+.wiz-lm-name{font-size:18px;font-weight:800;margin-top:4px}
+.wiz-canvas-wrap{position:relative;width:90vw;max-width:500px;aspect-ratio:1;background:#000;border-radius:12px;overflow:hidden;border:2px solid var(--bd);touch-action:none}
+.wiz-canvas-wrap canvas{display:block;width:100%;height:100%}
+.wiz-hint{text-align:center;padding:8px;font-size:11px;color:var(--txm);line-height:1.4}
+.wiz-hint b{color:var(--ac)}
+.wiz-btns{display:flex;gap:10px;padding:12px;justify-content:center}
+.wiz-btn{padding:12px 24px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f);transition:.15s;min-width:100px}
+.wiz-btn-confirm{background:var(--ac);color:var(--bg)}
+.wiz-btn-confirm:active{filter:brightness(.9)}
+.wiz-btn-skip{background:var(--sf2);border:1px solid var(--bd);color:var(--txm)}
+.wiz-btn-skip:active{border-color:var(--ac)}
+.wiz-progress{display:flex;gap:6px;padding:8px;justify-content:center}
+.wiz-pip{width:8px;height:8px;border-radius:50%;background:var(--bd)}
+.wiz-pip.done{background:var(--ac)}.wiz-pip.current{background:var(--wn);box-shadow:0 0 6px rgba(232,200,68,.5)}
+.wiz-scale-opt{background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:12px;cursor:pointer;text-align:center;color:var(--tx);font-family:var(--f);transition:.15s}
+.wiz-scale-opt:hover{border-color:var(--txd)}
+.wiz-scale-opt.active{border-color:#FFEA3D;background:rgba(255,234,61,.08);}
+
+/* Mode toggle */
+.mode-bar{display:flex;gap:0;padding:10px 16px;background:var(--sf);border-bottom:1px solid var(--bd);align-items:center;gap:12px}
+.mode-toggle{display:flex;border:1px solid var(--bd);border-radius:8px;overflow:hidden}
+.mode-btn{padding:7px 20px;font-size:12px;font-weight:700;font-family:var(--f);background:transparent;color:var(--txm);border:none;cursor:pointer;transition:all .2s;letter-spacing:.03em}
+.mode-btn.active{background:var(--ac);color:#0a0f0d}
+.mode-btn.active.cup{background:#a78bfa;color:#fff}
+.mode-lbl{font-size:10px;color:var(--txd);margin-left:auto}
+
+/* Cup mode */
+.cup-mode-wrap{display:none;padding:0 0 20px}
+.cup-mode-wrap.visible{display:block}
+.cup-shot-grid{display:grid;grid-template-columns:1fr;gap:16px;padding:12px 0}
+.cup-shot-card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.cup-shot-card.trial{border-top:3px solid var(--warn)}
+.cup-shot-card.final{border-top:3px solid #a78bfa}
+.cup-card-hdr{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd)}
+.cup-card-title{font-size:12px;font-weight:700;color:var(--tx)}
+.cup-card-tag{font-size:9px;font-weight:700;padding:2px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.06em}
+.cup-card-tag.trial{background:rgba(232,200,68,.15);color:var(--warn)}
+.cup-card-tag.final{background:rgba(167,139,250,.15);color:#a78bfa}
+.cup-canvas-wrap{position:relative;background:#000;width:100%;height:60vh;min-height:400px;overflow:hidden;cursor:crosshair}
+.cup-canvas-wrap canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+.cup-step-bar{padding:8px 12px;background:var(--sf2);border-top:1px solid var(--bd);font-size:11px;color:var(--txm);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cup-step-indicator{width:20px;height:20px;border-radius:50%;background:#a78bfa;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cup-results{padding:12px 14px;display:flex;gap:16px;flex-wrap:wrap;border-top:1px solid var(--bd)}
+.cup-result-metric{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:90px}
+.cup-result-val{font-size:36px;font-weight:800;font-family:var(--m);line-height:1}
+.cup-result-val.ok{color:#a78bfa}
+.cup-result-val.warn{color:var(--warn)}
+.cup-result-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txd)}
+.cup-result-range{font-size:9px;color:var(--txd)}
+.cup-action-bar{padding:8px 12px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--bd)}
+.cup-comparison{padding:14px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;margin-top:12px}
+.cup-comparison-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txd);margin-bottom:10px}
+.cup-compare-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center}
+.cup-compare-cell{padding:8px;background:var(--bg);border-radius:8px;border:1px solid var(--bd)}
+.cup-compare-lbl{font-size:9px;color:var(--txd);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.cup-compare-val{font-size:18px;font-weight:800;font-family:var(--m);color:var(--tx)}
+.cup-compare-delta{font-size:10px;color:var(--txm);margin-top:2px}
 </style>
 </head>
 <body>
 <div class="hdr"><div class="logo"><div class="logo-i">G</div><div><div class="logo-t">GaleyGrid</div><div class="logo-s">Intraop Analysis + Training</div></div></div><span class="badge">Prototype</span></div>
-<div class="main">
+<div class="mode-bar">
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeAP" onclick="setMode('ap')">AP Pelvis</button>
+    <button class="mode-btn cup" id="modeCup" onclick="setMode('cup')">⊙ Cup</button>
+  </div>
+  <span class="mode-lbl" id="modeLbl">LLD &amp; Offset Analysis</span>
+</div>
+
+<!-- Cup Mode -->
+<div class="cup-mode-wrap" id="cupModeWrap">
+  <div class="main" style="padding-top:12px">
+    <div class="disc">&#9888; Research prototype — not FDA cleared. Not for clinical decisions.</div>
+    <div class="cup-shot-grid" id="cupShotGrid">
+      <!-- Trial cup card -->
+      <div class="cup-shot-card trial" id="cupCardTrial">
+        <div class="cup-card-hdr">
+          <div class="cup-card-title">Trial Cup</div>
+          <div style="display:flex;gap:4px;align-items:center;margin-left:auto;margin-right:8px">
+            <button onclick="cupZoom('trial',1.25)" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--tx);padding:2px 8px;cursor:pointer;font-size:14px">+</button>
+            <span class="cup-zoom-lbl" id="cupZoomTrial" style="font-size:10px;font-family:var(--m);color:var(--txm);min-width:28px;text-align:center">1×</span>
+            <button onclick="cupZoom('trial',0.8)" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--tx);padding:2px 8px;cursor:pointer;font-size:14px">−</button>
+            <button onclick="cupResetZoom('trial')" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--txd);padding:2px 6px;cursor:pointer;font-size:9px">1:1</button>
+          </div>
+          <span class="cup-card-tag trial">Trial</span>
+        </div>
+        <div class="cup-canvas-wrap" id="cupWrapTrial">
+          <canvas id="cupCvTrial"></canvas>
+        </div>
+        <div class="cup-step-bar" id="cupStepTrial">
+          <span>Upload a fluoro shot to begin</span>
+        </div>
+        <div class="cup-action-bar">
+          <button class="btn btn-secondary btn-sm" onclick="uploadCupImg('trial')">&#128444; Library</button>
+          <button class="btn btn-secondary btn-sm" onclick="captureCupImg('trial')">&#128247; Camera</button>
+          <input type="file" id="cupFileTrial" accept="image/*" style="display:none" onchange="loadCupImg('trial',this.files[0])">
+          <input type="file" id="cupCapTrial" accept="image/*" capture="environment" style="display:none" onchange="loadCupImg('trial',this.files[0])">
+        </div>
+        <div class="cup-results" id="cupResultsTrial" style="display:none"></div>
+        <div class="cup-action-bar" id="cupSaveTrial" style="display:none">
+          <button class="btn btn-secondary btn-sm" onclick="resetCupShot('trial')">Reset</button>
+          <button class="btn btn-primary btn-sm" onclick="saveCupShot('trial')" style="background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.5);color:#a78bfa">Save Cup Data</button>
+          <button class="btn btn-primary btn-sm" onclick="sendCupToScreen('trial')" style="background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.5);color:#a78bfa">&#9654; Send to Screen</button>
+        </div>
+      </div>
+      <!-- Final cup card -->
+      <div class="cup-shot-card final" id="cupCardFinal">
+        <div class="cup-card-hdr">
+          <div class="cup-card-title">Final Cup</div>
+          <div style="display:flex;gap:4px;align-items:center;margin-left:auto;margin-right:8px">
+            <button onclick="cupZoom('final',1.25)" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--tx);padding:2px 8px;cursor:pointer;font-size:14px">+</button>
+            <span class="cup-zoom-lbl" id="cupZoomFinal" style="font-size:10px;font-family:var(--m);color:var(--txm);min-width:28px;text-align:center">1×</span>
+            <button onclick="cupZoom('final',0.8)" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--tx);padding:2px 8px;cursor:pointer;font-size:14px">−</button>
+            <button onclick="cupResetZoom('final')" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--txd);padding:2px 6px;cursor:pointer;font-size:9px">1:1</button>
+          </div>
+          <span class="cup-card-tag final">Final</span>
+        </div>
+        <div class="cup-canvas-wrap" id="cupWrapFinal">
+          <canvas id="cupCvFinal"></canvas>
+        </div>
+        <div class="cup-step-bar" id="cupStepFinal">
+          <span>Upload a fluoro shot to begin</span>
+        </div>
+        <div class="cup-action-bar">
+          <button class="btn btn-secondary btn-sm" onclick="uploadCupImg('final')">&#128444; Library</button>
+          <button class="btn btn-secondary btn-sm" onclick="captureCupImg('final')">&#128247; Camera</button>
+          <input type="file" id="cupFileFinal" accept="image/*" style="display:none" onchange="loadCupImg('final',this.files[0])">
+          <input type="file" id="cupCapFinal" accept="image/*" capture="environment" style="display:none" onchange="loadCupImg('final',this.files[0])">
+        </div>
+        <div class="cup-results" id="cupResultsFinal" style="display:none"></div>
+        <div class="cup-action-bar" id="cupSaveFinal" style="display:none">
+          <button class="btn btn-secondary btn-sm" onclick="resetCupShot('final')">Reset</button>
+          <button class="btn btn-primary btn-sm" onclick="saveCupShot('final')" style="background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.5);color:#a78bfa">Save Cup Data</button>
+          <button class="btn btn-primary btn-sm" onclick="sendCupToScreen('final')" style="background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.5);color:#a78bfa">&#9654; Send to Screen</button>
+        </div>
+      </div>
+    </div>
+    <!-- Comparison panel -->
+    <div class="cup-comparison" id="cupComparison" style="display:none">
+      <div class="cup-comparison-title">Trial vs Final Comparison</div>
+      <div class="cup-compare-grid" id="cupCompareGrid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="main" id="apModeWrap">
   <div class="disc">&#9888; Research prototype — not FDA cleared. Not for clinical decisions.</div>
   <div class="cfg" id="cfgPanel">
-    <div class="cfg-row"><span class="cfg-lbl">Model URL</span><input class="cfg-input" id="modelUrl" placeholder="https://galeygrid-api-production.up.railway.app"><span class="sts no" id="apiSts">Not set</span><button class="cfg-toggle" onclick="toggleCfg()">Hide</button></div>
-    <div class="cfg-row"><span class="cfg-lbl">Supabase URL</span><input class="cfg-input" id="sbUrl" placeholder="https://xxx.supabase.co"><span class="cfg-lbl" style="margin-left:4px">Key</span><input class="cfg-input" id="sbKey" placeholder="eyJ..."></div>
-    <div class="cfg-row"><span class="cfg-lbl">Op Side</span><select class="cfg-input" id="opSide" style="flex:0;width:80px"><option value="left">Left</option><option value="right">Right</option></select></div>
+    <div class="cfg-row" style="display:none"><input class="cfg-input" id="modelUrl"></div>
+    <div class="cfg-row" style="display:flex!important"><span class="cfg-lbl">API Status</span><span class="sts no" id="apiSts">Checking...</span></div>
+    <div class="cfg-row" style="display:none"><span class="cfg-lbl">Supabase URL</span><input class="cfg-input" id="sbUrl" placeholder="https://xxx.supabase.co"><span class="cfg-lbl" style="margin-left:4px">Key</span><input class="cfg-input" id="sbKey" placeholder="eyJ..."></div>
+    <div class="cfg-row" style="display:flex!important"><span class="cfg-lbl">Op Side</span><select class="cfg-input" id="opSide" style="flex:0;width:80px"><option value="left">Left</option><option value="right">Right</option></select></div>
   </div>
 
   <!-- Case Demographics -->
@@ -190,7 +350,10 @@
   </div>
   <div class="lm-hint" id="lmHint">&#9758; <strong>Tap &amp; drag</strong> landmarks to correct. Use <strong>&#9906; Scale</strong> to calibrate with any known reference (ball, caliper, or implant).
     <br><span style="font-size:9px;color:var(--txd)">Labels use patient orientation: PtR = patient's right (viewer's left) &bull; PtL = patient's left (viewer's right)</span></div>
-  <div style="text-align:center;margin-bottom:8px"><button onclick="toggleObTrace()" id="obTraceBtn" style="padding:4px 12px;border-radius:6px;font-size:9px;font-weight:600;cursor:pointer;border:1px solid var(--bdl);background:var(--sf2);color:var(--txd);font-family:var(--f)">Obturator Trace: OFF</button></div>
+  <div style="text-align:center;margin-bottom:8px">
+    <button onclick="toggleWizard()" id="wizBtn" style="padding:4px 12px;border-radius:6px;font-size:9px;font-weight:600;cursor:pointer;border:1px solid var(--ac);background:var(--acb);color:var(--ac);font-family:var(--f)">Accuracy Wizard: ON</button>
+    <button onclick="toggleObTrace()" id="obTraceBtn" style="padding:4px 12px;border-radius:6px;font-size:9px;font-weight:600;cursor:pointer;border:1px solid var(--bdl);background:var(--sf2);color:var(--txd);font-family:var(--f);margin-left:4px">Obturator Trace: OFF</button>
+  </div>
   <div id="shotList"></div>
   <button class="add-shot" onclick="addShot()">+ Add Fluoro Shot</button>
   <div id="cmpBox"></div>
@@ -199,7 +362,7 @@
     <h3>Training Data</h3><div class="export-count" id="exportCount">0</div><div class="export-sub">labeled images saved</div>
     <div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-secondary btn-sm" onclick="exportJSON()">Export JSON</button><button class="btn btn-sm" style="background:rgba(232,84,84,.1);border:1px solid rgba(232,84,84,.2);color:var(--dn)" onclick="clearLocal()">Clear</button></div>
   </div>
-</div>
+</div><!-- end apModeWrap -->
 <script src="https://cdn.jsdelivr.net/npm/dicom-parser@1.8.21/dist/dicomParser.min.js"></script>
 <script>
 const $=id=>document.getElementById(id);
@@ -215,9 +378,10 @@ let dragging=null; // {idx,key}
 // ============================================================
 // URL Params + Config
 // ============================================================
+const GG_DEFAULTS={modelUrl:'https://galeygrid-api-production.up.railway.app',sbUrl:'https://qzopthbeiavsiyvcpfnx.supabase.co',sbKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6b3B0aGJlaWF2c2l5dmNwZm54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzcyNzEsImV4cCI6MjA4OTQ1MzI3MX0.tWTWDGpfJpa6yLd2avc2OLEHldyZwDr7hrUWqaCSnrM'};
 (function(){const p=new URLSearchParams(location.search);const m={model:'modelUrl',sb:'sbUrl',sbk:'sbKey'};let f=false;for(const[k,id]of Object.entries(m)){const v=p.get(k);if(v){$(id).value=v;localStorage.setItem('gg_'+id,v);f=true}}if(f&&history.replaceState)history.replaceState({},'',location.pathname)})();
-['modelUrl','sbUrl','sbKey'].forEach(id=>{const el=$(id),s=localStorage.getItem('gg_'+id);if(s&&!el.value)el.value=s;el.addEventListener('input',()=>{localStorage.setItem('gg_'+id,el.value);if(id==='modelUrl')updSts()})});
-function updSts(){const u=$('modelUrl').value.trim();$('apiSts').textContent=u.startsWith('http')?'Ready':'Not set';$('apiSts').className='sts '+(u.startsWith('http')?'ok':'no');if(u.startsWith('http')&&$('sbUrl').value.trim().length>5)$('cfgPanel').classList.add('collapsed')}
+['modelUrl','sbUrl','sbKey'].forEach(id=>{const el=$(id),s=localStorage.getItem('gg_'+id)||GG_DEFAULTS[id]||'';if(s&&!el.value)el.value=s;el.addEventListener('input',()=>{localStorage.setItem('gg_'+id,el.value);if(id==='modelUrl')updSts()})});
+function updSts(){const u=$('modelUrl').value.trim();if(!u.startsWith('http')){$('apiSts').textContent='Not set';$('apiSts').className='sts no';return;}$('apiSts').textContent='Checking…';$('apiSts').className='sts';fetch(u+'/health',{method:'GET'}).then(r=>{$('apiSts').textContent=r.ok?'Ready':'Error';$('apiSts').className='sts '+(r.ok?'ok':'no')}).catch(()=>{$('apiSts').textContent='Offline';$('apiSts').className='sts no'});if($('sbUrl').value.trim().length>5)$('cfgPanel').classList.add('collapsed')}
 function toggleCfg(){$('cfgPanel').classList.toggle('collapsed')}
 updSts();
 
@@ -270,7 +434,7 @@ function shotPPM(idx){if(idx!=null&&shots[idx]?.scaleCal?.pxPerMm)return shots[i
 // Shots
 // ============================================================
 function addShot(){
-  shots.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),img:null,imageSource:null,dicomMeta:null,landmarks:{},analysisRaw:null,loading:false,zoom:{s:1,vx:0,vy:0},scaleCal:{active:false,refType:'ball',refMm:25,points:[],pxPerMm:null},cmpView:null});
+  shots.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),img:null,imageSource:null,dicomMeta:null,landmarks:{},analysisRaw:null,loading:false,zoom:{s:1,vx:0,vy:0},scaleCal:{active:false,refType:'ball',refMm:25,points:[],pxPerMm:null},cmpView:null,cup:{active:false,points:[],ellipse:null}});
   renderShots();
 }
 
@@ -283,7 +447,9 @@ function renderShots(scrollTo){
     const tag=isRef?'<span class="shot-tag ref">Reference</span>':'<span class="shot-tag intra">Intraop #'+idx+'</span>';
     const srcTag=shot.imageSource?`<span class="src-tag ${shot.imageSource==='dicom'?'dicom':'photo'}">${shot.imageSource}</span>`:'';
     const dicomInfo=shot.dicomMeta?`<span style="font-size:8px;color:var(--txd);margin-left:4px">${shot.dicomMeta.pixelSpacingMm?shot.dicomMeta.pixelSpacingMm.toFixed(2)+'mm/px':'no spacing'}${shot.dicomMeta.magnification?' mag:'+shot.dicomMeta.magnification.toFixed(2)+'x':''}</span>`:'';
-    let h='<div class="shot-h"><span class="shot-lbl">'+label+'</span><div>'+tag+srcTag+dicomInfo+'</div></div>';
+    const opSideVal=$('opSide').value;
+    const opBadge=`<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;background:rgba(62,219,160,.15);color:#3edba0;border:1px solid rgba(62,219,160,.35);margin-left:6px;letter-spacing:.04em">${opSideVal.toUpperCase()} OP</span>`;
+    let h='<div class="shot-h"><span class="shot-lbl">'+label+opBadge+'</span><div>'+tag+srcTag+dicomInfo+'</div></div>';
 
     if(!shot.img){
       h+=`<div class="dz" id="dz${idx}"><div class="dz-ic">&#8853;</div><div class="dz-txt">${isRef?'Upload reference AP pelvis':'Upload fluoro shot'}</div><div class="dz-h">Photo, DICOM, or live capture</div>
@@ -297,7 +463,7 @@ function renderShots(scrollTo){
       h+=`<div class="shot-act"><span class="fn">${shot.img.name}</span><div style="display:flex;gap:5px;align-items:center">`;
       if(shot.loading){h+='<span class="loader-t">Analyzing...</span>'}
       else if(!Object.keys(shot.landmarks).length){h+=`<button class="btn btn-primary btn-sm" onclick="analyzeShot(${idx})" ${$('modelUrl').value.trim().startsWith('http')?'':'disabled'}>Analyze</button>`}
-      else{h+=`<button class="btn btn-secondary btn-sm" onclick="saveShot(${idx})">Save</button>`}
+      else{h+=`<button class="btn btn-secondary btn-sm" onclick="saveShot(${idx})">Save</button><button class="btn btn-primary btn-sm" onclick="sendToScreen(${idx})" style="background:rgba(62,219,160,.2);border:1px solid rgba(62,219,160,.5);color:#3edba0">&#9654; Send to Screen</button>`}
       h+=`<button class="rm-btn" onclick="rmShot(${idx})">Remove</button></div></div>`;
       // Scale calibration bar
       const sc=shot.scaleCal;
@@ -323,6 +489,54 @@ function renderShots(scrollTo){
       h+='</div>';
       // Legend
       if(Object.keys(shot.landmarks).length){h+=`<div class="legend">${Object.entries(LM_COLORS).map(([k,c])=>`<div class="leg-i"><div class="leg-d" style="background:${c}"></div>${LM_SHORT[k]}</div>`).join('')}</div>`}
+      // Cup tool bar (only when landmarks present and scale set)
+      if(Object.keys(shot.landmarks).length){
+        const cup=shot.cup||{active:false,points:[],ellipse:null};
+        const ppm=shotPPM(idx);
+        h+=`<div class="cup-bar">`;
+        h+=`<button class="cup-btn ${cup.active?'active':''}" onclick="toggleCup(${idx})">⊙ Cup${cup.active?' (placing)':''}</button>`;
+        if(cup.active){
+          const n=cup.points.length;
+          const need=Math.max(0,5-n);
+          if(need>0)h+=`<span>Place <b>${need}</b> more rim point${need>1?'s':''} (min 5)</span>`;
+          else h+=`<span style="color:#a78bfa">${n} points placed — ${n>=5?'ellipse fit active':'need 5+'}</span>`;
+          if(n>0)h+=`<button class="cup-btn" onclick="undoCupPoint(${idx})">↩ Undo</button>`;
+          if(n>0)h+=`<button class="cup-btn" onclick="resetCup(${idx})">Clear</button>`;
+          if(cup.ellipse)h+=`<button class="cup-btn" style="border-color:var(--ac);color:var(--ac)" onclick="saveCupData(${idx})">Save Cup Data</button>`;
+        } else if(cup.ellipse){
+          const e=cup.ellipse;const ppm2=ppm||1;
+          const incOk=e.inclination>=30&&e.inclination<=50;
+          const antOk=e.anteversion>=10&&e.anteversion<=30;
+          h+=`<span class="cup-val ${incOk?'ok':'warn'}">Inc: ${e.inclination.toFixed(1)}°</span>`;
+          h+=`<span class="cup-val ${antOk?'ok':'warn'}">Ant: ${e.anteversion.toFixed(1)}°</span>`;
+          h+=`<button class="cup-btn" onclick="toggleCup(${idx})">Edit</button>`;
+        }
+        h+=`</div>`;
+        // Cup results panel
+        if(!cup.active&&cup.ellipse){
+          const e=cup.ellipse;
+          const incOk=e.inclination>=30&&e.inclination<=50;
+          const antOk=e.anteversion>=10&&e.anteversion<=30;
+          h+=`<div class="cup-panel">
+            <div class="cup-metric">
+              <div class="cup-metric-val ${incOk?'ok':'warn'}">${e.inclination.toFixed(1)}°</div>
+              <div class="cup-metric-lbl">Inclination</div>
+              <div class="cup-metric-range">Target 30–50°${incOk?'' : ' ⚠️ OUT'}</div>
+            </div>
+            <div class="cup-metric">
+              <div class="cup-metric-val ${antOk?'ok':'warn'}">${e.anteversion.toFixed(1)}°</div>
+              <div class="cup-metric-lbl">Anteversion</div>
+              <div class="cup-metric-range">Target 10–30°${antOk?'' : ' ⚠️ OUT'}</div>
+            </div>
+            <div class="cup-metric">
+              <div class="cup-metric-val" style="font-size:20px;color:var(--txm)">${e.points} pts</div>
+              <div class="cup-metric-lbl">Rim Points</div>
+              <div class="cup-metric-range">Fit confidence</div>
+            </div>
+            ${!ppm?'<span style="font-size:10px;color:var(--warn)">&#9888; Set scale for mm accuracy</span>':''}
+          </div>`;
+        }
+      }
       // Comparison toggle + delta bar (non-reference shots with landmarks)
       const refHasLM=shots[0]&&Object.keys(shots[0].landmarks||{}).length;
       if(!isRef&&Object.keys(shot.landmarks).length&&refHasLM){
@@ -337,46 +551,49 @@ function renderShots(scrollTo){
         const ppm=curM.ppm||refM.ppm;
         const fmtD=v=>ppm?(v/ppm).toFixed(1)+'mm':Math.round(v)+'px';
         
-        // LLD delta
-        let lldDelta=null,lldSide='';
+        // LLD delta — op side aware, no color coding
+        const opSide=$('opSide').value;
+        const opLabel=opSide==='left'?'L':'R';
+        const nonOpLabel=opSide==='left'?'R':'L';
+        let lldDelta=null,lldOpSub='',lldNonOpSub='';
         if(curM.lldTD!=null&&refM.lldTD!=null){
           lldDelta=curM.lldTD-refM.lldTD;
-          lldSide=lldDelta>0?'R lengthened':'L lengthened';
+          // lldTD positive = R longer; interpret from op side perspective
+          const opChange=opSide==='right'?lldDelta:-lldDelta;
+          const opMm=ppm?(Math.abs(lldDelta)/ppm).toFixed(1)+'mm':Math.round(Math.abs(lldDelta))+'px';
+          lldOpSub=Math.abs(lldDelta)<0.5?'no change':opChange>0?opLabel+' leg +'+opMm+' longer':opLabel+' leg '+opMm+' shorter';
+          lldNonOpSub=Math.abs(lldDelta)<0.5?'':nonOpLabel+' (non-op)';
         }
-        // Offset delta (operative side)
-        const opSide=$('opSide').value;
+        // Offset delta (operative side only)
         let offDelta=null,offDir='';
         if(opSide==='left'&&curM.offsetL!=null&&refM.offsetL!=null){
-          offDelta=curM.offsetL-refM.offsetL;offDir=offDelta>0?'L offset increased':'L offset decreased';
+          offDelta=curM.offsetL-refM.offsetL;
+          const mm=ppm?(Math.abs(offDelta)/ppm).toFixed(1)+'mm':Math.round(Math.abs(offDelta))+'px';
+          offDir=Math.abs(offDelta)<0.5?'no change':offDelta>0?'increased +'+mm:'decreased '+mm;
         } else if(opSide==='right'&&curM.offsetR!=null&&refM.offsetR!=null){
-          offDelta=curM.offsetR-refM.offsetR;offDir=offDelta>0?'R offset increased':'R offset decreased';
+          offDelta=curM.offsetR-refM.offsetR;
+          const mm=ppm?(Math.abs(offDelta)/ppm).toFixed(1)+'mm':Math.round(Math.abs(offDelta))+'px';
+          offDir=Math.abs(offDelta)<0.5?'no change':offDelta>0?'increased +'+mm:'decreased '+mm;
         }
         // AP
         const apOk=curM.isAP;
-        
-        const lldAbs=lldDelta!=null?Math.abs(lldDelta):null;
-        const lldThresh=ppm?(lldAbs!=null?lldAbs/ppm:0):lldAbs||0;
-        const lldColor=lldThresh<5?'green':lldThresh<10?'yellow':'red';
-        const offAbs=offDelta!=null?Math.abs(offDelta):null;
-        const offThresh=ppm?(offAbs!=null?offAbs/ppm:0):offAbs||0;
-        const offColor=offThresh<3?'green':offThresh<6?'yellow':'red';
-        const apColor=apOk===true?'green':apOk===false?'yellow':'';
-        
+
         h+=`<div class="delta-bar visible">
           <div class="delta-grid">
-            <div class="delta-cell ${lldDelta!=null?lldColor:''}">
+            <div class="delta-cell">
               <div class="delta-label">Leg Length Δ</div>
-              <div class="delta-val ${lldDelta!=null?lldColor:''}">${lldDelta!=null?fmtD(Math.abs(lldDelta)):'—'}</div>
-              <div class="delta-sub">${lldSide||'no data'}</div>
+              <div class="delta-val">${lldDelta!=null?fmtD(Math.abs(lldDelta)):'—'}</div>
+              <div class="delta-sub">${lldOpSub||'no data'}</div>
+              <div class="delta-sub" style="color:var(--txd);opacity:0.45;font-size:9px">${lldNonOpSub}</div>
             </div>
-            <div class="delta-cell ${offDelta!=null?offColor:''}">
-              <div class="delta-label">Offset Δ</div>
-              <div class="delta-val ${offDelta!=null?offColor:''}">${offDelta!=null?fmtD(Math.abs(offDelta)):'—'}</div>
+            <div class="delta-cell">
+              <div class="delta-label">${opLabel} Offset Δ (op)</div>
+              <div class="delta-val">${offDelta!=null?fmtD(Math.abs(offDelta)):'—'}</div>
               <div class="delta-sub">${offDir||'no data'}</div>
             </div>
-            <div class="delta-cell ${apColor}">
+            <div class="delta-cell">
               <div class="delta-label">AP Check</div>
-              <div class="delta-val ${apColor}">${apOk===true?'✓':apOk===false?'✗':'—'}</div>
+              <div class="delta-val">${apOk===true?'✓':apOk===false?'✗':'—'}</div>
               <div class="delta-sub">${apOk===true?'True AP':apOk===false?'Rotated':'no data'}</div>
             </div>
           </div>
@@ -646,6 +863,8 @@ function drawShot(idx){
   const drawLM=showingRef?shots[0].landmarks:shot.landmarks;
   const drawIdx=showingRef?0:idx;
   if(Object.keys(drawLM).length)drawOverlay(ctx,drawLM,W,H,ui,drawIdx);
+  // Cup overlay (always draw for current shot, not reference view)
+  if(!showingRef&&shot.cup)drawCupOverlay(ctx,shot.cup,shot.landmarks,W,H,ui,idx);
   
   // REFERENCE badge when showing ref image on a comparison shot
   if(showingRef){
@@ -1068,13 +1287,16 @@ function setupDrag(idx){
     // 1. Check if dragging an existing scale point
     const spi=findScalePt(p);
     if(spi>=0){dragging={idx,scaleIdx:spi};e.preventDefault();return true}
-    // 2. Check if placing a new scale point
+    // 2. Check if placing a cup rim point
+    const cupState=shots[idx].cup;
+    if(cupState&&cupState.active){addCupPoint(idx,p.x,p.y);e.preventDefault();return true}
+    // 3. Check if placing a new scale point
     const sc=shots[idx].scaleCal;
     if(sc.active&&sc.points.length<2){addScalePoint(idx,p.x,p.y);e.preventDefault();return true}
-    // 3. Check if dragging a landmark
+    // 4. Check if dragging a landmark
     const lm=shots[idx]?.landmarks;
     if(lm&&Object.keys(lm).length){const k=findLM(p);if(k){dragging={idx,key:k};e.preventDefault();return true}}
-    // 4. Pan
+    // 5. Pan
     pan={cx:clientX,cy:clientY};e.preventDefault();return false;
   }
 
@@ -1156,10 +1378,13 @@ async function analyzeShot(idx){
     // Scale coordinates if image was resized
     // Model returns coords in the image dimensions it received
     // Our image is already resized to max 1000px, so coords should match
+    console.log('[API RAW] first landmark sample:', JSON.stringify(Object.entries(data.landmarks||{})[0]));
     shot.landmarks=data.landmarks||{};
     shot.analysisRaw=data;
     clearObCache(idx);
   }catch(err){$('errBox').textContent=err.message;$('errBox').style.display=''}finally{shot.loading=false;renderShots(idx)}
+  // Launch accuracy wizard if enabled and landmarks were detected
+  if(wizEnabled&&Object.keys(shot.landmarks).length)startWizard(idx);
 }
 
 // ============================================================
@@ -1276,9 +1501,1631 @@ async function saveShot(idx){
   }catch(e){alert('Supabase error:\n'+e.message+'\n\n(Saved locally as backup)')}}else{alert('Saved locally ('+local.length+' total). Connect Supabase to sync.')}
   $('exportBox').style.display='';$('exportCount').textContent=local.length}
 
+// ============================================================
+// Render annotated canvas for OR display (teardrops + lessers only)
+// ============================================================
+function renderAnnotatedCanvas(idx){
+  const shot=shots[idx];if(!shot?.img)return null;
+  const W=shot.img.w,H=shot.img.h;
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');
+  ctx.drawImage(shot.img.el,0,0,W,H);
+  const lm=shot.landmarks;if(!Object.keys(lm).length)return null;
+  const sc=Math.max(W,H)/900;
+  const ppm=shotPPM(idx);
+  const fmt=px=>ppm?(px/ppm).toFixed(1)+'mm':Math.round(px)+'px';
+  const DISPLAY_LM=['left_teardrop','right_teardrop','left_lesser_trochanter','right_lesser_trochanter'];
+  const pts={};
+  for(const k of DISPLAY_LM){if(lm[k]&&lm[k].x!=null)pts[k]={x:lm[k].x,y:lm[k].y};}
+  const ltd=pts.left_teardrop,rtd=pts.right_teardrop;
+  const llt=pts.left_lesser_trochanter,rlt=pts.right_lesser_trochanter;
+  const opSide=$('opSide').value;
+  const fs=Math.max(13,15*sc);
+
+  // ---- Teardrop baseline ----
+  if(ltd&&rtd){
+    const dx=ltd.x-rtd.x,dy=ltd.y-rtd.y,len=Math.hypot(dx,dy);
+    if(len>0){
+      const ux=dx/len,uy=dy/len,ext=60*sc;
+      // Extended dashed line
+      dashLine(ctx,rtd.x-ux*ext,rtd.y-uy*ext,ltd.x+ux*ext,ltd.y+uy*ext,'rgba(255,255,255,.7)',2.5*sc,10*sc,7*sc);
+      // Distance label centered on baseline
+      const mx=(rtd.x+ltd.x)/2,my=(rtd.y+ltd.y)/2;
+      const txt=fmt(len);
+      ctx.font=`bold ${Math.round(fs*1.1)}px 'JetBrains Mono'`;
+      const tw=ctx.measureText(txt).width;
+      // Position label above the line
+      const perpX=-uy*28*sc,perpY=ux*28*sc;
+      fillRR(ctx,mx+perpX-tw/2-8*sc,my+perpY-fs-4*sc,tw+16*sc,fs+8*sc,5*sc);
+      ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,mx+perpX-tw/2-8*sc,my+perpY-fs-4*sc,tw+16*sc,fs+8*sc,5*sc);
+      ctx.fillStyle='#fff';ctx.fillText(txt,mx+perpX-tw/2,my+perpY+2*sc);
+    }
+  }
+
+  // ---- Perpendicular offset lines from lessers to teardrop line ----
+  if(ltd&&rtd){
+    for(const[k,isOp]of[
+      ['left_lesser_trochanter',opSide==='left'],
+      ['right_lesser_trochanter',opSide==='right']
+    ]){
+      const p=pts[k];if(!p)continue;
+      const col=LM_COLORS[k];
+      const pr=projPt(p.x,p.y,rtd.x,rtd.y,ltd.x,ltd.y);
+      const dist=Math.hypot(p.x-pr.x,p.y-pr.y);
+      const alpha=isOp?'dd':'55';
+      // Dashed perpendicular line
+      dashLine(ctx,p.x,p.y,pr.x,pr.y,col+alpha,isOp?3*sc:1.5*sc,7*sc,4*sc);
+      // Tick at projection point
+      const tdDx=ltd.x-rtd.x,tdDy=ltd.y-rtd.y,tdLen=Math.hypot(tdDx,tdDy);
+      const tux=tdDx/tdLen,tuy=tdDy/tdLen;
+      ctx.beginPath();ctx.moveTo(pr.x-tux*10*sc,pr.y-tuy*10*sc);ctx.lineTo(pr.x+tux*10*sc,pr.y+tuy*10*sc);
+      ctx.strokeStyle=col+alpha;ctx.lineWidth=isOp?3*sc:2*sc;ctx.stroke();
+      // Distance label (op side: larger, non-op: smaller and faded)
+      const lx=(p.x+pr.x)/2+14*sc,ly=(p.y+pr.y)/2;
+      const txt=fmt(dist);
+      ctx.font=`bold ${Math.round(isOp?fs:fs*.8)}px 'JetBrains Mono'`;
+      const tw=ctx.measureText(txt).width;
+      ctx.fillStyle='rgba(0,0,0,.75)';fillRR(ctx,lx-4*sc,ly-fs/2-3*sc,tw+10*sc,fs+6*sc,4*sc);
+      ctx.fillStyle=isOp?col:'rgba(200,200,200,.5)';ctx.fillText(txt,lx,ly+fs*.35);
+    }
+  }
+
+  // ---- Landmark dots + labels ----
+  for(const k of DISPLAY_LM){
+    const p=pts[k];if(!p)continue;
+    const col=LM_COLORS[k];const lbl=LM_SHORT[k];
+    const r=10*sc;
+    ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fill();
+    ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fillStyle=col;ctx.globalAlpha=0.9;ctx.fill();ctx.globalAlpha=1;
+    ctx.strokeStyle='#fff';ctx.lineWidth=2*sc;ctx.stroke();
+    ctx.font=`bold ${Math.round(fs*.85)}px 'DM Sans'`;
+    const tw=ctx.measureText(lbl).width;
+    const tx=p.x+r+4*sc,ty=p.y+4*sc;
+    ctx.fillStyle='rgba(0,0,0,0.75)';fillRR(ctx,tx-3,ty-fs+2,tw+8,fs+4,3);
+    ctx.fillStyle=col;ctx.fillText(lbl,tx+2,ty);
+  }
+
+  return cv;
+}
+
+
+// ============================================================
+// Send to Screen
+// ============================================================
+async function sendToScreen(idx){
+  const shot=shots[idx];if(!shot?.img||!Object.keys(shot.landmarks).length)return;
+  const sbUrl=$('sbUrl').value.trim(),sbKey=$('sbKey').value.trim();
+  if(!sbUrl||!sbKey){alert('Supabase not configured.');return}
+  const refHasLM=shots[0]&&Object.keys(shots[0].landmarks||{}).length;
+  const refM=refHasLM?calcMetrics(shots[0].landmarks,0):null;
+  const curM=calcMetrics(shot.landmarks,idx);
+  const ppm=curM.ppm||(refM&&refM.ppm)||null;
+  const px2mm=v=>ppm&&v!=null?(v/ppm):null;
+  const opSide=$('opSide').value;
+  // Deltas (vs reference)
+  let lldDelta=null,offDelta=null;
+  if(refM&&curM.lldTD!=null&&refM.lldTD!=null)lldDelta=px2mm(curM.lldTD-refM.lldTD);
+  if(refM&&opSide==='left'&&curM.offsetL!=null&&refM.offsetL!=null)offDelta=px2mm(curM.offsetL-refM.offsetL);
+  else if(refM&&opSide==='right'&&curM.offsetR!=null&&refM.offsetR!=null)offDelta=px2mm(curM.offsetR-refM.offsetR);
+  const payload={
+    case_id:$('caseId').value||'unknown',
+    updated_at:new Date().toISOString(),
+    op_side:opSide,
+    shot_number:idx,
+    // Deltas
+    lld_delta_mm:lldDelta!=null?parseFloat(lldDelta.toFixed(1)):null,
+    offset_delta_mm:offDelta!=null?parseFloat(offDelta.toFixed(1)):null,
+    ap_ok:curM.isAP,
+    // Absolutes — current shot
+    tilt_deg:curM.tilt!=null?parseFloat(curM.tilt.toFixed(1)):null,
+    lld_td_mm:px2mm(curM.lldTD)!=null?parseFloat(px2mm(curM.lldTD).toFixed(1)):null,
+    lld_it_mm:px2mm(curM.lldIT)!=null?parseFloat(px2mm(curM.lldIT).toFixed(1)):null,
+    offset_l_mm:px2mm(curM.offsetL)!=null?parseFloat(px2mm(curM.offsetL).toFixed(1)):null,
+    offset_r_mm:px2mm(curM.offsetR)!=null?parseFloat(px2mm(curM.offsetR).toFixed(1)):null,
+    ob_asym_pct:curM.obAsym!=null?parseFloat(curM.obAsym.toFixed(1)):null,
+    ob_dir:curM.obDir||null,
+    // Patient info
+    patient_age:parseFloat($('ptAge').value)||null,
+    patient_sex:$('ptSex').value||null,
+    // Reference absolutes (for full view)
+    ref_tilt_deg:refM&&refM.tilt!=null?parseFloat(refM.tilt.toFixed(1)):null,
+    ref_lld_td_mm:refM&&px2mm(refM.lldTD)!=null?parseFloat(px2mm(refM.lldTD).toFixed(1)):null,
+    ref_offset_l_mm:refM&&px2mm(refM.offsetL)!=null?parseFloat(px2mm(refM.offsetL).toFixed(1)):null,
+    ref_offset_r_mm:refM&&px2mm(refM.offsetR)!=null?parseFloat(px2mm(refM.offsetR).toFixed(1)):null,
+    has_scale:ppm!=null
+  };
+  try{
+    // Upload annotated image to storage
+    const annCv=renderAnnotatedCanvas(idx);
+    if(annCv){
+      const imgBlob=await new Promise(res=>annCv.toBlob(res,'image/jpeg',0.88));
+      const imgPath=`galeygrid/display_${payload.case_id}_shot${idx}.jpg`;
+      console.log('[SendToScreen] Uploading image to',imgPath,'size',imgBlob.size);
+      const storResp=await fetch(`${sbUrl}/storage/v1/object/fluoro-images/${imgPath}`,{
+        method:'POST',
+        headers:{'Authorization':`Bearer ${sbKey}`,'Content-Type':'image/jpeg','x-upsert':'true'},
+        body:imgBlob
+      });
+      const storText=await storResp.text();
+      console.log('[SendToScreen] Storage response',storResp.status,storText);
+      if(storResp.ok){
+        payload.image_url=`${sbUrl}/storage/v1/object/public/fluoro-images/${imgPath}`;
+        console.log('[SendToScreen] image_url set to',payload.image_url);
+      } else {
+        console.warn('[SendToScreen] Image upload failed:',storResp.status,storText);
+      }
+    } else {
+      console.warn('[SendToScreen] renderAnnotatedCanvas returned null for idx',idx);
+    }
+    const resp=await fetch(`${sbUrl}/rest/v1/live_display`,{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${sbKey}`,'apikey':sbKey,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify(payload)
+    });
+    if(!resp.ok){const t=await resp.text();throw new Error('DB error '+resp.status+': '+t.slice(0,300))}
+    // Flash button feedback
+    const btns=document.querySelectorAll(`#shot${idx} .btn-primary`);
+    btns.forEach(b=>{const orig=b.textContent;b.textContent='✓ Sent';b.style.color='#3edba0';setTimeout(()=>{b.textContent=orig},2000)});
+  }catch(e){alert('Send to Screen failed:\n'+e.message)}
+}
+
+
 function exportJSON(){const d=localStorage.getItem('gg_training')||'[]';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([d],{type:'application/json'}));a.download=`galeygrid_${new Date().toISOString().slice(0,10)}.json`;a.click()}
 function clearLocal(){if(confirm('Delete all local data?')){localStorage.removeItem('gg_training');$('exportCount').textContent='0'}}
 const ex=JSON.parse(localStorage.getItem('gg_training')||'[]');if(ex.length){$('exportBox').style.display='';$('exportCount').textContent=ex.length}
+// ============================================================
+// Accuracy Wizard
+// ============================================================
+let wizEnabled=true; // default ON
+const WIZ_LANDMARKS=[
+  {key:'right_teardrop',label:'Right Teardrop',short:'PtR-TD',color:'#FF5C5C',hint:'The inferior tip of the U-shaped teardrop shadow on the patient\'s RIGHT acetabulum'},
+  {key:'left_teardrop',label:'Left Teardrop',short:'PtL-TD',color:'#5C8AFF',hint:'The inferior tip of the U-shaped teardrop shadow on the patient\'s LEFT acetabulum'},
+  {key:'right_lesser_trochanter',label:'Right Lesser Trochanter',short:'PtR-LT',color:'#FF9E3D',hint:'The most medially prominent cortical bump on the patient\'s RIGHT femur'},
+  {key:'left_lesser_trochanter',label:'Left Lesser Trochanter',short:'PtL-LT',color:'#3DDFFF',hint:'The most medially prominent cortical bump on the patient\'s LEFT femur'},
+];
+let wizState=null; // {shotIdx, stepIdx, overlay element}
+
+function toggleWizard(){
+  wizEnabled=!wizEnabled;
+  const btn=$('wizBtn');
+  btn.textContent='Accuracy Wizard: '+(wizEnabled?'ON':'OFF');
+  btn.style.borderColor=wizEnabled?'var(--ac)':'var(--bdl)';
+  btn.style.color=wizEnabled?'var(--ac)':'var(--txd)';
+  btn.style.background=wizEnabled?'var(--acb)':'var(--sf2)';
+}
+
+function startWizard(shotIdx){
+  if(!wizEnabled)return;
+  const shot=shots[shotIdx];
+  if(!shot?.img||!Object.keys(shot.landmarks).length)return;
+  // Check that at least some wizard landmarks exist
+  const hasAny=WIZ_LANDMARKS.some(wl=>shot.landmarks[wl.key]?.x!=null);
+  if(!hasAny)return;
+  wizState={shotIdx,stepIdx:0};
+  showWizStep();
+}
+
+function showWizStep(){
+  if(!wizState)return;
+  const{shotIdx,stepIdx}=wizState;
+  const shot=shots[shotIdx];
+  if(stepIdx>=WIZ_LANDMARKS.length){endWizard();return}
+  
+  const wl=WIZ_LANDMARKS[stepIdx];
+
+  const lm=shot.landmarks[wl.key];
+  // Skip if landmark not detected
+  if(!lm||lm.x==null){wizState.stepIdx++;showWizStep();return}
+  
+  // Reset zoom each new step so you start with full context
+  wizZoom={s:1,dx:0,dy:0};
+  
+  // Build overlay
+  let ov=document.getElementById('wizOverlay');
+  if(!ov){ov=document.createElement('div');ov.id='wizOverlay';ov.className='wiz-overlay';document.body.appendChild(ov)}
+  
+  // Progress pips
+  let pips='';
+  WIZ_LANDMARKS.forEach((w,i)=>{
+    const cls=i<stepIdx?'done':i===stepIdx?'current':'';
+    pips+=`<div class="wiz-pip ${cls}"></div>`;
+  });
+  
+  ov.innerHTML=`
+    <div class="wiz-header">
+      Verify Landmark<div class="wiz-step">Step ${stepIdx+1} of ${WIZ_LANDMARKS.length}</div>
+      <div class="wiz-lm-name" style="color:${wl.color}">${wl.label}</div>
+    </div>
+    <div class="wiz-progress">${pips}</div>
+    <div class="wiz-canvas-wrap" id="wizCW"><canvas id="wizCv"></canvas></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px 0;gap:6px">
+      <div class="wiz-hint" style="margin:0;flex:1">${wl.hint}<br><b>Drag</b> to correct &nbsp;|&nbsp; <b>Scroll/pinch</b> to zoom</div>
+      <div style="display:flex;gap:4px;align-items:center">
+        <button onclick="applyWizZoomBtn(1.5)" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--bdl);background:rgba(14,21,18,.9);color:var(--txm);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>
+        <button onclick="applyWizZoomBtn(1/1.5)" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--bdl);background:rgba(14,21,18,.9);color:var(--txm);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center">−</button>
+        <button onclick="wizResetZoom()" style="padding:3px 8px;border-radius:6px;border:1px solid var(--bdl);background:rgba(14,21,18,.9);color:var(--txd);font-size:9px;font-weight:600;cursor:pointer">1:1</button>
+      </div>
+    </div>
+    <div class="wiz-btns">
+      <button class="wiz-btn wiz-btn-skip" onclick="wizSkip()">Skip</button>
+      <button class="wiz-btn wiz-btn-confirm" onclick="wizConfirm()">Confirm ✓</button>
+    </div>`;
+  ov.style.display='flex';
+  
+  // Draw zoomed view centered on landmark
+  setTimeout(()=>drawWizCanvas(),20);
+  setupWizDrag();
+}
+
+// Wizard zoom state: pan offset in image pixels from landmark center, zoom multiplier
+let wizZoom={s:1,dx:0,dy:0}; // s=zoom level (1=default view), dx/dy=pan from center
+
+function wizResetZoom(){wizZoom={s:1,dx:0,dy:0};drawWizCanvas();}
+function applyWizZoomBtn(factor){
+  if(!wizState)return;
+  const{shotIdx,stepIdx}=wizState;
+  const shot=shots[shotIdx];
+  const lm=shot.landmarks[WIZ_LANDMARKS[stepIdx]?.key];if(!lm)return;
+  const W=shot.img.w;
+  wizZoom.s=Math.max(0.5,Math.min(8,wizZoom.s*factor));
+  // Keep pan clamped when zooming via button
+  const newR=Math.round(W*0.22/wizZoom.s);
+  const H=shot.img.h;
+  wizZoom.dx=Math.max(-(lm.x-newR),Math.min(W-lm.x-newR,wizZoom.dx));
+  wizZoom.dy=Math.max(-(lm.y-newR),Math.min(H-lm.y-newR,wizZoom.dy));
+  drawWizCanvas();
+}
+
+function drawWizCanvas(){
+  if(!wizState)return;
+  const{shotIdx,stepIdx}=wizState;
+  const shot=shots[shotIdx];
+  const wl=WIZ_LANDMARKS[stepIdx];
+  const lm=shot.landmarks[wl.key];
+  if(!lm||lm.x==null)return;
+  
+  const cv=document.getElementById('wizCv');if(!cv)return;
+  const wrap=document.getElementById('wizCW');if(!wrap)return;
+  const size=Math.min(wrap.clientWidth,wrap.clientHeight)||400;
+  cv.width=size;cv.height=size;
+  const ctx=cv.getContext('2d');
+  
+  const W=shot.img.w,H=shot.img.h;
+  // Adaptive base view radius: ~22% of image width, capped to keep context
+  const baseR=Math.round(W*0.22);
+  const viewR=Math.round(baseR/wizZoom.s);
+  // Center follows landmark + pan offset (clamped so we don't go OOB)
+  const cx0=Math.max(viewR,Math.min(W-viewR,lm.x+wizZoom.dx));
+  const cy0=Math.max(viewR,Math.min(H-viewR,lm.y+wizZoom.dy));
+  const sx=cx0-viewR,sy=cy0-viewR,sw=viewR*2,sh=viewR*2;
+  
+  // Draw image cropped and scaled to canvas
+  ctx.fillStyle='#000';ctx.fillRect(0,0,size,size);
+  // Clamp source rect to image bounds
+  const srcX=Math.max(0,sx),srcY=Math.max(0,sy);
+  const srcW=Math.min(sw,W-srcX),srcH=Math.min(sh,H-srcY);
+  const dstX=srcX>sx?(srcX-sx)/sw*size:0;
+  const dstY=srcY>sy?(srcY-sy)/sh*size:0;
+  const dstW=srcW/sw*size,dstH=srcH/sh*size;
+  ctx.drawImage(shot.img.el,srcX,srcY,srcW,srcH,dstX,dstY,dstW,dstH);
+  
+  // Scale factor from image coords to canvas coords
+  const scale=size/sw;
+  const cx=(lm.x-sx)*scale;
+  const cy=(lm.y-sy)*scale;
+  
+  // Zoom level badge
+  if(wizZoom.s!==1){
+    ctx.font="bold 11px 'JetBrains Mono'";ctx.fillStyle='rgba(14,21,18,.9)';
+    const badge=wizZoom.s.toFixed(1)+'×';const bw=ctx.measureText(badge).width;
+    fillRR(ctx,size-bw-18,6,bw+12,18,5);
+    ctx.fillStyle='#3edba0';ctx.fillText(badge,size-bw-12,19);
+  }
+  
+  // Crosshair
+  ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=1;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(cx,0);ctx.lineTo(cx,size);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(size,cy);ctx.stroke();
+  ctx.setLineDash([]);
+  
+  // Landmark dot — large for touch
+  ctx.beginPath();ctx.arc(cx,cy,14,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.4)';ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,10,0,Math.PI*2);ctx.fillStyle=wl.color;ctx.globalAlpha=.9;ctx.fill();
+  ctx.globalAlpha=1;ctx.strokeStyle='#fff';ctx.lineWidth=2.5;ctx.stroke();
+  // Outer ring
+  ctx.beginPath();ctx.arc(cx,cy,18,0,Math.PI*2);ctx.strokeStyle=wl.color+'55';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
+  
+  // Label
+  ctx.font="bold 14px 'DM Sans'";
+  ctx.fillStyle='rgba(0,0,0,.8)';
+  const tw=ctx.measureText(wl.short).width;
+  fillRR(ctx,cx+16,cy-10,tw+10,20,4);
+  ctx.fillStyle=wl.color;ctx.fillText(wl.short,cx+21,cy+5);
+}
+
+function setupWizDrag(){
+  const cv=document.getElementById('wizCv');if(!cv||cv._wizDrag)return;cv._wizDrag=true;
+  let dragging=false,panning=false,panStart=null,lastTouchDist=null;
+  
+  function getImgCoords(clientX,clientY){
+    if(!wizState)return null;
+    const{shotIdx,stepIdx}=wizState;
+    const shot=shots[shotIdx];
+    const wl=WIZ_LANDMARKS[stepIdx];
+    const lm=shot.landmarks[wl.key];if(!lm)return null;
+    const rect=cv.getBoundingClientRect();
+    const W=shot.img.w,H=shot.img.h;
+    const baseR=Math.round(W*0.22);
+    const viewR=Math.round(baseR/wizZoom.s);
+    const cx0=Math.max(viewR,Math.min(W-viewR,lm.x+wizZoom.dx));
+    const cy0=Math.max(viewR,Math.min(H-viewR,lm.y+wizZoom.dy));
+    const sx=cx0-viewR,sy=cy0-viewR,sw=viewR*2;
+    const size=cv.width;
+    const scale=size/sw;
+    const canvasX=(clientX-rect.left)/(rect.width)*size;
+    const canvasY=(clientY-rect.top)/(rect.height)*size;
+    return{x:Math.round(sx+canvasX/scale),y:Math.round(sy+canvasY/scale)};
+  }
+
+  function applyWizZoom(factor,pivotCX,pivotCY){
+    if(!wizState)return;
+    const{shotIdx,stepIdx}=wizState;
+    const shot=shots[shotIdx];
+    const lm=shot.landmarks[WIZ_LANDMARKS[stepIdx]?.key];if(!lm)return;
+    const W=shot.img.w,H=shot.img.h;
+    const oldR=Math.round(W*0.22/wizZoom.s);
+    // Image coord of pivot
+    const rect=cv.getBoundingClientRect();
+    const size=cv.width;
+    const cx0=Math.max(oldR,Math.min(W-oldR,lm.x+wizZoom.dx));
+    const cy0=Math.max(oldR,Math.min(H-oldR,lm.y+wizZoom.dy));
+    const pivImgX=cx0-oldR+(pivotCX||size/2)/size*(oldR*2);
+    const pivImgY=cy0-oldR+(pivotCY||size/2)/size*(oldR*2);
+    wizZoom.s=Math.max(0.5,Math.min(8,wizZoom.s*factor));
+    const newR=Math.round(W*0.22/wizZoom.s);
+    // Keep pivot image point stable under cursor
+    const newCX0=pivImgX-((pivotCX||size/2)/size)*(newR*2);
+    const newCY0=pivImgY-((pivotCY||size/2)/size)*(newR*2);
+    wizZoom.dx=newCX0+newR-lm.x;
+    wizZoom.dy=newCY0+newR-lm.y;
+    drawWizCanvas();
+  }
+  
+  function onDown(e){
+    e.preventDefault();
+    if(e.touches&&e.touches.length===2){
+      lastTouchDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      dragging=false;panning=false;return;
+    }
+    const cl=e.touches?e.touches[0]:e;
+    // Determine if tap is near the landmark (within ~30% of canvas) → drag LM, else pan
+    const rect=cv.getBoundingClientRect();
+    const tapCX=(cl.clientX-rect.left)/rect.width*cv.width;
+    const tapCY=(cl.clientY-rect.top)/rect.height*cv.height;
+    // Find landmark canvas position
+    if(!wizState)return;
+    const{shotIdx,stepIdx}=wizState;
+    const shot=shots[shotIdx];
+    const lm=shot.landmarks[WIZ_LANDMARKS[stepIdx]?.key];
+    let nearLM=false;
+    if(lm&&lm.x!=null){
+      const W=shot.img.w,H=shot.img.h;
+      const baseR=Math.round(W*0.22);
+      const viewR=Math.round(baseR/wizZoom.s);
+      const cx0=Math.max(viewR,Math.min(W-viewR,lm.x+wizZoom.dx));
+      const cy0=Math.max(viewR,Math.min(H-viewR,lm.y+wizZoom.dy));
+      const scale=cv.width/(viewR*2);
+      const lmCX=(lm.x-(cx0-viewR))*scale;
+      const lmCY=(lm.y-(cy0-viewR))*scale;
+      nearLM=Math.hypot(tapCX-lmCX,tapCY-lmCY)<Math.max(40,cv.width*0.18);
+    }
+    if(nearLM){
+      dragging=true;panning=false;
+      const p=getImgCoords(cl.clientX,cl.clientY);
+      if(p)updateWizLM(p);
+    } else {
+      panning=true;dragging=false;
+      panStart={cx:cl.clientX,cy:cl.clientY,dx:wizZoom.dx,dy:wizZoom.dy};
+    }
+  }
+  function onMove(e){
+    e.preventDefault();
+    if(e.touches&&e.touches.length===2&&lastTouchDist!=null){
+      const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      const rect=cv.getBoundingClientRect();
+      const mx=((e.touches[0].clientX+e.touches[1].clientX)/2-rect.left)/rect.width*cv.width;
+      const my=((e.touches[0].clientY+e.touches[1].clientY)/2-rect.top)/rect.height*cv.height;
+      applyWizZoom(d/lastTouchDist,mx,my);lastTouchDist=d;return;
+    }
+    const cl=e.touches?e.touches[0]:e;
+    if(dragging){
+      const p=getImgCoords(cl.clientX,cl.clientY);
+      if(p)updateWizLM(p);
+    } else if(panning&&panStart){
+      if(!wizState)return;
+      const{shotIdx,stepIdx}=wizState;
+      const shot=shots[shotIdx];
+      const lm=shot.landmarks[WIZ_LANDMARKS[stepIdx]?.key];if(!lm)return;
+      const W=shot.img.w,H=shot.img.h;
+      const viewR=Math.round(W*0.22/wizZoom.s);
+      const rect=cv.getBoundingClientRect();
+      const pxPerImgPx=cv.width/(viewR*2);
+      wizZoom.dx=panStart.dx-(cl.clientX-panStart.cx)/rect.width*cv.width/pxPerImgPx;
+      wizZoom.dy=panStart.dy-(cl.clientY-panStart.cy)/rect.height*cv.height/pxPerImgPx;
+      drawWizCanvas();
+    }
+  }
+  function onUp(e){dragging=false;panning=false;panStart=null;lastTouchDist=null;}
+  function onWheel(e){
+    e.preventDefault();
+    const rect=cv.getBoundingClientRect();
+    const mx=(e.clientX-rect.left)/rect.width*cv.width;
+    const my=(e.clientY-rect.top)/rect.height*cv.height;
+    applyWizZoom(e.deltaY<0?1.3:1/1.3,mx,my);
+  }
+  
+  cv.addEventListener('mousedown',onDown);cv.addEventListener('mousemove',onMove);cv.addEventListener('mouseup',onUp);
+  cv.addEventListener('touchstart',onDown,{passive:false});cv.addEventListener('touchmove',onMove,{passive:false});cv.addEventListener('touchend',onUp);
+  cv.addEventListener('wheel',onWheel,{passive:false});
+}
+
+function updateWizLM(p){
+  if(!wizState)return;
+  const{shotIdx,stepIdx}=wizState;
+  const wl=WIZ_LANDMARKS[stepIdx];
+  shots[shotIdx].landmarks[wl.key].x=p.x;
+  shots[shotIdx].landmarks[wl.key].y=p.y;
+  shots[shotIdx].landmarks[wl.key].confidence='surgeon_corrected';
+  drawWizCanvas();
+}
+
+function wizConfirm(){
+  if(!wizState)return;
+  const{shotIdx,stepIdx}=wizState;
+  const wl=WIZ_LANDMARKS[stepIdx];
+  shots[shotIdx].landmarks[wl.key].confidence='wizard_confirmed';
+  wizState.stepIdx++;
+  showWizStep();
+}
+
+function wizSkip(){
+  if(!wizState)return;
+  wizState.stepIdx++;
+  showWizStep();
+}
+
+// ============================================================
+// Mode Toggle
+// ============================================================
+let currentMode='ap';
+function setMode(m){
+  currentMode=m;
+  $('modeAP').classList.toggle('active',m==='ap');
+  $('modeCup').classList.toggle('active',m==='cup');
+  $('apModeWrap').style.display=m==='ap'?'':'none';
+  $('cupModeWrap').classList.toggle('visible',m==='cup');
+  $('modeLbl').textContent=m==='ap'?'LLD & Offset Analysis':'Acetabular Cup Positioning';
+  if(m==='cup')renderCupMode();
+}
+
+// ============================================================
+// Cup Mode State
+// ============================================================
+// STEPS per shot:
+// 0 = no image
+// 1 = image loaded, place reference line (2 points)
+// 2 = reference line set, place rim points (min 6)
+// 3 = ellipse fit complete, show results
+
+const CUP_SHOTS={
+  trial:{img:null,step:0,refPts:[],rimPts:[],ellipse:null,angles:null,saved:false,zoom:{s:1,ox:0,oy:0},refMode:'teardrop'},
+  final:{img:null,step:0,refPts:[],rimPts:[],ellipse:null,angles:null,saved:false,zoom:{s:1,ox:0,oy:0},refMode:'teardrop'}
+};
+const REF_MODES={
+  teardrop:{label:'Teardrops',hint:'Tap left then right teardrop',rot:0},
+  ischial:{label:'Ischials',hint:'Tap left then right ischial tuberosity',rot:0},
+  symphysis:{label:'Pubic Symphysis',hint:'Tap top then bottom of symphysis (will rotate 90°)',rot:90},
+};
+const CUP_MIN_RIM=6;
+const CUP_COLORS={rim:'#a78bfa',ref:'#FFEA3D'};
+const INCL_MIN=30,INCL_MAX=50,ANT_MIN=10,ANT_MAX=30;
+
+function uploadCupImg(slot){$('cupFile'+cap(slot)).click();}
+function captureCupImg(slot){$('cupCap'+cap(slot)).click();}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+
+function loadCupImg(slot,file){
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      // Keep full resolution for display quality, resize only for storage
+      const W0=img.naturalWidth,H0=img.naturalHeight;
+      const maxStore=1600;let sw=W0,sh=H0;
+      const sratio=Math.min(maxStore/sw,maxStore/sh,1);sw=Math.round(sw*sratio);sh=Math.round(sh*sratio);
+      const sc2=document.createElement('canvas');sc2.width=sw;sc2.height=sh;
+      sc2.getContext('2d').drawImage(img,0,0,sw,sh);
+      const du=sc2.toDataURL('image/jpeg',.92);
+      // Use full resolution for display (img.el = original), stored dims = full res
+      CUP_SHOTS[slot]={img:{el:img,b64:du.split(',')[1],w:W0,h:H0,sw,sh,name:file.name},step:1,refPts:[],rimPts:[],ellipse:null,angles:null,saved:false,zoom:{s:1,ox:0,oy:0},refMode:'teardrop'};
+      renderCupShot(slot);
+      setupCupCanvas(slot);
+    };
+    img.src=e.target.result;
+  };
+  r.readAsDataURL(file);
+}
+
+function resetCupShot(slot){
+  CUP_SHOTS[slot]={img:null,step:0,refPts:[],rimPts:[],ellipse:null,angles:null,saved:false};
+  renderCupShot(slot);
+  renderCupComparison();
+}
+
+function renderCupMode(){
+  renderCupShot('trial');
+  renderCupShot('final');
+  renderCupComparison();
+}
+
+function renderCupShot(slot){
+  const s=CUP_SHOTS[slot];
+  const stepBar=$('cupStep'+cap(slot));
+  const results=$('cupResults'+cap(slot));
+  const saveBar=$('cupSave'+cap(slot));
+
+  // Step bar
+  if(s.step===0){
+    stepBar.innerHTML='<span>Upload a fluoro shot to begin</span>';
+  } else if(s.step===1){
+    const need=2-s.refPts.length;
+    const mode=REF_MODES[s.refMode]||REF_MODES.teardrop;
+    stepBar.innerHTML=`<div class="cup-step-indicator">1</div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${Object.entries(REF_MODES).map(([k,v])=>`<button onclick="setCupRefMode('${slot}','${k}')"
+            style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid ${s.refMode===k?'#FFEA3D':'var(--bd)'};background:${s.refMode===k?'rgba(255,234,61,.12)':'var(--sf2)'};color:${s.refMode===k?'#FFEA3D':'var(--txm)'};font-family:var(--f)">${v.label}</button>`).join('')}
+        </div>
+        <span>${need>0?`Tap <b>${need}</b> point${need>1?'s':''} — ${mode.hint} &nbsp;|&nbsp; <b>Drag</b> existing points to adjust`:'Reference set ✓ — <b>drag</b> either point to fine-tune'}</span>
+      </div>`;
+  } else if(s.step===2){
+    const n=s.rimPts.length;
+    const need=Math.max(0,CUP_MIN_RIM-n);
+    stepBar.innerHTML=`<div class="cup-step-indicator">2</div>
+      <span>${need>0?`Place <b>${need}</b> more rim point${need>1?'s':''} (min ${CUP_MIN_RIM})`:`<b>${n} points</b> placed — tap more to improve fit, or <b>Fit Ellipse</b>`}</span>
+      <button class="cup-btn" style="margin-left:auto;border-color:#FFEA3D44;color:#FFEA3DCC;font-size:9px" onclick="editCupRefLine('${slot}')">✏ Ref Line</button>
+      ${n>=CUP_MIN_RIM?`<button class="btn btn-primary btn-sm" onclick="fitCupEllipse('${slot}')" style="background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.5);color:#a78bfa">Fit Ellipse →</button>`:''}
+      ${n>0?`<button class="cup-btn" onclick="undoCupRimPt('${slot}')">↩ Undo</button>`:''}`;
+  } else if(s.step===3&&s.angles){
+    const a=s.angles;
+    const incOk=a.inclination>=INCL_MIN&&a.inclination<=INCL_MAX;
+    const antOk=a.anteversion>=ANT_MIN&&a.anteversion<=ANT_MAX;
+    stepBar.innerHTML=`<div class="cup-step-indicator" style="background:${incOk&&antOk?'#a78bfa':'var(--warn)'}">✓</div>
+      <span>Ellipse fit — ${s.rimPts.length} pts &nbsp;|&nbsp; <b>Tap</b> to add rim pts</span>
+      <button class="cup-btn" style="border-color:#FFEA3D44;color:#FFEA3DCC;font-size:9px" onclick="editCupRefLine('${slot}')">✏ Ref Line</button>
+      <button class="cup-btn" onclick="undoCupRimPt('${slot}')">↩ Undo</button>
+      <button class="cup-btn" onclick="redoCupRim('${slot}')" style="margin-left:auto">Clear Rim</button>`;
+    // Results
+    results.style.display='flex';
+    results.innerHTML=`
+      <div class="cup-result-metric">
+        <div class="cup-result-val ${incOk?'ok':'warn'}">${a.inclination.toFixed(1)}°</div>
+        <div class="cup-result-lbl">Inclination</div>
+        <div class="cup-result-range">Target ${INCL_MIN}–${INCL_MAX}°${incOk?'':' ⚠'}</div>
+      </div>
+      <div class="cup-result-metric">
+        <div class="cup-result-val ${antOk?'ok':'warn'}">${a.anteversion.toFixed(1)}°</div>
+        <div class="cup-result-lbl">Anteversion</div>
+        <div class="cup-result-range">Target ${ANT_MIN}–${ANT_MAX}°${antOk?'':' ⚠'}</div>
+      </div>
+      <div class="cup-result-metric">
+        <div class="cup-result-val" style="font-size:20px;color:var(--txm)">${s.rimPts.length}</div>
+        <div class="cup-result-lbl">Rim Points</div>
+        <div class="cup-result-range">Ellipse fit</div>
+      </div>`;
+    saveBar.style.display='flex';
+    renderCupComparison();
+  }
+  if(s.step<3){results.style.display='none';saveBar.style.display='none';}
+  drawCupCanvas(slot);
+}
+
+function cupZoom(slot,factor){
+  const z=CUP_SHOTS[slot].zoom;
+  z.s=Math.max(1,Math.min(10,z.s*factor));
+  if(z.s===1){z.ox=0;z.oy=0;}
+  clampCupZoom(slot);
+  const lbl=$('cupZoom'+cap(slot));if(lbl)lbl.textContent=z.s.toFixed(1)+'×';
+  drawCupCanvas(slot);
+}
+function cupResetZoom(slot){
+  CUP_SHOTS[slot].zoom={s:1,ox:0,oy:0};
+  const lbl=$('cupZoom'+cap(slot));if(lbl)lbl.textContent='1×';
+  drawCupCanvas(slot);
+}
+
+function setCupRefMode(slot,mode){
+  CUP_SHOTS[slot].refMode=mode;
+  CUP_SHOTS[slot].refPts=[];
+  renderCupShot(slot);
+}
+
+function undoCupRimPt(slot){
+  CUP_SHOTS[slot].rimPts.pop();
+  renderCupShot(slot);
+}
+
+function redoCupRim(slot){
+  CUP_SHOTS[slot].rimPts=[];
+  CUP_SHOTS[slot].ellipse=null;
+  CUP_SHOTS[slot].angles=null;
+  CUP_SHOTS[slot].step=2;
+  renderCupShot(slot);
+}
+
+function fitCupEllipse(slot){
+  const s=CUP_SHOTS[slot];
+  if(s.rimPts.length<CUP_MIN_RIM)return;
+  const e=fitEllipse(s.rimPts);
+  if(!e){alert('Ellipse fit failed — try adding more points around the full rim');return;}
+  s.ellipse=e;
+  // Calculate angles relative to reference line (with rotation for symphysis)
+  const modeRot=(REF_MODES[s.refMode]||REF_MODES.teardrop).rot*Math.PI/180;
+  const rawRefAngle=s.refPts.length===2?Math.atan2(s.refPts[1].y-s.refPts[0].y,s.refPts[1].x-s.refPts[0].x):0;
+  const refAngle=rawRefAngle+modeRot;
+  let majAngle=e.theta-refAngle;
+  while(majAngle<0)majAngle+=Math.PI;
+  while(majAngle>Math.PI)majAngle-=Math.PI;
+  if(majAngle>Math.PI/2)majAngle=Math.PI-majAngle;
+  const inclination=majAngle*180/Math.PI;
+  const anteversion=Math.asin(Math.min(1,e.minor/e.major))*180/Math.PI;
+  s.angles={inclination,anteversion,axisRatio:e.minor/e.major};
+  s.step=3;
+  renderCupShot(slot);
+}
+
+function renderCupComparison(){
+  const t=CUP_SHOTS.trial,f=CUP_SHOTS.final;
+  const comp=$('cupComparison');
+  if(!t.angles||!f.angles){comp.style.display='none';return;}
+  comp.style.display='';
+  const grid=$('cupCompareGrid');
+  const rows=[
+    {lbl:'Inclination',t:t.angles.inclination,f:f.angles.inclination,unit:'°',min:INCL_MIN,max:INCL_MAX},
+    {lbl:'Anteversion',t:t.angles.anteversion,f:f.angles.anteversion,unit:'°',min:ANT_MIN,max:ANT_MAX},
+  ];
+  let h='<div class="cup-compare-cell" style="background:transparent;border:none"></div><div class="cup-compare-cell"><div class="cup-compare-lbl">Trial</div></div><div class="cup-compare-cell"><div class="cup-compare-lbl">Final</div></div>';
+  for(const row of rows){
+    const delta=f[row.lbl.toLowerCase()]||row.f-row.t;
+    const tOk=row.t>=row.min&&row.t<=row.max;
+    const fOk=row.f>=row.min&&row.f<=row.max;
+    const diff=row.f-row.t;
+    h+=`<div class="cup-compare-cell" style="background:transparent;border:none"><div class="cup-compare-lbl">${row.lbl}</div></div>
+      <div class="cup-compare-cell"><div class="cup-compare-val" style="color:${tOk?'#a78bfa':'var(--warn)'}">${row.t.toFixed(1)}${row.unit}</div></div>
+      <div class="cup-compare-cell"><div class="cup-compare-val" style="color:${fOk?'#a78bfa':'var(--warn)'}">${row.f.toFixed(1)}${row.unit}</div><div class="cup-compare-delta">${diff>=0?'+':''}${diff.toFixed(1)}${row.unit} vs trial</div></div>`;
+  }
+  grid.innerHTML=h;
+}
+
+// ============================================================
+// Cup Canvas Drawing
+// ============================================================
+function getCupTransform(slot){
+  const cv=$('cupCv'+cap(slot));const wrap=$('cupWrap'+cap(slot));
+  const s=CUP_SHOTS[slot];
+  const dw=cv.width||wrap.clientWidth||400;
+  const dh=cv.height||Math.round(dw*0.75);
+  const W=s.img?.w||1,H=s.img?.h||1;
+  const baseScale=Math.min(dw/W,dh/H);
+  const z=s.zoom||{s:1,ox:0,oy:0};
+  const scale=baseScale*z.s;
+  const offX=(dw-W*scale)/2+z.ox;
+  const offY=(dh-H*scale)/2+z.oy;
+  return{scale,offX,offY,baseScale,dw,dh,W,H};
+}
+
+function clampCupZoom(slot){
+  const cv=$('cupCv'+cap(slot));const wrap=$('cupWrap'+cap(slot));
+  const s=CUP_SHOTS[slot];if(!s.img)return;
+  const{scale,dw,dh,W,H}=getCupTransform(slot);
+  const z=s.zoom;
+  const imgW=W*scale,imgH=H*scale;
+  const maxOx=Math.max(0,(imgW-dw)/2);
+  const maxOy=Math.max(0,(imgH-dh)/2);
+  z.ox=Math.max(-maxOx,Math.min(maxOx,z.ox));
+  z.oy=Math.max(-maxOy,Math.min(maxOy,z.oy));
+}
+
+function drawCupCanvas(slot){
+  const cv=$('cupCv'+cap(slot));const wrap=$('cupWrap'+cap(slot));
+  const s=CUP_SHOTS[slot];
+  if(!cv||!wrap)return;
+  // Set dimensions first so getCupTransform uses correct values
+  const dw=Math.max(wrap.clientWidth||400, 100);
+  const dh=Math.max(wrap.clientHeight||Math.round(dw*0.75), 100);
+  cv.width=dw;cv.height=dh;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle='#0a0f0d';ctx.fillRect(0,0,dw,dh);
+  if(!s.img){
+    ctx.fillStyle='var(--txd,#4a6655)';ctx.font='14px sans-serif';ctx.textAlign='center';
+    ctx.fillText('Upload a fluoro shot to begin',dw/2,dh/2);ctx.textAlign='left';
+    return;
+  }
+  const{scale,offX,offY,W,H}=getCupTransform(slot);
+  const sc=Math.max(dw,dh)/900;
+  ctx.drawImage(s.img.el,offX,offY,W*scale,H*scale);
+
+  // Draw reference line
+  if(s.refPts.length>0){
+    s.refPts.forEach((p,i)=>{
+      const px=offX+p.x*scale,py=offY+p.y*scale;
+      ctx.beginPath();ctx.arc(px,py,6*sc,0,Math.PI*2);ctx.fillStyle=CUP_COLORS.ref;ctx.fill();
+      ctx.strokeStyle='#000';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.fillStyle=CUP_COLORS.ref;ctx.font=`bold ${Math.round(9*sc)}px 'DM Sans'`;ctx.fillText(`R${i+1}`,px+8,py+4);
+    });
+    if(s.refPts.length===2){
+      const p1=s.refPts[0],p2=s.refPts[1];
+      const x1=offX+p1.x*scale,y1=offY+p1.y*scale,x2=offX+p2.x*scale,y2=offY+p2.y*scale;
+      const isSym=(s.refMode==='symphysis');
+      // For symphysis: show the actual line AND the derived horizontal (90° rotation)
+      const rawDx=x2-x1,rawDy=y2-y1,rawLen=Math.hypot(rawDx,rawDy);
+      if(rawLen>0){
+        const rux=rawDx/rawLen,ruy=rawDy/rawLen,ext=40*sc;
+        // Draw the tapped reference line (faint)
+        ctx.setLineDash([4*sc,4*sc]);ctx.strokeStyle=CUP_COLORS.ref+'55';ctx.lineWidth=1.5*sc;
+        ctx.beginPath();ctx.moveTo(x1-rux*ext,y1-ruy*ext);ctx.lineTo(x2+rux*ext,y2+ruy*ext);ctx.stroke();
+        if(isSym){
+          // Rotate 90° — this is the effective horizontal
+          const mx=(x1+x2)/2,my=(y1+y2)/2;
+          ctx.setLineDash([6*sc,4*sc]);ctx.strokeStyle=CUP_COLORS.ref+'cc';ctx.lineWidth=2*sc;
+          ctx.beginPath();ctx.moveTo(mx-ruy*ext*2,my+rux*ext*2);ctx.lineTo(mx+ruy*ext*2,my-rux*ext*2);ctx.stroke();
+          ctx.setLineDash([]);
+          // Label
+          ctx.font=`bold ${Math.round(9*sc)}px 'DM Sans'`;ctx.fillStyle=CUP_COLORS.ref;
+          ctx.fillText('Horiz →',mx+ruy*ext*2+4,my-rux*ext*2);
+        } else {
+          ctx.setLineDash([6*sc,4*sc]);ctx.strokeStyle=CUP_COLORS.ref+'aa';ctx.lineWidth=1.5*sc;
+          ctx.beginPath();ctx.moveTo(x1-rux*ext,y1-ruy*ext);ctx.lineTo(x2+rux*ext,y2+ruy*ext);ctx.stroke();
+        }
+        ctx.setLineDash([]);
+      }
+    }
+  }
+
+  // Draw rim points
+  s.rimPts.forEach((p,i)=>{
+    const px=offX+p.x*scale,py=offY+p.y*scale;
+    const r=7*sc;
+    ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.4)';ctx.fill();
+    ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.fillStyle=CUP_COLORS.rim;ctx.globalAlpha=.9;ctx.fill();ctx.globalAlpha=1;
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.5*sc;ctx.stroke();
+    ctx.fillStyle=CUP_COLORS.rim;ctx.font=`bold ${Math.round(9*sc)}px 'JetBrains Mono'`;ctx.fillText(i+1,px+r+2,py+3);
+  });
+
+  // Draw fitted ellipse
+  if(s.ellipse&&s.step===3){
+    const e=s.ellipse;
+    const cx=offX+e.cx*scale,cy=offY+e.cy*scale;
+    const maj=e.major*scale,min=e.minor*scale;
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(e.theta);
+    ctx.beginPath();ctx.ellipse(0,0,maj,min,0,0,Math.PI*2);
+    ctx.strokeStyle='#a78bfa';ctx.lineWidth=2.5*sc;ctx.globalAlpha=.9;ctx.stroke();
+    ctx.globalAlpha=.08;ctx.fillStyle='#a78bfa';ctx.fill();ctx.globalAlpha=1;
+    // Major axis
+    ctx.setLineDash([6*sc,4*sc]);ctx.strokeStyle='rgba(167,139,250,.6)';ctx.lineWidth=1.5*sc;
+    ctx.beginPath();ctx.moveTo(-maj,0);ctx.lineTo(maj,0);ctx.stroke();ctx.setLineDash([]);
+    ctx.restore();
+    // Angle label
+    if(s.angles){
+      const a=s.angles;
+      const incOk=a.inclination>=INCL_MIN&&a.inclination<=INCL_MAX;
+      const antOk=a.anteversion>=ANT_MIN&&a.anteversion<=ANT_MAX;
+      const tx=cx,ty=cy-min-22*sc;
+      const txt=`Inc ${a.inclination.toFixed(1)}° | Ant ${a.anteversion.toFixed(1)}°`;
+      ctx.font=`bold ${Math.round(12*sc)}px 'JetBrains Mono'`;
+      const tw=ctx.measureText(txt).width;
+      ctx.fillStyle='rgba(0,0,0,.85)';
+      fillRR(ctx,tx-tw/2-8*sc,ty-14*sc,tw+16*sc,18*sc,5*sc);
+      ctx.fillStyle=incOk&&antOk?'#a78bfa':'#e8c844';ctx.fillText(txt,tx-tw/2,ty);
+    }
+  }
+}
+
+// ============================================================
+// Cup Canvas Interaction
+// ============================================================
+function setupCupCanvas(slot){
+  const cv=$('cupCv'+cap(slot));const wrap=$('cupWrap'+cap(slot));
+  if(!cv||cv._cupSetup)return;cv._cupSetup=true;
+  const s=()=>CUP_SHOTS[slot];
+
+  function getImgPt(clientX,clientY){
+    const rect=cv.getBoundingClientRect();
+    const cx=(clientX-rect.left)*(cv.width/rect.width);
+    const cy=(clientY-rect.top)*(cv.height/rect.height);
+    const{scale,offX,offY}=getCupTransform(slot);
+    const x=(cx-offX)/scale,y=(cy-offY)/scale;
+    const W=s().img?.w||1,H=s().img?.h||1;
+    if(x<0||x>W||y<0||y>H)return null;
+    return{x,y};
+  }
+
+  let panning=false,panStart=null,moved=false,draggingRef=-1;
+
+  function findNearRefPt(p){
+    const st=s();if(!st.refPts.length)return -1;
+    const{scale}=getCupTransform(slot);
+    const hitR=Math.max(18,24/scale);
+    for(let i=0;i<st.refPts.length;i++){
+      if(Math.hypot(p.x-st.refPts[i].x,p.y-st.refPts[i].y)<hitR)return i;
+    }
+    return -1;
+  }
+
+  function onDown(e){
+    e.preventDefault();
+    const cl=e.touches?e.touches[0]:e;
+    const p=getImgPt(cl.clientX,cl.clientY);
+    // Check if near an existing ref point (always draggable)
+    if(p){
+      const ri=findNearRefPt(p);
+      if(ri>=0){draggingRef=ri;moved=false;return;}
+    }
+    panning=true;moved=false;draggingRef=-1;
+    panStart={x:cl.clientX,y:cl.clientY,ox:s().zoom.ox,oy:s().zoom.oy};
+  }
+
+  function onMove(e){
+    e.preventDefault();
+    const cl=e.touches?e.touches[0]:e;
+    if(draggingRef>=0){
+      const p=getImgPt(cl.clientX,cl.clientY);
+      if(p){s().refPts[draggingRef]=p;moved=true;renderCupShot(slot);}
+      return;
+    }
+    if(!panning||!panStart)return;
+    const dx=cl.clientX-panStart.x,dy=cl.clientY-panStart.y;
+    if(Math.hypot(dx,dy)>4)moved=true;
+    if(s().zoom.s>1){
+      s().zoom.ox=panStart.ox+dx;
+      s().zoom.oy=panStart.oy+dy;
+      clampCupZoom(slot);
+      drawCupCanvas(slot);
+    }
+  }
+
+  function onUp(e){
+    if(draggingRef>=0){
+      draggingRef=-1;
+      // Recalculate angles if ellipse already fit
+      if(s().step===3)fitCupEllipse(slot);
+      return;
+    }
+    const wasPanning=panning;panning=false;
+    if(wasPanning&&!moved){
+      // It was a tap — place point
+      const cl=e.changedTouches?e.changedTouches[0]:e;
+      const p=getImgPt(cl.clientX,cl.clientY);if(!p)return;
+      const st=s();
+      if(st.step===1){
+        // Don't add if tapping near existing ref pt (that would be a drag start)
+        if(findNearRefPt(p)<0){
+          st.refPts.push(p);
+          console.log('[Cup] ref pt added:',p,'total:',st.refPts.length);
+          if(st.refPts.length>=2)st.step=2;
+          renderCupShot(slot);
+        }
+      } else if(st.step===2||st.step===3){
+        st.rimPts.push(p);
+        console.log('[Cup] rim pt added:',p,'total:',st.rimPts.length);
+        // Auto-refit if already had ellipse
+        if(st.step===3&&st.rimPts.length>=CUP_MIN_RIM)fitCupEllipse(slot);
+        else renderCupShot(slot);
+      }
+    }
+    panStart=null;moved=false;
+  }
+
+  function onWheel(e){
+    e.preventDefault();
+    const z=s().zoom;
+    const factor=e.deltaY<0?1.25:1/1.25;
+    const rect=cv.getBoundingClientRect();
+    const mx=(e.clientX-rect.left)*(cv.width/rect.width);
+    const my=(e.clientY-rect.top)*(cv.height/rect.height);
+    const{scale,offX,offY}=getCupTransform(slot);
+    const imgX=(mx-offX)/scale,imgY=(my-offY)/scale;
+    z.s=Math.max(1,Math.min(10,z.s*factor));
+    if(z.s===1){z.ox=0;z.oy=0;}else{
+      const{scale:ns,offX:nx,offY:ny}=getCupTransform(slot);
+      z.ox+=mx-(nx+imgX*ns);
+      z.oy+=my-(ny+imgY*ns);
+      clampCupZoom(slot);
+    }
+    drawCupCanvas(slot);
+    // Update zoom label if present
+    const lbl=cv.parentElement.querySelector('.cup-zoom-lbl');
+    if(lbl)lbl.textContent=z.s.toFixed(1)+'×';
+  }
+
+  cv.addEventListener('mousedown',onDown);
+  cv.addEventListener('mousemove',onMove);
+  cv.addEventListener('mouseup',onUp);
+  cv.addEventListener('touchstart',onDown,{passive:false});
+  cv.addEventListener('touchmove',onMove,{passive:false});
+  cv.addEventListener('touchend',onUp,{passive:false});
+  cv.addEventListener('wheel',onWheel,{passive:false});
+}
+
+// ============================================================
+// Cup Data Save
+// ============================================================
+async function saveCupShot(slot){
+  const s=CUP_SHOTS[slot];
+  if(!s.angles||!s.img)return;
+  const sbUrl=$('sbUrl').value.trim(),sbKey=$('sbKey').value.trim();
+  if(!sbUrl||!sbKey){alert('Supabase not configured');return;}
+  const W=s.img.w,H=s.img.h;
+  // Upload image first
+  const blob=await(await fetch('data:image/jpeg;base64,'+s.img.b64)).blob();
+  const imgId=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const imgPath=`cup/${imgId}.jpg`;
+  try{
+    const storResp=await fetch(`${sbUrl}/storage/v1/object/fluoro-images/${imgPath}`,{
+      method:'POST',headers:{'Authorization':`Bearer ${sbKey}`,'Content-Type':'image/jpeg','x-upsert':'true'},body:blob});
+    if(!storResp.ok){const t=await storResp.text();throw new Error('Storage: '+t.slice(0,200));}
+  }catch(e){alert('Image upload failed: '+e.message);return;}
+  const record={
+    id:imgId,timestamp:new Date().toISOString(),
+    case_id:$('caseId').value||null,
+    shot_type:slot, // 'trial' or 'final'
+    image_source:'photo',image_w:W,image_h:H,
+    storage_path:imgPath,
+    // Reference line (normalized)
+    ref_pts_normalized:s.refPts.map(p=>({x:p.x/W,y:p.y/H})),
+    // Rim points (normalized for training)
+    rim_pts_normalized:s.rimPts.map(p=>({x:p.x/W,y:p.y/H})),
+    rim_pts_px:s.rimPts.map(p=>({x:Math.round(p.x),y:Math.round(p.y)})),
+    rim_point_count:s.rimPts.length,
+    // Ellipse
+    ellipse_cx_norm:s.ellipse.cx/W,ellipse_cy_norm:s.ellipse.cy/H,
+    ellipse_major_px:s.ellipse.major,ellipse_minor_px:s.ellipse.minor,
+    ellipse_theta_rad:s.ellipse.theta,
+    axis_ratio:s.angles.axisRatio,
+    // Measurements
+    inclination_deg:parseFloat(s.angles.inclination.toFixed(2)),
+    anteversion_deg:parseFloat(s.angles.anteversion.toFixed(2)),
+    inclination_in_range:s.angles.inclination>=INCL_MIN&&s.angles.inclination<=INCL_MAX,
+    anteversion_in_range:s.angles.anteversion>=ANT_MIN&&s.angles.anteversion<=ANT_MAX,
+    inclination_target_min:INCL_MIN,inclination_target_max:INCL_MAX,
+    anteversion_target_min:ANT_MIN,anteversion_target_max:ANT_MAX,
+    // Implant
+    implant_cup_mm:parseFloat($('impCup').value)||null,
+  };
+  try{
+    const resp=await fetch(`${sbUrl}/rest/v1/cup_measurements`,{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${sbKey}`,'apikey':sbKey,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(record)});
+    if(!resp.ok){const t=await resp.text();throw new Error(t.slice(0,200));}
+    s.saved=true;
+    const btn=$('cupSave'+cap(slot)).querySelector('.btn-primary');
+    if(btn){const o=btn.textContent;btn.textContent='✓ Saved';setTimeout(()=>btn.textContent=o,2000);}
+  }catch(e){alert('Save failed: '+e.message);}
+}
+
+// ============================================================
+// Cup — Edit Ref Line (drop back to step 1 without clearing rim pts)
+// ============================================================
+function editCupRefLine(slot){
+  const s=CUP_SHOTS[slot];
+  if(!s.img)return;
+  s.step=1; // back to ref placement
+  // Keep rim points so user can re-set ref line then continue
+  renderCupShot(slot);
+}
+
+// ============================================================
+// Cup — Render annotated canvas for OR display
+// ============================================================
+function renderAnnotatedCupCanvas(slot){
+  const s=CUP_SHOTS[slot];
+  if(!s.img||!s.angles||!s.ellipse)return null;
+  const W=s.img.w,H=s.img.h;
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');
+  ctx.drawImage(s.img.el,0,0,W,H);
+  const sc=Math.max(W,H)/900;
+
+  // Reference line
+  if(s.refPts.length===2){
+    const p1=s.refPts[0],p2=s.refPts[1];
+    const rawDx=p2.x-p1.x,rawDy=p2.y-p1.y,rawLen=Math.hypot(rawDx,rawDy);
+    if(rawLen>0){
+      const rux=rawDx/rawLen,ruy=rawDy/rawLen,ext=80*sc;
+      ctx.setLineDash([8*sc,6*sc]);ctx.strokeStyle='rgba(255,234,61,.8)';ctx.lineWidth=3*sc;
+      ctx.beginPath();ctx.moveTo(p1.x-rux*ext,p1.y-ruy*ext);ctx.lineTo(p2.x+rux*ext,p2.y+ruy*ext);ctx.stroke();
+      ctx.setLineDash([]);
+      // Ref point dots
+      [p1,p2].forEach((p,i)=>{
+        ctx.beginPath();ctx.arc(p.x,p.y,10*sc,0,Math.PI*2);ctx.fillStyle='#FFEA3D';ctx.fill();
+        ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.stroke();
+        ctx.font=`bold ${Math.round(11*sc)}px 'DM Sans'`;ctx.fillStyle='#000';
+        ctx.fillText(`R${i+1}`,p.x-5*sc,p.y+4*sc);
+      });
+    }
+  }
+
+  // Rim points
+  s.rimPts.forEach((p,i)=>{
+    const r=9*sc;
+    ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fillStyle='rgba(167,139,250,.8)';ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=2*sc;ctx.stroke();
+    ctx.font=`bold ${Math.round(10*sc)}px 'JetBrains Mono'`;ctx.fillStyle='#fff';
+    ctx.fillText(i+1,p.x+r+2,p.y+4);
+  });
+
+  // Fitted ellipse
+  const e=s.ellipse;
+  const incOk=s.angles.inclination>=INCL_MIN&&s.angles.inclination<=INCL_MAX;
+  const antOk=s.angles.anteversion>=ANT_MIN&&s.angles.anteversion<=ANT_MAX;
+  const ellColor=incOk&&antOk?'#a78bfa':'#e8c844';
+  ctx.save();ctx.translate(e.cx,e.cy);ctx.rotate(e.theta);
+  ctx.beginPath();ctx.ellipse(0,0,e.major,e.minor,0,0,Math.PI*2);
+  ctx.strokeStyle=ellColor;ctx.lineWidth=4*sc;ctx.globalAlpha=.9;ctx.stroke();
+  ctx.globalAlpha=.08;ctx.fillStyle=ellColor;ctx.fill();ctx.globalAlpha=1;
+  ctx.setLineDash([8*sc,5*sc]);ctx.strokeStyle=ellColor+'99';ctx.lineWidth=2*sc;
+  ctx.beginPath();ctx.moveTo(-e.major,0);ctx.lineTo(e.major,0);ctx.stroke();
+  ctx.setLineDash([]);ctx.restore();
+
+  // Large measurement label
+  const a=s.angles;
+  const txt1=`Inc  ${a.inclination.toFixed(1)}°`;
+  const txt2=`Ant  ${a.anteversion.toFixed(1)}°`;
+  const fs=Math.round(44*sc);
+  ctx.font=`800 ${fs}px 'JetBrains Mono'`;
+  const tw=Math.max(ctx.measureText(txt1).width,ctx.measureText(txt2).width);
+  const bx=e.cx-tw/2-24*sc,by=e.cy-e.minor-fs*2.6-20*sc;
+  ctx.fillStyle='rgba(0,0,0,.82)';fillRR(ctx,bx,by,tw+48*sc,fs*2.8,12*sc);
+  ctx.fillStyle=incOk?ellColor:'#e8c844';ctx.fillText(txt1,bx+24*sc,by+fs+4*sc);
+  ctx.fillStyle=antOk?ellColor:'#e8c844';ctx.fillText(txt2,bx+24*sc,by+fs*2.4);
+
+  // Shot type badge
+  const badge=slot==='final'?'FINAL CUP':'TRIAL CUP';
+  const bfs=Math.round(22*sc);
+  ctx.font=`800 ${bfs}px 'DM Sans'`;
+  const bw=ctx.measureText(badge).width;
+  ctx.fillStyle='rgba(167,139,250,.18)';fillRR(ctx,W-bw-44*sc,20*sc,bw+28*sc,bfs+16*sc,8*sc);
+  ctx.strokeStyle='#a78bfa88';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='#a78bfa';ctx.fillText(badge,W-bw-30*sc,20*sc+bfs+4*sc);
+
+  return cv;
+}
+
+// ============================================================
+// Cup — Send to OR Display Screen
+// ============================================================
+async function sendCupToScreen(slot){
+  const s=CUP_SHOTS[slot];
+  if(!s.angles||!s.img){alert('Fit the ellipse first before sending to screen.');return;}
+  const sbUrl=$('sbUrl').value.trim(),sbKey=$('sbKey').value.trim();
+  if(!sbUrl||!sbKey){alert('Supabase not configured.');return;}
+  const a=s.angles;
+  const incOk=a.inclination>=INCL_MIN&&a.inclination<=INCL_MAX;
+  const antOk=a.anteversion>=ANT_MIN&&a.anteversion<=ANT_MAX;
+  const payload={
+    case_id:$('caseId').value||'unknown',
+    updated_at:new Date().toISOString(),
+    shot_type:slot,
+    inclination_deg:parseFloat(a.inclination.toFixed(1)),
+    anteversion_deg:parseFloat(a.anteversion.toFixed(1)),
+    inclination_ok:incOk,
+    anteversion_ok:antOk,
+    rim_point_count:s.rimPts.length,
+    axis_ratio:parseFloat(a.axisRatio.toFixed(4)),
+    ref_mode:s.refMode,
+    implant_cup_mm:parseFloat($('impCup')?.value)||null,
+    image_url:null
+  };
+  try{
+    // Render and upload annotated image
+    const annCv=renderAnnotatedCupCanvas(slot);
+    if(annCv){
+      const imgBlob=await new Promise(res=>annCv.toBlob(res,'image/jpeg',0.9));
+      const imgPath=`galeygrid/cup_display_${payload.case_id}_${slot}.jpg`;
+      const storResp=await fetch(`${sbUrl}/storage/v1/object/fluoro-images/${imgPath}`,{
+        method:'POST',
+        headers:{'Authorization':`Bearer ${sbKey}`,'Content-Type':'image/jpeg','x-upsert':'true'},
+        body:imgBlob
+      });
+      if(storResp.ok){
+        payload.image_url=`${sbUrl}/storage/v1/object/public/fluoro-images/${imgPath}`;
+      }else{console.warn('[CupSend] Image upload failed',storResp.status);}
+    }
+    const resp=await fetch(`${sbUrl}/rest/v1/cup_live_display`,{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${sbKey}`,'apikey':sbKey,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify(payload)
+    });
+    if(!resp.ok){const t=await resp.text();throw new Error('DB: '+t.slice(0,200));}
+    // Flash feedback on the button
+    const btns=$('cupSave'+cap(slot)).querySelectorAll('.btn-primary');
+    btns.forEach(b=>{if(b.textContent.includes('Screen')){const o=b.textContent;b.textContent='✓ Sent';b.style.color='#a78bfa';setTimeout(()=>{b.textContent=o;b.style.color='';},2000);}});
+  }catch(e){alert('Send to Screen failed:\n'+e.message);}
+}
+
+
+
+// Robust ellipse fitting — SVD + eigenvalue decomposition
+// Numerically stable via coordinate normalization and eigenvalue-based axis extraction
+function fitEllipse(pts){
+  const n=pts.length;if(n<5)return null;
+  try{
+    const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
+    // Normalize
+    const mx=xs.reduce((a,b)=>a+b,0)/n;
+    const my=ys.reduce((a,b)=>a+b,0)/n;
+    const scale=Math.sqrt(xs.reduce((s,x,i)=>s+(x-mx)**2+(ys[i]-my)**2,0)/n);
+    if(scale<1e-10)return null;
+    const xn=xs.map(x=>(x-mx)/scale);
+    const yn=ys.map((y,i)=>(y-my)/scale);
+    // Build design matrix 
+    const D=xn.map((x,i)=>[x*x,x*yn[i],yn[i]*yn[i],x,yn[i],1]);
+    // Compute S = D^T * D (6x6)
+    const S=Array.from({length:6},(_,i)=>Array.from({length:6},(_,j)=>D.reduce((s,r)=>s+r[i]*r[j],0)));
+    // SVD via Jacobi on S (since S is symmetric, use eigendecomposition)
+    // Use power method to find null space (smallest eigenvalue direction)
+    const ev=symmEig6(S);
+    if(!ev)return null;
+    // ev = {vectors: 6x6 matrix (cols=eigenvectors), values: 6 eigenvalues}
+    // Take eigenvector with smallest |eigenvalue| = null space
+    let minIdx=0;
+    for(let i=1;i<6;i++)if(Math.abs(ev.values[i])<Math.abs(ev.values[minIdx]))minIdx=i;
+    let a=ev.vectors.map(row=>row[minIdx]);
+    // Ensure ellipse: 4AC-B^2 > 0
+    if(4*a[0]*a[2]-a[1]*a[1]<0)a=a.map(x=>-x);
+    // Denormalize: x_n=(x-mx)/scale, substitute back
+    const[A,B,C,Dn,En,Fn]=a;
+    const Ao=A,Bo=B,Co=C;
+    const Do=Dn*scale-2*A*mx-B*my;
+    const Eo=En*scale-2*C*my-B*mx;
+    const Fo=A*mx*mx+B*mx*my+C*my*my-Dn*scale*mx-En*scale*my+Fn*scale*scale;
+    // Extract geometric params via eigenvalue of 2x2 matrix M=[[A,B/2],[B/2,C]]
+    const disc=Bo*Bo-4*Ao*Co;
+    if(disc>=0)return null;
+    const cx=(2*Co*Do-Bo*Eo)/disc;
+    const cy=(2*Ao*Eo-Bo*Do)/disc;
+    // 2x2 matrix eigenvalues
+    const tr=Ao+Co,det2=Ao*Co-(Bo/2)*(Bo/2);
+    const sq=Math.sqrt(Math.max(0,tr*tr/4-det2));
+    const lam1=tr/2+sq,lam2=tr/2-sq;
+    // det of 3x3 matrix [[A,B/2,D/2],[B/2,C,E/2],[D/2,E/2,F]]
+    const detM33=Ao*(Co*Fo-(Eo/2)*(Eo/2))-(Bo/2)*((Bo/2)*Fo-(Eo/2)*(Do/2))+(Do/2)*((Bo/2)*(Eo/2)-Co*(Do/2));
+    const detM=det2;
+    if(Math.abs(detM)<1e-12||detM<0)return null;
+    const v1=-detM33/(detM*lam1);
+    const v2=-detM33/(detM*lam2);
+    if(v1<=0||v2<=0||isNaN(v1)||isNaN(v2))return null;
+    const a1=Math.sqrt(v1),a2=Math.sqrt(v2);
+    const major=Math.max(a1,a2),minor=Math.min(a1,a2);
+    // Theta = angle of major axis
+    let theta;
+    if(Math.abs(Bo)<1e-10){theta=Ao<Co?0:Math.PI/2;}
+    else{
+      theta=0.5*Math.atan2(Bo,Ao-Co);
+      if(a1<a2)theta+=Math.PI/2;
+    }
+    // Normalize theta to [0, pi)
+    while(theta<0)theta+=Math.PI;
+    while(theta>=Math.PI)theta-=Math.PI;
+    return{cx,cy,major,minor,theta,coeff:[Ao,Bo,Co,Do,Eo,Fo]};
+  }catch(e){console.warn('[Cup] Ellipse fit error:',e.message);return null;}
+}
+
+// Symmetric 6x6 eigendecomposition via Jacobi iterations
+function symmEig6(S){
+  const n=6;
+  // Copy S
+  const A=S.map(r=>[...r]);
+  // V = identity (accumulates eigenvectors)
+  const V=Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>i===j?1:0));
+  // Jacobi sweeps
+  for(let sweep=0;sweep<50;sweep++){
+    let maxOff=0;
+    for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)maxOff=Math.max(maxOff,Math.abs(A[i][j]));
+    if(maxOff<1e-12)break;
+    for(let p=0;p<n;p++){
+      for(let q=p+1;q<n;q++){
+        if(Math.abs(A[p][q])<1e-14)continue;
+        const theta2=(A[q][q]-A[p][p])/(2*A[p][q]);
+        const t=Math.sign(theta2)/(Math.abs(theta2)+Math.sqrt(1+theta2*theta2));
+        const c=1/Math.sqrt(1+t*t),s=t*c;
+        // Update A
+        const App=A[p][p],Aqq=A[q][q],Apq=A[p][q];
+        A[p][p]=c*c*App-2*s*c*Apq+s*s*Aqq;
+        A[q][q]=s*s*App+2*s*c*Apq+c*c*Aqq;
+        A[p][q]=0;A[q][p]=0;
+        for(let r=0;r<n;r++){
+          if(r===p||r===q)continue;
+          const Arp=A[r][p],Arq=A[r][q];
+          A[r][p]=c*Arp-s*Arq;A[p][r]=A[r][p];
+          A[r][q]=s*Arp+c*Arq;A[q][r]=A[r][q];
+        }
+        // Update V
+        for(let r=0;r<n;r++){
+          const Vrp=V[r][p],Vrq=V[r][q];
+          V[r][p]=c*Vrp-s*Vrq;
+          V[r][q]=s*Vrp+c*Vrq;
+        }
+      }
+    }
+  }
+  return{values:A.map((r,i)=>r[i]),vectors:V};
+}
+
+function calcCupAngles(ellipse, landmarks, shotIdx){
+  if(!ellipse)return null;
+  const ppm=shotPPM(shotIdx);
+  // Inclination — angle of cup opening relative to teardrop horizontal
+  // Major axis of ellipse = cup rim plane intersection with AP view
+  // Inclination = angle between major axis and horizontal (teardrop line)
+  const lm=landmarks;
+  let tdAngle=0; // teardrop line angle (should be ~0 for true AP)
+  const ltd=lm['left_teardrop'],rtd=lm['right_teardrop'];
+  if(ltd&&rtd)tdAngle=Math.atan2(ltd.y-rtd.y,ltd.x-rtd.x);
+  // Major axis angle relative to teardrop line
+  let majAngle=ellipse.theta-tdAngle;
+  // Normalize to 0-90
+  while(majAngle<0)majAngle+=Math.PI;
+  while(majAngle>Math.PI)majAngle-=Math.PI;
+  if(majAngle>Math.PI/2)majAngle=Math.PI-majAngle;
+  const inclination=majAngle*180/Math.PI;
+  // Anteversion — from ellipse axis ratio
+  // radiographic anteversion: arcsin(minor/major)
+  const axisRatio=ellipse.minor/ellipse.major;
+  const anteversion=Math.asin(Math.min(1,axisRatio))*180/Math.PI;
+  return{inclination,anteversion,axisRatio,ppm};
+}
+
+function toggleCup(idx){
+  if(!shots[idx].cup)shots[idx].cup={active:false,points:[],ellipse:null};
+  shots[idx].cup.active=!shots[idx].cup.active;
+  if(shots[idx].cup.active){
+    // Deactivate scale mode if active
+    if(shots[idx].scaleCal.active){shots[idx].scaleCal.active=false;}
+  }
+  drawShot(idx);renderShots(idx);
+}
+
+function undoCupPoint(idx){
+  if(!shots[idx].cup)return;
+  shots[idx].cup.points.pop();
+  updateCupEllipse(idx);
+  drawShot(idx);renderShots(idx);
+}
+
+function resetCup(idx){
+  shots[idx].cup={active:true,points:[],ellipse:null};
+  drawShot(idx);renderShots(idx);
+}
+
+function updateCupEllipse(idx){
+  const cup=shots[idx].cup;if(!cup)return;
+  if(cup.points.length>=5){
+    const e=fitEllipse(cup.points);
+    if(e){
+      const angles=calcCupAngles(e,shots[idx].landmarks,idx);
+      cup.ellipse=angles?{...e,...angles,points:cup.points.length}:null;
+    } else cup.ellipse=null;
+  } else cup.ellipse=null;
+}
+
+function addCupPoint(idx,x,y){
+  if(!shots[idx].cup||!shots[idx].cup.active)return;
+  shots[idx].cup.points.push({x,y});
+  updateCupEllipse(idx);
+  drawShot(idx);renderShots(idx);
+}
+
+async function saveCupData(idx){
+  const shot=shots[idx];
+  const cup=shot.cup;
+  if(!cup||!cup.ellipse)return;
+  const sbUrl=$('sbUrl').value.trim(),sbKey=$('sbKey').value.trim();
+  if(!sbUrl||!sbKey){alert('Supabase not configured');return;}
+  const W=shot.img.w,H=shot.img.h;
+  const record={
+    id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    timestamp:new Date().toISOString(),
+    case_id:$('caseId').value||null,
+    shot_id:shot.id,
+    image_source:shot.imageSource||'photo',
+    image_w:W,image_h:H,
+    storage_path:shot.analysisRaw?.storage_path||null,
+    // Rim points — normalized for training
+    rim_points_normalized:cup.points.map(p=>({x:p.x/W,y:p.y/H})),
+    rim_points_px:cup.points.map(p=>({x:Math.round(p.x),y:Math.round(p.y)})),
+    point_count:cup.points.length,
+    // Ellipse geometric params
+    ellipse_cx_norm:cup.cx/W,ellipse_cy_norm:cup.cy/H,
+    ellipse_major_px:cup.major,ellipse_minor_px:cup.minor,
+    ellipse_theta_rad:cup.theta,
+    // Clinical measurements
+    inclination_deg:parseFloat(cup.ellipse.inclination.toFixed(2)),
+    anteversion_deg:parseFloat(cup.ellipse.anteversion.toFixed(2)),
+    axis_ratio:parseFloat(cup.ellipse.axisRatio.toFixed(4)),
+    px_per_mm:shotPPM(idx)||null,
+    // Implant info from demographics
+    implant_cup_mm:parseFloat($('impCup').value)||null,
+    // Target ranges
+    inclination_target_min:30,inclination_target_max:50,
+    anteversion_target_min:10,anteversion_target_max:30,
+    inclination_in_range:cup.ellipse.inclination>=30&&cup.ellipse.inclination<=50,
+    anteversion_in_range:cup.ellipse.anteversion>=10&&cup.ellipse.anteversion<=30,
+  };
+  try{
+    const resp=await fetch(`${sbUrl}/rest/v1/cup_measurements`,{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${sbKey}`,'apikey':sbKey,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(record)
+    });
+    if(!resp.ok){const t=await resp.text();throw new Error(t.slice(0,200));}
+    // Flash confirmation
+    const bars=document.querySelectorAll(`#shot${idx} .cup-bar button`);
+    bars.forEach(b=>{if(b.textContent.includes('Save')){const o=b.textContent;b.textContent='✓ Saved';setTimeout(()=>b.textContent=o,2000);}});
+  }catch(e){alert('Cup save error: '+e.message);}
+}
+
+// Draw cup overlay on canvas
+function drawCupOverlay(ctx,cup,lm,W,H,ui,shotIdx){
+  if(!cup||(!cup.active&&!cup.ellipse))return;
+  const sc=Math.max(W,H)/900;
+  const pts=cup.points;
+
+  // Draw placed rim points
+  pts.forEach((p,i)=>{
+    const r=7*sc*ui;
+    ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.4)';ctx.fill();
+    ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fillStyle='#a78bfa';ctx.globalAlpha=.9;ctx.fill();ctx.globalAlpha=1;
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.5*sc*ui;ctx.stroke();
+    ctx.font=`bold ${Math.round(9*sc*ui)}px 'JetBrains Mono'`;
+    ctx.fillStyle='#a78bfa';ctx.fillText(i+1,p.x+r+2*ui,p.y+3*ui);
+  });
+
+  // Draw fitted ellipse if we have one
+  if(cup.ellipse&&pts.length>=5){
+    const e=cup; // ellipse params are merged into cup.ellipse but cx/cy/major/minor/theta on cup itself
+    // Find the raw ellipse params
+    const rawE=fitEllipse(pts);
+    if(rawE){
+      ctx.save();
+      ctx.translate(rawE.cx,rawE.cy);
+      ctx.rotate(rawE.theta);
+      ctx.beginPath();
+      ctx.ellipse(0,0,rawE.major,rawE.minor,0,0,Math.PI*2);
+      ctx.strokeStyle='#a78bfa';ctx.lineWidth=2.5*sc*ui;ctx.globalAlpha=.85;ctx.stroke();
+      ctx.globalAlpha=.08;ctx.fillStyle='#a78bfa';ctx.fill();
+      ctx.globalAlpha=1;
+      ctx.restore();
+
+      // Draw major axis line
+      ctx.save();
+      ctx.translate(rawE.cx,rawE.cy);ctx.rotate(rawE.theta);
+      ctx.setLineDash([6*sc*ui,4*sc*ui]);
+      ctx.strokeStyle='rgba(167,139,250,.6)';ctx.lineWidth=1.5*sc*ui;
+      ctx.beginPath();ctx.moveTo(-rawE.major,0);ctx.lineTo(rawE.major,0);ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      // Angle label
+      const ang=cup.ellipse;
+      if(ang){
+        const incOk=ang.inclination>=30&&ang.inclination<=50;
+        const antOk=ang.anteversion>=10&&ang.anteversion<=30;
+        const lx=rawE.cx,ly=rawE.cy-rawE.minor-28*sc*ui;
+        const txt=`Inc ${ang.inclination.toFixed(1)}° | Ant ${ang.anteversion.toFixed(1)}°`;
+        ctx.font=`bold ${Math.round(13*sc*ui)}px 'JetBrains Mono'`;
+        const tw=ctx.measureText(txt).width;
+        ctx.fillStyle='rgba(0,0,0,.8)';
+        fillRR(ctx,lx-tw/2-8*sc*ui,ly-14*sc*ui,tw+16*sc*ui,18*sc*ui,5*sc*ui);
+        ctx.fillStyle=incOk&&antOk?'#a78bfa':var_warn||'#e8c844';
+        ctx.fillText(txt,lx-tw/2,ly);
+      }
+    }
+  }
+
+  // Mode hint when active
+  if(cup.active&&pts.length<5){
+    const need=5-pts.length;
+    const txt=`Tap ${need} more rim point${need>1?'s':''}`;
+    ctx.font=`bold ${Math.round(12*sc*ui)}px 'DM Sans'`;
+    const tw=ctx.measureText(txt).width;
+    ctx.fillStyle='rgba(0,0,0,.8)';fillRR(ctx,W/2-tw/2-10*ui,H-40*sc*ui,tw+20*ui,20*sc*ui,6*ui);
+    ctx.fillStyle='#a78bfa';ctx.fillText(txt,W/2-tw/2,H-26*sc*ui);
+  }
+}
+const var_warn='#e8c844';
+
+// ============================================================
+// Scale Prompt — launched after wizard, uses full canvas
+// ============================================================
+const SCALE_PRESETS=[
+  {type:'head',mm:36,label:'36mm Fem Head',default:true},
+  {type:'head',mm:32,label:'32mm Fem Head'},
+  {type:'ball',mm:25,label:'25mm Ball'},
+  {type:'custom',mm:null,label:'Hana Post'},
+  {type:'custom',mm:null,label:'Custom…'},
+];
+
+function startScalePrompt(shotIdx){
+  // Remove any existing banner
+  const old=document.getElementById('scaleBanner');if(old)old.remove();
+
+  const shot=shots[shotIdx];if(!shot?.img)return;
+  // Reset scale points for fresh calibration
+  shot.scaleCal.points=[];
+  shot.scaleCal.pxPerMm=null;
+
+  // Default to 36mm femoral head
+  let selType='head',selMm=36;
+  setScaleRef(shotIdx,'head','type');
+  setScaleRef(shotIdx,36,'mm');
+
+  const shotEl=document.getElementById('shot'+shotIdx);if(!shotEl)return;
+
+  const banner=document.createElement('div');
+  banner.id='scaleBanner';
+  banner.style.cssText='position:sticky;bottom:0;left:0;right:0;z-index:50;background:rgba(10,15,13,.97);border-top:2px solid #FFEA3D;padding:12px 16px;display:flex;flex-direction:column;gap:10px';
+
+  function renderBanner(){
+    const sc=shot.scaleCal;
+    const pts=sc.points.length;
+    const statusTxt=sc.pxPerMm
+      ?`✓ ${sc.pxPerMm.toFixed(2)} px/mm — scale set`
+      :pts===1?'Point 1 set — tap the second edge on the image above'
+      :'Tap two edges of the reference object on the image above';
+
+    banner.innerHTML=`
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div style="font-size:12px;font-weight:700;color:#FFEA3D;letter-spacing:.05em">⟳ SCALE CALIBRATION</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${SCALE_PRESETS.map((p,i)=>`<button onclick="bannerSelectPreset(${shotIdx},${i})" id="scalePre${i}"
+            style="padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--f);border:1px solid ${selMm===p.mm&&selType===p.type?'#FFEA3D':'var(--bd)'};background:${selMm===p.mm&&selType===p.type?'rgba(255,234,61,.12)':'var(--sf2)'};color:${selMm===p.mm&&selType===p.type?'#FFEA3D':'var(--txm)'}"
+            >${p.label}</button>`).join('')}
+          <input id="customScaleMm" type="number" placeholder="mm" min="1" max="200"
+            style="width:60px;padding:5px 7px;border-radius:8px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);font-size:11px;font-family:var(--m);display:none">
+        </div>
+        <button onclick="dismissScaleBanner(${shotIdx})" style="padding:5px 12px;border-radius:8px;font-size:11px;color:var(--txd);background:none;border:1px solid var(--bd);cursor:pointer">Skip</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="scaleBannerStatus" style="font-size:12px;color:${sc.pxPerMm?'var(--ac)':'var(--txm)'};flex:1">${statusTxt}</div>
+        ${sc.pxPerMm?`<button onclick="dismissScaleBanner(${shotIdx})" style="padding:7px 18px;border-radius:8px;font-size:12px;font-weight:700;background:var(--ac);color:var(--bg);border:none;cursor:pointer">Done ✓</button>`:''}
+        ${pts>0&&!sc.pxPerMm?`<button onclick="resetBannerScale(${shotIdx})" style="padding:5px 10px;border-radius:8px;font-size:11px;color:var(--txm);background:none;border:1px solid var(--bd);cursor:pointer">Reset</button>`:''}
+      </div>`;
+
+    // Wire preset buttons
+    SCALE_PRESETS.forEach((p,i)=>{
+      const btn=banner.querySelector('#scalePre'+i);if(!btn)return;
+      btn.onclick=()=>bannerSelectPreset(shotIdx,i);
+    });
+  }
+
+  renderBanner();
+  shotEl.appendChild(banner);
+
+  // Attach tap handler to canvas
+  const cv=document.getElementById('cv'+shotIdx);if(!cv)return;
+  function onScaleTap(e){
+    const sc=shot.scaleCal;
+    if(sc.pxPerMm)return; // already done
+    const rect=cv.getBoundingClientRect();
+    const z=shot.zoom;
+    const cl=e.touches?e.touches[0]:e;
+    const canvasX=(cl.clientX-rect.left)*(cv.width/rect.width);
+    const canvasY=(cl.clientY-rect.top)*(cv.height/rect.height);
+    const imgX=canvasX/z.s+z.vx;
+    const imgY=canvasY/z.s+z.vy;
+    if(sc.points.length>=2)sc.points=[];
+    sc.points.push({x:imgX,y:imgY});
+    if(sc.points.length===2){
+      const dx=sc.points[1].x-sc.points[0].x,dy=sc.points[1].y-sc.points[0].y;
+      sc.pxPerMm=Math.hypot(dx,dy)/(sc.refMm||36);
+    }
+    drawShot(shotIdx);
+    renderBanner();
+  }
+  cv._scaleTapHandler=onScaleTap;
+  cv.addEventListener('click',onScaleTap);
+  cv.addEventListener('touchend',onScaleTap);
+
+  window._scaleShotIdx=shotIdx;
+}
+
+function bannerSelectPreset(shotIdx,idx){
+  const p=SCALE_PRESETS[idx];
+  const shot=shots[shotIdx];if(!shot)return;
+  const customInput=document.getElementById('customScaleMm');
+
+  if(p.label==='Custom…'||p.label==='Hana Post'){
+    // Show custom input for Hana Post / Custom
+    if(customInput){
+      customInput.style.display='';
+      customInput.placeholder=p.label==='Hana Post'?'mm':'mm';
+      customInput.focus();
+      customInput.oninput=()=>{
+        const mm=parseFloat(customInput.value);if(!mm||mm<=0)return;
+        setScaleRef(shotIdx,'custom','type');setScaleRef(shotIdx,mm,'mm');
+        shot.scaleCal.points=[];shot.scaleCal.pxPerMm=null;
+        drawShot(shotIdx);
+        const banner=document.getElementById('scaleBanner');
+        if(banner){const st=banner.querySelector('#scaleBannerStatus');if(st)st.textContent='Tap two edges of '+mm+'mm object on the image';}
+      };
+    }
+    return;
+  }
+  if(customInput)customInput.style.display='none';
+  setScaleRef(shotIdx,p.type,'type');setScaleRef(shotIdx,p.mm,'mm');
+  shot.scaleCal.points=[];shot.scaleCal.pxPerMm=null;
+  drawShot(shotIdx);
+  // Re-render banner with new selection
+  const old=document.getElementById('scaleBanner');if(old)old.remove();
+  // Re-run startScalePrompt logic but preserving selection
+  const shotEl=document.getElementById('shot'+shotIdx);if(!shotEl)return;
+  const banner=document.createElement('div');
+  banner.id='scaleBanner';
+  banner.style.cssText='position:sticky;bottom:0;left:0;right:0;z-index:50;background:rgba(10,15,13,.97);border-top:2px solid #FFEA3D;padding:12px 16px;display:flex;flex-direction:column;gap:10px';
+  const selMm=p.mm,selType=p.type;
+  banner.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div style="font-size:12px;font-weight:700;color:#FFEA3D;letter-spacing:.05em">⟳ SCALE CALIBRATION</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${SCALE_PRESETS.map((pr,i)=>`<button onclick="bannerSelectPreset(${shotIdx},${i})" id="scalePre${i}"
+          style="padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--f);border:1px solid ${selMm===pr.mm&&selType===pr.type?'#FFEA3D':'var(--bd)'};background:${selMm===pr.mm&&selType===pr.type?'rgba(255,234,61,.12)':'var(--sf2)'};color:${selMm===pr.mm&&selType===pr.type?'#FFEA3D':'var(--txm)'}"
+          >${pr.label}</button>`).join('')}
+        <input id="customScaleMm" type="number" placeholder="mm" min="1" max="200"
+          style="width:60px;padding:5px 7px;border-radius:8px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);font-size:11px;font-family:var(--m);display:none">
+      </div>
+      <button onclick="dismissScaleBanner(${shotIdx})" style="padding:5px 12px;border-radius:8px;font-size:11px;color:var(--txd);background:none;border:1px solid var(--bd);cursor:pointer">Skip</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div id="scaleBannerStatus" style="font-size:12px;color:var(--txm);flex:1">Tap two edges of the ${p.mm}mm ${p.type} on the image above</div>
+    </div>`;
+  shotEl.appendChild(banner);
+}
+
+function resetBannerScale(shotIdx){
+  const shot=shots[shotIdx];if(!shot)return;
+  shot.scaleCal.points=[];shot.scaleCal.pxPerMm=null;
+  drawShot(shotIdx);
+  startScalePrompt(shotIdx);
+}
+
+function dismissScaleBanner(shotIdx){
+  const banner=document.getElementById('scaleBanner');if(banner)banner.remove();
+  const cv=document.getElementById('cv'+shotIdx);
+  if(cv&&cv._scaleTapHandler){
+    cv.removeEventListener('click',cv._scaleTapHandler);
+    cv.removeEventListener('touchend',cv._scaleTapHandler);
+    delete cv._scaleTapHandler;
+  }
+  drawShot(shotIdx);updateCmp();renderShots(shotIdx);
+}
+
+
+function endWizard(){
+  const ov=document.getElementById('wizOverlay');
+  if(ov)ov.style.display='none';
+  const shotIdx=wizState?.shotIdx;
+  wizState=null;
+  if(shotIdx!=null){
+    drawShot(shotIdx);updateCmp();renderShots(shotIdx);
+    // If no scale set yet, launch scale prompt on the full canvas
+    if(!shots[shotIdx]?.scaleCal?.pxPerMm) startScalePrompt(shotIdx);
+  }
+}
+
 addShot();
 </script>
 </body>
