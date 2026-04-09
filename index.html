@@ -1718,9 +1718,18 @@ function showWizStep(){
   // Skip if landmark not detected
   if(!lm||lm.x==null){wizState.stepIdx++;showWizStep();return}
   
-  // Reset zoom each new step so you start with full context
-  wizZoom={s:1,dx:0,dy:0};
-  
+  // Reset view each new step — centered on landmark at a comfortable zoom
+  if(!wizState)return;
+  {
+    const shot=shots[wizState.shotIdx];
+    const lm=shot.landmarks[WIZ_LANDMARKS[wizState.stepIdx]?.key];
+    if(lm&&lm.x!=null){
+      wizView={zoom:3,cx:lm.x,cy:lm.y}; // start at 3× zoom centered on landmark
+    } else {
+      wizView={zoom:1,cx:shot.img?.w/2||0,cy:shot.img?.h/2||0};
+    }
+  }
+
   // Build overlay
   let ov=document.getElementById('wizOverlay');
   if(!ov){ov=document.createElement('div');ov.id='wizOverlay';ov.className='wiz-overlay';document.body.appendChild(ov)}
@@ -1739,43 +1748,25 @@ function showWizStep(){
     </div>
     <div class="wiz-progress">${pips}</div>
     <div class="wiz-canvas-wrap" id="wizCW"><canvas id="wizCv"></canvas></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px 0;gap:6px">
-      <div class="wiz-hint" style="margin:0;flex:1">${wl.hint}<br><b>Drag</b> to correct &nbsp;|&nbsp; <b>Scroll/pinch</b> to zoom</div>
-      <div style="display:flex;gap:4px;align-items:center">
-        <button onclick="applyWizZoomBtn(1.5)" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--bdl);background:rgba(14,21,18,.9);color:var(--txm);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>
-        <button onclick="applyWizZoomBtn(1/1.5)" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--bdl);background:rgba(14,21,18,.9);color:var(--txm);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center">−</button>
-        <button onclick="wizResetZoom()" style="padding:3px 8px;border-radius:6px;border:1px solid var(--bdl);background:rgba(14,21,18,.9);color:var(--txd);font-size:9px;font-weight:600;cursor:pointer">1:1</button>
-      </div>
-    </div>
+    <div class="wiz-hint">${wl.hint}<br><b>Drag anywhere</b> to move point &nbsp;·&nbsp; <b>Pinch or scroll</b> to zoom</div>
     <div class="wiz-btns">
       <button class="wiz-btn wiz-btn-skip" onclick="wizSkip()">Skip</button>
       <button class="wiz-btn wiz-btn-confirm" onclick="wizConfirm()">Confirm ✓</button>
     </div>`;
   ov.style.display='flex';
-  
-  // Draw zoomed view centered on landmark
-  setTimeout(()=>drawWizCanvas(),20);
-  setupWizDrag();
+
+  // Draw then attach drag handlers (order matters — draw sizes the canvas first)
+  setTimeout(()=>{drawWizCanvas();setupWizDrag();},20);
 }
 
-// Wizard zoom state: pan offset in image pixels from landmark center, zoom multiplier
-let wizZoom={s:1,dx:0,dy:0}; // s=zoom level (1=default view), dx/dy=pan from center
-
-function wizResetZoom(){wizZoom={s:1,dx:0,dy:0};drawWizCanvas();}
-function applyWizZoomBtn(factor){
-  if(!wizState)return;
-  const{shotIdx,stepIdx}=wizState;
-  const shot=shots[shotIdx];
-  const lm=shot.landmarks[WIZ_LANDMARKS[stepIdx]?.key];if(!lm)return;
-  const W=shot.img.w;
-  wizZoom.s=Math.max(0.5,Math.min(8,wizZoom.s*factor));
-  // Keep pan clamped when zooming via button
-  const newR=Math.round(W*0.22/wizZoom.s);
-  const H=shot.img.h;
-  wizZoom.dx=Math.max(-(lm.x-newR),Math.min(W-lm.x-newR,wizZoom.dx));
-  wizZoom.dy=Math.max(-(lm.y-newR),Math.min(H-lm.y-newR,wizZoom.dy));
-  drawWizCanvas();
-}
+// ============================================================
+// Wizard canvas — simple, reliable zoom + drag
+// State: wizView holds the current viewport in image coords
+// The view is always centered on landmark on step start,
+// then user can pan (single finger) or pinch-zoom freely.
+// Any single-finger drag moves the landmark.
+// ============================================================
+let wizView={zoom:1,cx:0,cy:0}; // zoom=scale multiplier, cx/cy=image-coord view center
 
 function drawWizCanvas(){
   if(!wizState)return;
@@ -1784,191 +1775,167 @@ function drawWizCanvas(){
   const wl=WIZ_LANDMARKS[stepIdx];
   const lm=shot.landmarks[wl.key];
   if(!lm||lm.x==null)return;
-  
+
   const cv=document.getElementById('wizCv');if(!cv)return;
   const wrap=document.getElementById('wizCW');if(!wrap)return;
-  const size=Math.min(wrap.clientWidth,wrap.clientHeight)||400;
-  cv.width=size;cv.height=size;
+  // Size canvas to fill wrap
+  const cw=wrap.clientWidth||400,ch=wrap.clientHeight||400;
+  cv.width=cw;cv.height=ch;
   const ctx=cv.getContext('2d');
-  
+
   const W=shot.img.w,H=shot.img.h;
-  // Adaptive base view radius: ~22% of image width, capped to keep context
-  const baseR=Math.round(W*0.22);
-  const viewR=Math.round(baseR/wizZoom.s);
-  // Center follows landmark + pan offset (clamped so we don't go OOB)
-  const cx0=Math.max(viewR,Math.min(W-viewR,lm.x+wizZoom.dx));
-  const cy0=Math.max(viewR,Math.min(H-viewR,lm.y+wizZoom.dy));
-  const sx=cx0-viewR,sy=cy0-viewR,sw=viewR*2,sh=viewR*2;
-  
-  // Draw image cropped and scaled to canvas
-  ctx.fillStyle='#000';ctx.fillRect(0,0,size,size);
-  // Clamp source rect to image bounds
-  const srcX=Math.max(0,sx),srcY=Math.max(0,sy);
-  const srcW=Math.min(sw,W-srcX),srcH=Math.min(sh,H-srcY);
-  const dstX=srcX>sx?(srcX-sx)/sw*size:0;
-  const dstY=srcY>sy?(srcY-sy)/sh*size:0;
-  const dstW=srcW/sw*size,dstH=srcH/sh*size;
-  ctx.drawImage(shot.img.el,srcX,srcY,srcW,srcH,dstX,dstY,dstW,dstH);
-  
-  // Scale factor from image coords to canvas coords
-  const scale=size/sw;
-  const cx=(lm.x-sx)*scale;
-  const cy=(lm.y-sy)*scale;
-  
-  // Zoom level badge
-  if(wizZoom.s!==1){
-    ctx.font="bold 11px 'JetBrains Mono'";ctx.fillStyle='rgba(14,21,18,.9)';
-    const badge=wizZoom.s.toFixed(1)+'×';const bw=ctx.measureText(badge).width;
-    fillRR(ctx,size-bw-18,6,bw+12,18,5);
-    ctx.fillStyle='#3edba0';ctx.fillText(badge,size-bw-12,19);
-  }
-  
+  // pixels of image visible = canvas size / (baseScale * zoom)
+  const baseScale=Math.min(cw/W,ch/H);
+  const scale=baseScale*wizView.zoom;
+
+  // View center in image coords (clamped to image)
+  const vc={
+    x:Math.max(0,Math.min(W,wizView.cx)),
+    y:Math.max(0,Math.min(H,wizView.cy))
+  };
+
+  // Canvas offset: image point vc maps to canvas center
+  const ox=cw/2-vc.x*scale;
+  const oy=ch/2-vc.y*scale;
+
+  ctx.fillStyle='#000';ctx.fillRect(0,0,cw,ch);
+  ctx.drawImage(shot.img.el,ox,oy,W*scale,H*scale);
+
+  // Landmark in canvas coords
+  const lx=ox+lm.x*scale;
+  const ly=oy+lm.y*scale;
+
   // Crosshair
-  ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=1;
-  ctx.setLineDash([4,4]);
-  ctx.beginPath();ctx.moveTo(cx,0);ctx.lineTo(cx,size);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(size,cy);ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.25)';ctx.lineWidth=1;ctx.setLineDash([5,5]);
+  ctx.beginPath();ctx.moveTo(lx,0);ctx.lineTo(lx,ch);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,ly);ctx.lineTo(cw,ly);ctx.stroke();
   ctx.setLineDash([]);
-  
-  // Landmark dot — large for touch
-  ctx.beginPath();ctx.arc(cx,cy,14,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.4)';ctx.fill();
-  ctx.beginPath();ctx.arc(cx,cy,10,0,Math.PI*2);ctx.fillStyle=wl.color;ctx.globalAlpha=.9;ctx.fill();
+
+  // Landmark dot
+  const r=Math.max(14,22/wizView.zoom);
+  ctx.beginPath();ctx.arc(lx,ly,r+4,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.45)';ctx.fill();
+  ctx.beginPath();ctx.arc(lx,ly,r,0,Math.PI*2);ctx.fillStyle=wl.color;ctx.globalAlpha=.92;ctx.fill();
   ctx.globalAlpha=1;ctx.strokeStyle='#fff';ctx.lineWidth=2.5;ctx.stroke();
-  // Outer ring
-  ctx.beginPath();ctx.arc(cx,cy,18,0,Math.PI*2);ctx.strokeStyle=wl.color+'55';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
-  
+  ctx.beginPath();ctx.arc(lx,ly,r+8,0,Math.PI*2);ctx.strokeStyle=wl.color+'66';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
+
   // Label
-  ctx.font="bold 14px 'DM Sans'";
-  ctx.fillStyle='rgba(0,0,0,.8)';
+  ctx.font="bold 13px 'DM Sans'";
   const tw=ctx.measureText(wl.short).width;
-  fillRR(ctx,cx+16,cy-10,tw+10,20,4);
-  ctx.fillStyle=wl.color;ctx.fillText(wl.short,cx+21,cy+5);
+  const lbx=lx+r+6,lby=ly-6;
+  ctx.fillStyle='rgba(0,0,0,.82)';fillRR(ctx,lbx-3,lby-14,tw+10,20,4);
+  ctx.fillStyle=wl.color;ctx.fillText(wl.short,lbx+2,lby+1);
+
+  // Zoom badge
+  if(wizView.zoom!==1){
+    ctx.font="bold 10px 'JetBrains Mono'";
+    const badge=wizView.zoom.toFixed(1)+'×';const bw=ctx.measureText(badge).width;
+    ctx.fillStyle='rgba(14,21,18,.88)';fillRR(ctx,cw-bw-16,6,bw+10,16,4);
+    ctx.fillStyle='#3edba0';ctx.fillText(badge,cw-bw-11,19);
+  }
 }
 
 function setupWizDrag(){
-  const cv=document.getElementById('wizCv');if(!cv||cv._wizDrag)return;cv._wizDrag=true;
-  let dragging=false,panning=false,panStart=null,lastTouchDist=null;
-  
-  function getImgCoords(clientX,clientY){
+  // Always fetch fresh canvas — innerHTML is rebuilt each step
+  const cv=document.getElementById('wizCv');if(!cv)return;
+  // Remove old listeners by cloning
+  const fresh=cv.cloneNode(false);
+  cv.parentNode.replaceChild(fresh,cv);
+  const c=fresh; // use this from now on
+
+  let lastTouchDist=null,lastTouchMid=null;
+  let dragActive=false,dragStart=null;
+
+  function canvasToImg(clientX,clientY){
+    const rect=c.getBoundingClientRect();
+    const px=(clientX-rect.left)/rect.width*c.width;
+    const py=(clientY-rect.top)/rect.height*c.height;
     if(!wizState)return null;
     const{shotIdx,stepIdx}=wizState;
     const shot=shots[shotIdx];
-    const wl=WIZ_LANDMARKS[stepIdx];
-    const lm=shot.landmarks[wl.key];if(!lm)return null;
-    const rect=cv.getBoundingClientRect();
     const W=shot.img.w,H=shot.img.h;
-    const baseR=Math.round(W*0.22);
-    const viewR=Math.round(baseR/wizZoom.s);
-    const cx0=Math.max(viewR,Math.min(W-viewR,lm.x+wizZoom.dx));
-    const cy0=Math.max(viewR,Math.min(H-viewR,lm.y+wizZoom.dy));
-    const sx=cx0-viewR,sy=cy0-viewR,sw=viewR*2;
-    const size=cv.width;
-    const scale=size/sw;
-    const canvasX=(clientX-rect.left)/(rect.width)*size;
-    const canvasY=(clientY-rect.top)/(rect.height)*size;
-    return{x:Math.round(sx+canvasX/scale),y:Math.round(sy+canvasY/scale)};
+    const baseScale=Math.min(c.width/W,c.height/H);
+    const scale=baseScale*wizView.zoom;
+    const ox=c.width/2-wizView.cx*scale;
+    const oy=c.height/2-wizView.cy*scale;
+    const ix=(px-ox)/scale,iy=(py-oy)/scale;
+    return{x:Math.max(0,Math.min(W,ix)),y:Math.max(0,Math.min(H,iy))};
   }
 
-  function applyWizZoom(factor,pivotCX,pivotCY){
+  function doZoom(factor,pivotClient){
     if(!wizState)return;
-    const{shotIdx,stepIdx}=wizState;
+    const{shotIdx}=wizState;
     const shot=shots[shotIdx];
-    const lm=shot.landmarks[WIZ_LANDMARKS[stepIdx]?.key];if(!lm)return;
     const W=shot.img.w,H=shot.img.h;
-    const oldR=Math.round(W*0.22/wizZoom.s);
-    // Image coord of pivot
-    const rect=cv.getBoundingClientRect();
-    const size=cv.width;
-    const cx0=Math.max(oldR,Math.min(W-oldR,lm.x+wizZoom.dx));
-    const cy0=Math.max(oldR,Math.min(H-oldR,lm.y+wizZoom.dy));
-    const pivImgX=cx0-oldR+(pivotCX||size/2)/size*(oldR*2);
-    const pivImgY=cy0-oldR+(pivotCY||size/2)/size*(oldR*2);
-    wizZoom.s=Math.max(0.5,Math.min(8,wizZoom.s*factor));
-    const newR=Math.round(W*0.22/wizZoom.s);
-    // Keep pivot image point stable under cursor
-    const newCX0=pivImgX-((pivotCX||size/2)/size)*(newR*2);
-    const newCY0=pivImgY-((pivotCY||size/2)/size)*(newR*2);
-    wizZoom.dx=newCX0+newR-lm.x;
-    wizZoom.dy=newCY0+newR-lm.y;
+    // Image coord under pivot before zoom
+    const pivImg=canvasToImg(pivotClient.x,pivotClient.y);
+    const oldZ=wizView.zoom;
+    wizView.zoom=Math.max(0.5,Math.min(12,wizView.zoom*factor));
+    if(pivImg){
+      // After zoom, adjust center so pivot stays under same screen point
+      const baseScale=Math.min(c.width/W,c.height/H);
+      const newScale=baseScale*wizView.zoom;
+      const rect=c.getBoundingClientRect();
+      const px=(pivotClient.x-rect.left)/rect.width*c.width;
+      const py=(pivotClient.y-rect.top)/rect.height*c.height;
+      wizView.cx=pivImg.x-(px-c.width/2)/newScale;
+      wizView.cy=pivImg.y-(py-c.height/2)/newScale;
+    }
+    // Clamp view center
+    wizView.cx=Math.max(0,Math.min(W,wizView.cx));
+    wizView.cy=Math.max(0,Math.min(H,wizView.cy));
     drawWizCanvas();
   }
-  
-  function onDown(e){
+
+  c.addEventListener('wheel',e=>{
     e.preventDefault();
-    if(e.touches&&e.touches.length===2){
+    doZoom(e.deltaY<0?1.25:1/1.25,{x:e.clientX,y:e.clientY});
+  },{passive:false});
+
+  c.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    if(e.touches.length===2){
       lastTouchDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-      dragging=false;panning=false;return;
+      lastTouchMid={x:(e.touches[0].clientX+e.touches[1].clientX)/2,y:(e.touches[0].clientY+e.touches[1].clientY)/2};
+      dragActive=false;
+    } else if(e.touches.length===1){
+      dragActive=true;
+      dragStart={cx:e.touches[0].clientX,cy:e.touches[0].clientY,vcx:wizView.cx,vcy:wizView.cy};
     }
-    const cl=e.touches?e.touches[0]:e;
-    // Determine if tap is near the landmark (within ~30% of canvas) → drag LM, else pan
-    const rect=cv.getBoundingClientRect();
-    const tapCX=(cl.clientX-rect.left)/rect.width*cv.width;
-    const tapCY=(cl.clientY-rect.top)/rect.height*cv.height;
-    // Find landmark canvas position
-    if(!wizState)return;
-    const{shotIdx,stepIdx}=wizState;
-    const shot=shots[shotIdx];
-    const lm=shot.landmarks[WIZ_LANDMARKS[stepIdx]?.key];
-    let nearLM=false;
-    if(lm&&lm.x!=null){
-      const W=shot.img.w,H=shot.img.h;
-      const baseR=Math.round(W*0.22);
-      const viewR=Math.round(baseR/wizZoom.s);
-      const cx0=Math.max(viewR,Math.min(W-viewR,lm.x+wizZoom.dx));
-      const cy0=Math.max(viewR,Math.min(H-viewR,lm.y+wizZoom.dy));
-      const scale=cv.width/(viewR*2);
-      const lmCX=(lm.x-(cx0-viewR))*scale;
-      const lmCY=(lm.y-(cy0-viewR))*scale;
-      nearLM=Math.hypot(tapCX-lmCX,tapCY-lmCY)<Math.max(40,cv.width*0.18);
-    }
-    if(nearLM){
-      dragging=true;panning=false;
-      const p=getImgCoords(cl.clientX,cl.clientY);
-      if(p)updateWizLM(p);
-    } else {
-      panning=true;dragging=false;
-      panStart={cx:cl.clientX,cy:cl.clientY,dx:wizZoom.dx,dy:wizZoom.dy};
-    }
-  }
-  function onMove(e){
+  },{passive:false});
+
+  c.addEventListener('touchmove',e=>{
     e.preventDefault();
-    if(e.touches&&e.touches.length===2&&lastTouchDist!=null){
+    if(e.touches.length===2&&lastTouchDist!=null){
       const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-      const rect=cv.getBoundingClientRect();
-      const mx=((e.touches[0].clientX+e.touches[1].clientX)/2-rect.left)/rect.width*cv.width;
-      const my=((e.touches[0].clientY+e.touches[1].clientY)/2-rect.top)/rect.height*cv.height;
-      applyWizZoom(d/lastTouchDist,mx,my);lastTouchDist=d;return;
-    }
-    const cl=e.touches?e.touches[0]:e;
-    if(dragging){
-      const p=getImgCoords(cl.clientX,cl.clientY);
+      const mid={x:(e.touches[0].clientX+e.touches[1].clientX)/2,y:(e.touches[0].clientY+e.touches[1].clientY)/2};
+      doZoom(d/lastTouchDist,mid);
+      lastTouchDist=d;lastTouchMid=mid;
+    } else if(e.touches.length===1&&dragActive&&dragStart){
+      // Single finger: move the LANDMARK (not pan)
+      const p=canvasToImg(e.touches[0].clientX,e.touches[0].clientY);
       if(p)updateWizLM(p);
-    } else if(panning&&panStart){
-      if(!wizState)return;
-      const{shotIdx,stepIdx}=wizState;
-      const shot=shots[shotIdx];
-      const lm=shot.landmarks[WIZ_LANDMARKS[stepIdx]?.key];if(!lm)return;
-      const W=shot.img.w,H=shot.img.h;
-      const viewR=Math.round(W*0.22/wizZoom.s);
-      const rect=cv.getBoundingClientRect();
-      const pxPerImgPx=cv.width/(viewR*2);
-      wizZoom.dx=panStart.dx-(cl.clientX-panStart.cx)/rect.width*cv.width/pxPerImgPx;
-      wizZoom.dy=panStart.dy-(cl.clientY-panStart.cy)/rect.height*cv.height/pxPerImgPx;
-      drawWizCanvas();
     }
-  }
-  function onUp(e){dragging=false;panning=false;panStart=null;lastTouchDist=null;}
-  function onWheel(e){
+  },{passive:false});
+
+  c.addEventListener('touchend',e=>{
+    if(e.touches.length<2){lastTouchDist=null;lastTouchMid=null;}
+    if(e.touches.length===0){dragActive=false;dragStart=null;}
+  });
+
+  // Mouse: drag moves landmark, wheel zooms
+  c.addEventListener('mousedown',e=>{
     e.preventDefault();
-    const rect=cv.getBoundingClientRect();
-    const mx=(e.clientX-rect.left)/rect.width*cv.width;
-    const my=(e.clientY-rect.top)/rect.height*cv.height;
-    applyWizZoom(e.deltaY<0?1.3:1/1.3,mx,my);
-  }
-  
-  cv.addEventListener('mousedown',onDown);cv.addEventListener('mousemove',onMove);cv.addEventListener('mouseup',onUp);
-  cv.addEventListener('touchstart',onDown,{passive:false});cv.addEventListener('touchmove',onMove,{passive:false});cv.addEventListener('touchend',onUp);
-  cv.addEventListener('wheel',onWheel,{passive:false});
+    dragActive=true;
+    dragStart={cx:e.clientX,cy:e.clientY,vcx:wizView.cx,vcy:wizView.cy};
+    const p=canvasToImg(e.clientX,e.clientY);
+    if(p)updateWizLM(p);
+  });
+  c.addEventListener('mousemove',e=>{
+    if(!dragActive)return;
+    const p=canvasToImg(e.clientX,e.clientY);
+    if(p)updateWizLM(p);
+  });
+  c.addEventListener('mouseup',()=>{dragActive=false;dragStart=null;});
 }
 
 function updateWizLM(p){
