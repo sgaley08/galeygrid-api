@@ -205,35 +205,36 @@ async function poll(){
   try{
     const headers={'apikey':sbKey,'Authorization':`Bearer ${sbKey}`,'Content-Type':'application/json'};
 
-    // Fetch latest AP row
-    const apResp=await fetch(`${sbUrl}/rest/v1/live_display?order=updated_at.desc&limit=1`,{headers});
-    const cupResp=await fetch(`${sbUrl}/rest/v1/cup_live_display?order=updated_at.desc&limit=1`,{headers});
+    // Fetch latest row from each table in parallel
+    const [apResp,cupResp]=await Promise.all([
+      fetch(`${sbUrl}/rest/v1/live_display?order=updated_at.desc&limit=1`,{headers}),
+      fetch(`${sbUrl}/rest/v1/cup_live_display?order=updated_at.desc&limit=1`,{headers})
+    ]);
 
     let apRow=null,cupRow=null;
-    if(apResp.ok){const d=await apResp.json();apRow=d[0]||null;}
-    if(cupResp.ok){const d=await cupResp.json();cupRow=d[0]||null;}
+    if(apResp.ok){const d=await apResp.json();apRow=Array.isArray(d)?d[0]||null:null;}
+    if(cupResp.ok){const d=await cupResp.json();cupRow=Array.isArray(d)?d[0]||null:null;}
 
     lastPollTs=new Date();
 
-    // Compare timestamps → pick newest
-    const apT=apRow?new Date(apRow.updated_at):null;
-    const cupT=cupRow?new Date(cupRow.updated_at):null;
-
     if(!apRow&&!cupRow){
-      setPollStatus('No data yet — send a shot from the iPad','');
+      setPollStatus('Waiting — press "Send to Screen" on the iPad','');
       setStatusDot('idle');
       return;
     }
 
-    if(cupT&&(!apT||cupT>=apT)){
+    // Pick whichever table has the most recent updated_at
+    const apT=apRow&&apRow.updated_at?new Date(apRow.updated_at).getTime():0;
+    const cupT=cupRow&&cupRow.updated_at?new Date(cupRow.updated_at).getTime():0;
+
+    if(cupT>apT){
       renderCupMode(cupRow);
     } else {
       renderApMode(apRow);
     }
 
     setStatusDot(currentMode==='cup'?'cup-live':'live');
-    const ago=Math.round((Date.now()-lastPollTs)/1000);
-    setPollStatus(`Last update: ${lastPollTs.toLocaleTimeString()} · polling every 5 s`,'');
+    setPollStatus(`${currentMode==='cup'?'Cup Positioning':'AP / LLD'} · updated ${lastPollTs.toLocaleTimeString()} · auto-refresh 5 s`,'');
 
   }catch(err){
     setPollStatus(`Poll error: ${err.message}`,'warn');
@@ -340,25 +341,24 @@ function renderApMode(row){
   }
 }
 
-// ============================================================
-// Render Cup Positioning mode
-// ============================================================
 function renderCupMode(row){
   currentMode='cup';
   document.getElementById('modeTag').className='cup';
-  document.getElementById('modeTag').textContent=`Cup · ${(row.shot_type||'').toUpperCase()}`;
+  const shotLabel=row.shot_type==='final'?'FINAL':'TRIAL';
+  document.getElementById('modeTag').textContent=`Cup · ${shotLabel}`;
   document.getElementById('dpModeLabel').textContent='Cup Positioning';
 
   const caseId=row.case_id||'—';
-  document.getElementById('caseLabel').textContent=`Case ${caseId} · ${row.shot_type==='final'?'Final':'Trial'}`;
+  document.getElementById('caseLabel').textContent=`Case ${caseId} · ${shotLabel}`;
 
   // Image
-  maybeUpdateImage(row.image_url,`${row.shot_type==='final'?'Final':'Trial'} Cup · ${new Date(row.updated_at).toLocaleTimeString()}`);
+  maybeUpdateImage(row.image_url,`${shotLabel} Cup · ${new Date(row.updated_at).toLocaleTimeString()}`);
 
-  const inc=row.inclination_deg;
-  const ant=row.anteversion_deg;
-  const incOk=inc>=30&&inc<=50;
-  const antOk=ant>=10&&ant<=30;
+  const inc=row.inclination_deg!=null?parseFloat(row.inclination_deg):null;
+  const ant=row.anteversion_deg!=null?parseFloat(row.anteversion_deg):null;
+  // Use DB flags if present, fallback to recalc
+  const incOk=row.inclination_ok!=null?row.inclination_ok:(inc!=null&&inc>=30&&inc<=50);
+  const antOk=row.anteversion_ok!=null?row.anteversion_ok:(ant!=null&&ant>=10&&ant<=30);
   const allOk=incOk&&antOk;
 
   let html='';
@@ -367,7 +367,7 @@ function renderCupMode(row){
   html+=`<div class="delta-card ${incOk?'ok':'warn'}">
     <div class="delta-name">Inclination</div>
     <div class="delta-val ${incOk?'cup-ok':'warn'}">${inc!=null?inc.toFixed(1):'—'}<span style="font-size:22px;font-weight:600">°</span></div>
-    <div class="delta-sub">Target 30–50°${incOk?'':' ⚠ OUT OF RANGE'}</div>
+    <div class="delta-sub">Target 30–50°${incOk?'':' &nbsp;⚠ OUT OF RANGE'}</div>
     ${inc!=null?makeTargetBar(inc,0,80,[30,50],incOk?'cup-ok':'warn',true):''}
   </div>`;
 
@@ -375,28 +375,27 @@ function renderCupMode(row){
   html+=`<div class="delta-card ${antOk?'ok':'warn'}" style="margin-bottom:0">
     <div class="delta-name">Anteversion</div>
     <div class="delta-val ${antOk?'cup-ok':'warn'}">${ant!=null?ant.toFixed(1):'—'}<span style="font-size:22px;font-weight:600">°</span></div>
-    <div class="delta-sub">Target 10–30°${antOk?'':' ⚠ OUT OF RANGE'}</div>
+    <div class="delta-sub">Target 10–30°${antOk?'':' &nbsp;⚠ OUT OF RANGE'}</div>
     ${ant!=null?makeTargetBar(ant,0,60,[10,30],antOk?'cup-ok':'warn',true):''}
   </div>`;
 
-  // Supplemental
+  // Supplemental metrics
   const pts=row.rim_point_count;
   const axR=row.axis_ratio;
-  if(pts||axR){
+  if(pts||axR||row.implant_cup_mm){
     html+=`<div class="metric-row" style="margin-top:10px;margin-bottom:0">
       ${pts?`<div class="metric-cell"><div class="metric-lbl">Rim Points</div><div class="metric-val neutral">${pts}</div><div class="metric-range">Ellipse confidence</div></div>`:''}
-      ${axR?`<div class="metric-cell"><div class="metric-lbl">Axis Ratio</div><div class="metric-val neutral">${(axR*100).toFixed(0)}%</div><div class="metric-range">minor/major</div></div>`:''}
+      ${axR?`<div class="metric-cell"><div class="metric-lbl">Axis Ratio</div><div class="metric-val neutral">${(parseFloat(axR)*100).toFixed(0)}%</div><div class="metric-range">minor/major</div></div>`:''}
       ${row.implant_cup_mm?`<div class="metric-cell"><div class="metric-lbl">Cup Size</div><div class="metric-val neutral">${row.implant_cup_mm}</div><div class="metric-range">mm</div></div>`:''}
     </div>`;
   }
 
-  // Overall status
-  html+=`<div style="margin-top:10px;padding:8px 12px;border-radius:8px;text-align:center;background:${allOk?'rgba(167,139,250,.12)':'rgba(232,200,68,.1)'};border:1px solid ${allOk?'rgba(167,139,250,.3)':'rgba(232,200,68,.3)'};font-size:11px;font-weight:700;color:${allOk?'#a78bfa':'#e8c844'}">${allOk?'✓ Both angles in target zone':'⚠ Adjust cup position'}</div>`;
+  // Overall status banner
+  html+=`<div style="margin-top:10px;padding:10px 14px;border-radius:8px;text-align:center;background:${allOk?'rgba(167,139,250,.12)':'rgba(232,200,68,.1)'};border:1px solid ${allOk?'rgba(167,139,250,.3)':'rgba(232,200,68,.3)'};font-size:12px;font-weight:700;color:${allOk?'#a78bfa':'#e8c844'}">${allOk?'✓ Both angles in target zone':'⚠ Adjust cup position'}</div>`;
 
   document.getElementById('dpMain').innerHTML=html;
   document.getElementById('dpMain').classList.add('flash-in');
   setTimeout(()=>document.getElementById('dpMain').classList.remove('flash-in'),400);
-
   document.getElementById('dpRefSection').style.display='none';
 }
 

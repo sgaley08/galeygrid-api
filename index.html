@@ -2088,7 +2088,7 @@ function renderCupShot(slot){
           ${Object.entries(REF_MODES).map(([k,v])=>`<button onclick="setCupRefMode('${slot}','${k}')"
             style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid ${s.refMode===k?'#FFEA3D':'var(--bd)'};background:${s.refMode===k?'rgba(255,234,61,.12)':'var(--sf2)'};color:${s.refMode===k?'#FFEA3D':'var(--txm)'};font-family:var(--f)">${v.label}</button>`).join('')}
         </div>
-        <span>${need>0?`Tap <b>${need}</b> point${need>1?'s':''} — ${mode.hint} &nbsp;|&nbsp; <b>Drag</b> existing points to adjust`:'Reference set ✓ — <b>drag</b> either point to fine-tune'}</span>
+        <span>${need>0?`Tap <b>${need}</b> point${need>1?'s':''} — ${mode.hint}`:'✓ Ref line set &nbsp;·&nbsp; <b>drag yellow dots</b> to adjust anytime'}</span>
       </div>`;
   } else if(s.step===2){
     const n=s.rimPts.length;
@@ -2133,8 +2133,40 @@ function renderCupShot(slot){
 }
 
 function cupZoom(slot,factor){
-  const z=CUP_SHOTS[slot].zoom;
-  z.s=Math.max(1,Math.min(10,z.s*factor));
+  const s=CUP_SHOTS[slot];
+  const z=s.zoom;
+  const cv=$('cupCv'+cap(slot));
+  const wrap=$('cupWrap'+cap(slot));
+  if(!cv||!wrap||!s.img)return;
+
+  const dw=cv.width||wrap.clientWidth||400;
+  const dh=cv.height||Math.round(dw*0.75);
+  const W=s.img.w,H=s.img.h;
+  const baseScale=Math.min(dw/W,dh/H);
+
+  // Determine the focal point in IMAGE coords
+  let focalX=W/2,focalY=H/2;
+  if(s.ellipse&&(s.step===3)){
+    // Center on fitted ellipse
+    focalX=s.ellipse.cx;focalY=s.ellipse.cy;
+  } else if(s.refPts.length>=2){
+    // Center on ref line midpoint
+    focalX=(s.refPts[0].x+s.refPts[1].x)/2;
+    focalY=(s.refPts[0].y+s.refPts[1].y)/2;
+  } else if(s.refPts.length===1){
+    focalX=s.refPts[0].x;focalY=s.refPts[0].y;
+  }
+
+  const oldScale=baseScale*z.s;
+  const newS=Math.max(1,Math.min(10,z.s*factor));
+  const newScale=baseScale*newS;
+
+  // Keep focal point fixed under canvas center
+  // canvas center = offX + focalX*scale  →  offX = dw/2 - focalX*scale
+  // offX = (dw - W*scale)/2 + ox  →  ox = dw/2 - focalX*scale - (dw-W*scale)/2
+  z.ox=(dw/2)-focalX*newScale-((dw-W*newScale)/2);
+  z.oy=(dh/2)-focalY*newScale-((dh-H*newScale)/2);
+  z.s=newS;
   if(z.s===1){z.ox=0;z.oy=0;}
   clampCupZoom(slot);
   const lbl=$('cupZoom'+cap(slot));if(lbl)lbl.textContent=z.s.toFixed(1)+'×';
@@ -2261,9 +2293,15 @@ function drawCupCanvas(slot){
   if(s.refPts.length>0){
     s.refPts.forEach((p,i)=>{
       const px=offX+p.x*scale,py=offY+p.y*scale;
-      ctx.beginPath();ctx.arc(px,py,6*sc,0,Math.PI*2);ctx.fillStyle=CUP_COLORS.ref;ctx.fill();
+      // Outer drag-hint ring (always visible)
+      ctx.beginPath();ctx.arc(px,py,14*sc,0,Math.PI*2);
+      ctx.strokeStyle=CUP_COLORS.ref+'44';ctx.lineWidth=2*sc;ctx.setLineDash([4*sc,3*sc]);ctx.stroke();ctx.setLineDash([]);
+      // Main dot
+      ctx.beginPath();ctx.arc(px,py,9*sc,0,Math.PI*2);ctx.fillStyle=CUP_COLORS.ref;ctx.fill();
       ctx.strokeStyle='#000';ctx.lineWidth=1.5;ctx.stroke();
-      ctx.fillStyle=CUP_COLORS.ref;ctx.font=`bold ${Math.round(9*sc)}px 'DM Sans'`;ctx.fillText(`R${i+1}`,px+8,py+4);
+      ctx.fillStyle='#000';ctx.font=`bold ${Math.round(9*sc)}px 'DM Sans'`;
+      ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(`R${i+1}`,px,py);
+      ctx.textAlign='left';ctx.textBaseline='alphabetic';
     });
     if(s.refPts.length===2){
       const p1=s.refPts[0],p2=s.refPts[1];
@@ -2354,12 +2392,18 @@ function setupCupCanvas(slot){
 
   let panning=false,panStart=null,moved=false,draggingRef=-1;
 
-  function findNearRefPt(p){
+  // Hit detection in CANVAS coords so it works at any zoom level
+  function findNearRefPtCanvas(clientX,clientY){
     const st=s();if(!st.refPts.length)return -1;
-    const{scale}=getCupTransform(slot);
-    const hitR=Math.max(18,24/scale);
+    const{scale,offX,offY}=getCupTransform(slot);
+    const rect=cv.getBoundingClientRect();
+    const canX=(clientX-rect.left)*(cv.width/rect.width);
+    const canY=(clientY-rect.top)*(cv.height/rect.height);
+    const HIT=28; // canvas pixels — big enough for fat fingers
     for(let i=0;i<st.refPts.length;i++){
-      if(Math.hypot(p.x-st.refPts[i].x,p.y-st.refPts[i].y)<hitR)return i;
+      const px=offX+st.refPts[i].x*scale;
+      const py=offY+st.refPts[i].y*scale;
+      if(Math.hypot(canX-px,canY-py)<HIT)return i;
     }
     return -1;
   }
@@ -2367,12 +2411,9 @@ function setupCupCanvas(slot){
   function onDown(e){
     e.preventDefault();
     const cl=e.touches?e.touches[0]:e;
-    const p=getImgPt(cl.clientX,cl.clientY);
-    // Check if near an existing ref point (always draggable)
-    if(p){
-      const ri=findNearRefPt(p);
-      if(ri>=0){draggingRef=ri;moved=false;return;}
-    }
+    // Always check ref pts first — draggable in ANY step
+    const ri=findNearRefPtCanvas(cl.clientX,cl.clientY);
+    if(ri>=0){draggingRef=ri;moved=false;return;}
     panning=true;moved=false;draggingRef=-1;
     panStart={x:cl.clientX,y:cl.clientY,ox:s().zoom.ox,oy:s().zoom.oy};
   }
@@ -2401,26 +2442,23 @@ function setupCupCanvas(slot){
       draggingRef=-1;
       // Recalculate angles if ellipse already fit
       if(s().step===3)fitCupEllipse(slot);
+      else renderCupShot(slot);
       return;
     }
     const wasPanning=panning;panning=false;
     if(wasPanning&&!moved){
       // It was a tap — place point
       const cl=e.changedTouches?e.changedTouches[0]:e;
+      // Skip if tap was near an existing ref point
+      if(findNearRefPtCanvas(cl.clientX,cl.clientY)>=0){panStart=null;moved=false;return;}
       const p=getImgPt(cl.clientX,cl.clientY);if(!p)return;
       const st=s();
       if(st.step===1){
-        // Don't add if tapping near existing ref pt (that would be a drag start)
-        if(findNearRefPt(p)<0){
-          st.refPts.push(p);
-          console.log('[Cup] ref pt added:',p,'total:',st.refPts.length);
-          if(st.refPts.length>=2)st.step=2;
-          renderCupShot(slot);
-        }
+        st.refPts.push(p);
+        if(st.refPts.length>=2)st.step=2;
+        renderCupShot(slot);
       } else if(st.step===2||st.step===3){
         st.rimPts.push(p);
-        console.log('[Cup] rim pt added:',p,'total:',st.rimPts.length);
-        // Auto-refit if already had ellipse
         if(st.step===3&&st.rimPts.length>=CUP_MIN_RIM)fitCupEllipse(slot);
         else renderCupShot(slot);
       }
