@@ -1658,7 +1658,7 @@ async function sendToScreen(idx){
     } else {
       console.warn('[SendToScreen] renderAnnotatedCanvas returned null for idx',idx);
     }
-    const resp=await fetch(`${sbUrl}/rest/v1/live_display`,{
+    const resp=await fetch(`${sbUrl}/rest/v1/live_display?on_conflict=id`,{
       method:'POST',
       headers:{'Authorization':`Bearer ${sbKey}`,'apikey':sbKey,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
       body:JSON.stringify(payload)
@@ -2666,7 +2666,7 @@ async function sendCupToScreen(slot){
         payload.image_url=`${sbUrl}/storage/v1/object/public/fluoro-images/${imgPath}`;
       }else{console.warn('[CupSend] Image upload failed',storResp.status);}
     }
-    const resp=await fetch(`${sbUrl}/rest/v1/cup_live_display`,{
+    const resp=await fetch(`${sbUrl}/rest/v1/cup_live_display?on_conflict=id`,{
       method:'POST',
       headers:{'Authorization':`Bearer ${sbKey}`,'apikey':sbKey,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
       body:JSON.stringify(payload)
