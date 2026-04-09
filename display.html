@@ -234,7 +234,9 @@ async function poll(){
     }
 
     setStatusDot(currentMode==='cup'?'cup-live':'live');
-    setPollStatus(`${currentMode==='cup'?'Cup Positioning':'AP / LLD'} · updated ${lastPollTs.toLocaleTimeString()} · auto-refresh 5 s`,'');
+    const winner=cupT>apT?'Cup':'AP';
+    const ts=new Date(Math.max(apT,cupT)).toLocaleTimeString();
+    setPollStatus(`Showing: ${currentMode==='cup'?'Cup Positioning':'AP/LLD'} · sent ${ts} · polls every 5 s`,'');
 
   }catch(err){
     setPollStatus(`Poll error: ${err.message}`,'warn');

@@ -1608,6 +1608,7 @@ async function sendToScreen(idx){
   if(refM&&opSide==='left'&&curM.offsetL!=null&&refM.offsetL!=null)offDelta=px2mm(curM.offsetL-refM.offsetL);
   else if(refM&&opSide==='right'&&curM.offsetR!=null&&refM.offsetR!=null)offDelta=px2mm(curM.offsetR-refM.offsetR);
   const payload={
+    id:'singleton',
     case_id:$('caseId').value||'unknown',
     updated_at:new Date().toISOString(),
     op_side:opSide,
@@ -2390,6 +2391,17 @@ function setupCupCanvas(slot){
     return{x,y};
   }
 
+  // Like getImgPt but clamps to image bounds — never returns null, safe for dragging
+  function getImgPtClamped(clientX,clientY){
+    const rect=cv.getBoundingClientRect();
+    const cx=(clientX-rect.left)*(cv.width/rect.width);
+    const cy=(clientY-rect.top)*(cv.height/rect.height);
+    const{scale,offX,offY}=getCupTransform(slot);
+    const x=(cx-offX)/scale,y=(cy-offY)/scale;
+    const W=s().img?.w||1,H=s().img?.h||1;
+    return{x:Math.max(0,Math.min(W,x)),y:Math.max(0,Math.min(H,y))};
+  }
+
   let panning=false,panStart=null,moved=false,draggingRef=-1;
 
   // Hit detection in CANVAS coords so it works at any zoom level
@@ -2422,8 +2434,12 @@ function setupCupCanvas(slot){
     e.preventDefault();
     const cl=e.touches?e.touches[0]:e;
     if(draggingRef>=0){
-      const p=getImgPt(cl.clientX,cl.clientY);
-      if(p){s().refPts[draggingRef]=p;moved=true;renderCupShot(slot);}
+      // Use clamped coords — drag never gets stuck at image edge
+      const p=getImgPtClamped(cl.clientX,cl.clientY);
+      s().refPts[draggingRef]=p;moved=true;
+      // Refit ellipse live if already computed
+      if(s().step===3&&s().rimPts.length>=CUP_MIN_RIM)fitCupEllipse(slot);
+      else renderCupShot(slot);
       return;
     }
     if(!panning||!panStart)return;
@@ -2654,6 +2670,7 @@ async function sendCupToScreen(slot){
   const incOk=a.inclination>=INCL_MIN&&a.inclination<=INCL_MAX;
   const antOk=a.anteversion>=ANT_MIN&&a.anteversion<=ANT_MAX;
   const payload={
+    id:'singleton',
     case_id:$('caseId').value||'unknown',
     updated_at:new Date().toISOString(),
     shot_type:slot,
