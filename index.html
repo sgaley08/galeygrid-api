@@ -12,378 +12,844 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#060a09;--sf:#0e1512;--sf2:#151d19;--bd:#1e2b25;--bdl:#2d3f36;--tx:#e4ece6;--txm:#8a9e90;--txd:#546058;--ac:#3edba0;--acd:#268a62;--acb:rgba(62,219,160,.07);--dn:#e85454;--wn:#e8c844;--wnb:rgba(232,200,68,.07);--f:'DM Sans',-apple-system,sans-serif;--m:'JetBrains Mono','SF Mono',monospace}
-*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;background:var(--bg);color:var(--tx);font-family:var(--f);-webkit-font-smoothing:antialiased;overflow-x:hidden}button{font-family:var(--f)}
-.hdr{padding:12px 16px;border-bottom:1px solid var(--bd);background:var(--sf);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.logo{display:flex;align-items:center;gap:8px}.logo-i{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--ac),var(--acd));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--bg)}.logo-t{font-size:15px;font-weight:700;letter-spacing:-.02em}.logo-s{font-size:8px;color:var(--txd);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
-.badge{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:3px 7px;border-radius:10px;background:var(--wnb);color:var(--wn);border:1px solid rgba(232,200,68,.15)}
-.main{max-width:720px;margin:0 auto;padding:12px}
-.cfg{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:12px;margin-bottom:12px}
-.cfg-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}.cfg-row:last-child{margin-bottom:0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:var(--f);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button{font-family:var(--f)}
+
+/* ── Header ── */
+.hdr{padding:10px 16px;border-bottom:1px solid var(--bd);background:var(--sf);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:8px}
+.logo{display:flex;align-items:center;gap:8px;min-width:0}
+.logo-i{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--ac),var(--acd));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--bg);flex-shrink:0}
+.logo-t{font-size:15px;font-weight:700;letter-spacing:-.02em}
+.logo-s{font-size:8px;color:var(--txd);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.badge{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:3px 7px;border-radius:10px;background:var(--wnb);color:var(--wn);border:1px solid rgba(232,200,68,.15);flex-shrink:0}
+.case-pill{background:var(--sf2);border:1px solid var(--bdl);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:11px;font-weight:600;color:var(--txm);display:flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;transition:.15s;white-space:nowrap;flex:1;justify-content:center;max-width:200px}
+.case-pill:active{background:var(--acb);border-color:var(--acd);color:var(--ac)}
+.case-pill-id{color:var(--ac);font-family:var(--m);font-size:11px}
+
+/* ── Config panel ── */
+.cfg{background:var(--sf);border-bottom:1px solid var(--bd);padding:12px 16px;transition:.2s}
+.cfg.collapsed{display:none}
+.cfg-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.cfg-row:last-child{margin-bottom:0}
 .cfg-lbl{font-size:10px;font-weight:600;color:var(--txd);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
-.cfg-input{background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;color:var(--tx);font-size:11px;font-family:var(--m);outline:none;flex:1;min-width:100px}
-.cfg-input:focus{border-color:var(--acd)}select.cfg-input{font-family:var(--f);cursor:pointer}
-.sts{font-size:10px;font-weight:500}.sts.ok{color:var(--ac)}.sts.no{color:var(--dn)}
-.cfg-toggle{font-size:10px;color:var(--ac);background:none;border:none;cursor:pointer;font-weight:600}
-.cfg.collapsed .cfg-row{display:none}.cfg.collapsed .cfg-row:first-child{display:flex}
+.cfg-input{background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;color:var(--tx);font-size:11px;font-family:var(--m);outline:none;flex:1;min-width:80px}
+.cfg-input:focus{border-color:var(--acd)}
+select.cfg-input{font-family:var(--f);cursor:pointer}
+.sts{font-size:10px;font-weight:500}
+.sts.ok{color:var(--ac)}
+.sts.no{color:var(--dn)}
 
-/* Shots */
-.shot{background:var(--sf);border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:12px}.shot.ref{border-color:var(--acd)}
-.shot-h{padding:8px 12px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
-.shot-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--txm)}
-.shot-tag{font-size:9px;font-weight:600;padding:2px 6px;border-radius:6px}.shot-tag.ref{color:var(--ac);background:var(--acb)}.shot-tag.intra{color:var(--wn);background:var(--wnb)}
-.src-tag{font-size:8px;font-weight:600;padding:2px 5px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;margin-left:4px}
-.src-tag.photo{color:var(--wn);background:var(--wnb)}.src-tag.dicom{color:var(--ac);background:var(--acb)}
+/* ── Disclaimer ── */
+.disc{padding:7px 14px;background:var(--wnb);border-bottom:1px solid rgba(232,200,68,.1);font-size:9px;color:var(--wn);line-height:1.5;text-align:center}
 
-.dz{padding:24px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:120px;cursor:pointer;transition:.15s}
-.dz:hover,.dz.on{background:var(--acb)}
-.dz-ic{width:32px;height:32px;border-radius:8px;border:2px dashed var(--bdl);display:flex;align-items:center;justify-content:center;margin-bottom:6px;font-size:15px;color:var(--txd)}
-.dz-txt{font-size:11px;color:var(--txm);text-align:center;line-height:1.4}.dz-h{font-size:9px;color:var(--txd);margin-top:2px}
-.dz-btns{display:flex;gap:6px;margin-top:8px}
-.dz-btn{padding:6px 11px;border-radius:7px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--bdl);background:var(--sf2);color:var(--txm);transition:.15s;-webkit-tap-highlight-color:transparent}
-.dz-btn:active{background:var(--acb);color:var(--ac);border-color:var(--acd)}
+/* ── Stepper ── */
+.stepper{display:flex;align-items:center;padding:10px 14px 0;background:var(--sf);border-bottom:1px solid var(--bd);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.stepper::-webkit-scrollbar{display:none}
+.step-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0 4px 10px;min-width:52px}
+.step-dot{width:11px;height:11px;border-radius:50%;border:2px solid var(--bdl);background:var(--bg);transition:.25s;flex-shrink:0}
+.step-lbl{font-size:9px;font-weight:600;color:var(--txd);text-transform:uppercase;letter-spacing:.04em;text-align:center;white-space:nowrap;transition:.25s}
+.step-conn{flex:1;height:2px;background:var(--bdl);margin-bottom:14px;transition:.25s;min-width:12px}
+.step-item.done .step-dot{background:var(--ac);border-color:var(--ac)}
+.step-item.done .step-lbl{color:var(--acd)}
+.step-item.active .step-dot{background:var(--ac);border-color:var(--ac);box-shadow:0 0 0 3px rgba(62,219,160,.25);animation:pdot 2s ease-in-out infinite}
+.step-item.active .step-lbl{color:var(--ac);font-weight:800}
+.step-conn.done{background:var(--ac)}
+@keyframes pdot{0%,100%{box-shadow:0 0 0 3px rgba(62,219,160,.25)}50%{box-shadow:0 0 0 6px rgba(62,219,160,.1)}}
 
-/* Canvas + Zoom */
+/* ── Instruction banner ── */
+.instr{padding:12px 16px;background:var(--sf2);border-bottom:2px solid var(--acd)}
+.instr-step{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--acd);margin-bottom:3px}
+.instr-title{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:2px}
+.instr-body{font-size:13px;color:var(--txm);line-height:1.45}
+
+/* ── Step panels ── */
+.step-panel{display:none}
+.step-panel.active{display:block}
+
+/* ── Main content ── */
+.main{max-width:720px;margin:0 auto;padding:12px}
+
+/* ── Op side toggle ── */
+.op-section{margin-bottom:16px}
+.op-section-lbl{font-size:11px;font-weight:700;color:var(--txm);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.op-toggle{display:flex;gap:10px}
+.op-btn{flex:1;padding:20px 12px;border-radius:12px;border:2px solid var(--bdl);background:var(--sf2);color:var(--txm);font-size:17px;font-weight:700;cursor:pointer;transition:.15s;font-family:var(--f);-webkit-tap-highlight-color:transparent;min-height:64px}
+.op-btn.active{border-color:var(--ac);background:var(--acb);color:var(--ac)}
+.op-btn:active{transform:scale(.98)}
+
+/* ── Case ID row ── */
+.case-id-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:12px 14px}
+.case-id-input{background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;color:var(--ac);font-size:16px;font-weight:700;font-family:var(--m);outline:none;width:130px;letter-spacing:.04em;cursor:default}
+.api-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:10px 14px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;flex-wrap:wrap}
+
+/* ── Demo collapsible ── */
+details.demo-details{margin-bottom:12px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+details.demo-details summary{padding:11px 14px;font-size:11px;font-weight:600;color:var(--txm);cursor:pointer;list-style:none;display:flex;align-items:center;-webkit-tap-highlight-color:transparent}
+details.demo-details summary::after{content:'›';font-size:16px;margin-left:auto;transition:.2s}
+details.demo-details[open] summary::after{transform:rotate(90deg)}
+details.demo-details summary::-webkit-details-marker{display:none}
+.demo-inner{padding:10px 14px;border-top:1px solid var(--bd)}
+.demo-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.demo-row:last-child{margin-bottom:0}
+
+/* ── Shot cards ── */
+.shot{background:var(--sf);border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:12px}
+.shot.ref{border-color:var(--acd)}
+.shot-h{padding:8px 12px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.shot-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--txm);display:flex;align-items:center;gap:6px}
+.op-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:rgba(62,219,160,.12);color:var(--ac);border:1px solid rgba(62,219,160,.25)}
+.src-tag{font-size:8px;font-weight:600;padding:2px 5px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em}
+.src-tag.photo{color:var(--wn);background:var(--wnb)}
+.src-tag.dicom{color:var(--ac);background:var(--acb)}
+
+/* ── Capture grid (big camera / library) ── */
+.capture-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+.capture-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:26px 10px;background:var(--sf2);border:2px dashed var(--bdl);border-radius:12px;cursor:pointer;transition:.15s;-webkit-tap-highlight-color:transparent;min-height:100px;text-decoration:none}
+.capture-card:active,.capture-card:hover{border-color:var(--ac);background:var(--acb)}
+.capture-icon{font-size:30px;line-height:1}
+.capture-lbl{font-size:14px;font-weight:700;color:var(--txm)}
+.capture-card:active .capture-lbl,.capture-card:hover .capture-lbl{color:var(--ac)}
+
+/* ── Canvas + Zoom ── */
 .cw{position:relative;background:#000;touch-action:none;-webkit-user-select:none;user-select:none;overflow:hidden}
 .cw canvas{display:block;width:100%;height:auto}
 .zoom-bar{position:absolute;bottom:8px;right:8px;display:flex;gap:4px;z-index:10}
-.zoom-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--bdl);background:rgba(14,21,18,.9);color:var(--txm);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.zoom-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--bdl);background:rgba(14,21,18,.9);color:var(--txm);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
 .zoom-btn:active{color:var(--ac);border-color:var(--ac)}
 .zoom-badge{position:absolute;top:8px;left:8px;font-size:10px;font-weight:700;color:var(--ac);background:rgba(14,21,18,.9);padding:3px 8px;border-radius:6px;z-index:10;pointer-events:none;display:none}
-
-.shot-act{padding:6px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.shot-act{padding:8px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
 .fn{font-size:9px;color:var(--txd);font-family:var(--m);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:35%}
-.rm-btn{font-size:10px;color:var(--dn);background:0;border:0;cursor:pointer;font-weight:500}
+.rm-btn{font-size:10px;color:var(--dn);background:none;border:none;cursor:pointer;font-weight:500;padding:6px;min-height:36px}
 
-/* Per-shot scale calibration */
+/* ── Scale bar ── */
 .scale-bar{padding:8px 12px;border-top:1px solid var(--bd);background:var(--sf2);display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:10px;color:var(--txm)}
-.cup-bar{padding:8px 12px;border-top:1px solid var(--bd);background:var(--sf2);display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:10px;color:var(--txm)}
-.cup-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--sf);color:var(--txm);font-size:10px;font-weight:600;cursor:pointer;font-family:var(--f)}
-.cup-btn.active{border-color:#a78bfa;background:rgba(167,139,250,.12);color:#a78bfa}
-.cup-val{font-size:11px;font-weight:700;font-family:var(--m);padding:2px 8px;border-radius:4px}
-.cup-val.ok{background:rgba(62,219,160,.12);color:var(--ac)}
-.cup-val.warn{background:rgba(232,200,68,.12);color:var(--warn)}
-.cup-panel{padding:10px 14px;border-top:2px solid #a78bfa;background:rgba(167,139,250,.05);display:flex;gap:16px;flex-wrap:wrap;align-items:center}
-.cup-metric{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:80px}
-.cup-metric-val{font-size:32px;font-weight:800;font-family:var(--m);line-height:1}
-.cup-metric-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txd)}
-.cup-metric-range{font-size:9px;color:var(--txd)}
-.cup-metric-val.ok{color:#a78bfa}
-.cup-metric-val.warn{color:var(--warn)}
-.scale-btn{padding:4px 10px;border-radius:6px;font-size:9px;font-weight:600;cursor:pointer;border:1px solid var(--bdl);background:var(--sf);color:var(--txm);-webkit-tap-highlight-color:transparent}
+.scale-btn{padding:5px 11px;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--bdl);background:var(--sf);color:var(--txm);-webkit-tap-highlight-color:transparent;min-height:34px}
 .scale-btn.active{border-color:#FFEA3D;color:#FFEA3D;background:rgba(255,234,61,.08)}
 .scale-val{font-size:11px;font-weight:700;color:var(--ac);font-family:var(--m)}
 .scale-input{background:var(--bg);border:1px solid var(--bd);border-radius:5px;padding:3px 6px;color:var(--tx);font-size:10px;font-family:var(--m);outline:none;width:45px;text-align:center}
 .scale-select{background:var(--bg);border:1px solid var(--bd);border-radius:5px;padding:3px 6px;color:var(--tx);font-size:10px;font-family:var(--f);outline:none;cursor:pointer}
 
-/* Buttons */
-.btn{padding:9px 14px;border-radius:8px;border:none;font-size:11px;font-weight:700;cursor:pointer;transition:.2s}
+/* ── Buttons ── */
+.btn{padding:11px 16px;border-radius:10px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:.15s;-webkit-tap-highlight-color:transparent;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
 .btn-primary{background:linear-gradient(135deg,var(--ac),var(--acd));color:var(--bg)}
 .btn-primary:disabled{background:var(--bd);color:var(--txd);cursor:default;opacity:.5}
-.btn-secondary{background:var(--sf);border:1px solid var(--bd);color:var(--txm)}.btn-secondary:hover{border-color:var(--ac);color:var(--ac)}
-.btn-sm{font-size:10px;padding:6px 10px}
+.btn-secondary{background:var(--sf);border:1px solid var(--bd);color:var(--txm)}
+.btn-secondary:hover{border-color:var(--ac);color:var(--ac)}
+.btn-sm{font-size:10px;padding:7px 12px;min-height:34px}
 .lm-hint{padding:8px 12px;background:var(--acb);border:1px solid rgba(62,219,160,.12);border-radius:8px;font-size:10px;color:var(--ac);margin-bottom:8px;line-height:1.5;text-align:center;display:none}
-.add-shot{width:100%;padding:14px;border-radius:10px;border:2px dashed var(--bdl);background:0;color:var(--txm);font-size:12px;font-weight:600;cursor:pointer;margin-bottom:12px;transition:.15s;font-family:var(--f)}
-.add-shot:hover{border-color:var(--ac);color:var(--ac);background:var(--acb)}
 
-/* Comparison */
-.cmp-toggle{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--bd);margin:0 12px 6px}
-.cmp-tab{flex:1;padding:8px;text-align:center;font-size:11px;font-weight:700;cursor:pointer;background:var(--sf2);color:var(--txm);border:none;font-family:var(--f);transition:.15s}
+/* ── Big result card (48px+ metrics) ── */
+.result-card{background:var(--sf);border:2px solid var(--bd);border-radius:12px;margin:0 0 10px;overflow:hidden}
+.result-card.warn{border-color:rgba(232,200,68,.5)}
+.result-card.danger{border-color:rgba(232,84,84,.5)}
+.result-row-big{display:flex;padding:10px 6px 6px}
+.metric-big{flex:1;text-align:center;padding:8px 4px}
+.metric-num{font-size:44px;font-weight:800;font-family:var(--m);line-height:1;letter-spacing:-.02em}
+.metric-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txd);margin-top:5px}
+.metric-sub{font-size:11px;color:var(--txm);margin-top:3px;font-weight:500}
+
+/* ── AP badge (large color-coded) ── */
+.ap-badge{display:inline-block;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.ap-badge.ok{background:rgba(62,219,160,.15);color:var(--ac);border:1px solid rgba(62,219,160,.3)}
+.ap-badge.bad{background:rgba(232,84,84,.12);color:var(--dn);border:1px solid rgba(232,84,84,.25)}
+.ap-badge.unknown{background:var(--sf2);color:var(--txm);border:1px solid var(--bd)}
+
+/* ── Delta chips (intra vs ref) ── */
+.delta-row{display:flex;gap:8px;padding:8px 10px;border-top:1px solid var(--bd);background:rgba(0,0,0,.2)}
+.delta-chip{flex:1;background:var(--bg);border-radius:8px;border:1px solid var(--bd);padding:8px 10px}
+.delta-chip-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txd);display:block;margin-bottom:2px}
+.delta-chip-val{font-size:24px;font-weight:800;font-family:var(--m);display:block;line-height:1.1}
+.delta-chip-sub{font-size:10px;color:var(--txm);display:block;margin-top:2px}
+
+/* ── Legend ── */
+.legend{display:flex;flex-wrap:wrap;gap:5px;padding:5px 12px;background:var(--sf2);border-top:1px solid var(--bd);font-size:8px}
+.leg-i{display:flex;align-items:center;gap:3px;color:var(--txm)}
+.leg-d{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* ── Cup inline section ── */
+.cup-inline{background:var(--sf);border:1px solid rgba(167,139,250,.35);border-radius:10px;overflow:hidden;margin-top:10px;margin-bottom:4px}
+.cup-inline-hdr{padding:8px 12px;border-bottom:1px solid rgba(167,139,250,.2);display:flex;align-items:center;justify-content:space-between;background:rgba(167,139,250,.06)}
+.cup-inline-title{font-size:10px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:.06em}
+.cup-zoom-ctrl{display:flex;align-items:center;gap:4px}
+.cup-canvas-wrap{position:relative;background:#000;touch-action:none;-webkit-user-select:none;user-select:none;overflow:hidden}
+.cup-canvas-wrap canvas{display:block;width:100%;height:auto}
+.cup-step-bar{padding:8px 12px;background:var(--sf2);border-top:1px solid var(--bd);font-size:11px;color:var(--txm);display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:44px}
+.cup-step-ind{width:20px;height:20px;border-radius:50%;background:#a78bfa;color:var(--bg);font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cup-action-bar{padding:8px 12px;border-top:1px solid var(--bd);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.cup-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--sf);color:var(--txm);font-size:10px;font-weight:600;cursor:pointer;font-family:var(--f);min-height:34px}
+.cup-btn.active{border-color:#a78bfa;background:rgba(167,139,250,.12);color:#a78bfa}
+
+/* ── Cup big results ── */
+.cup-results-big{display:flex;padding:10px;gap:8px;border-top:1px solid rgba(167,139,250,.2);background:rgba(167,139,250,.04)}
+.cup-result-metric{flex:1;text-align:center;background:var(--bg);border-radius:8px;padding:10px 6px;border:1px solid var(--bd)}
+.cup-result-val{font-size:44px;font-weight:800;font-family:var(--m);line-height:1}
+.cup-result-val.ok{color:#a78bfa}
+.cup-result-val.warn{color:var(--wn)}
+.cup-result-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txd);margin-top:5px}
+.cup-result-range{font-size:9px;color:var(--txd);margin-top:2px}
+
+/* ── Compare (step 5) ── */
+.cmp-toggle{display:flex;border-radius:8px;overflow:hidden;border:1px solid var(--bd);margin:0 0 6px}
+.cmp-tab{flex:1;padding:9px;text-align:center;font-size:11px;font-weight:700;cursor:pointer;background:var(--sf2);color:var(--txm);border:none;font-family:var(--f);transition:.15s;min-height:40px}
 .cmp-tab.active{background:rgba(62,219,160,.12);color:var(--ac)}
 .cmp-tab.ref-tab.active{background:rgba(92,138,255,.12);color:#5C8AFF}
-
-/* Delta banner below canvas in comparison mode */
 .delta-bar{padding:10px 14px;background:var(--sf2);border-top:1px solid var(--bd);display:none}
 .delta-bar.visible{display:block}
 .delta-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 @media(max-width:400px){.delta-grid{grid-template-columns:1fr}}
-.delta-cell{text-align:center;padding:8px 4px;background:var(--bg);border-radius:8px;border:2px solid var(--bd)}
+.delta-cell{text-align:center;padding:10px 4px;background:var(--bg);border-radius:8px;border:2px solid var(--bd)}
 .delta-cell.green{border-color:rgba(62,219,160,.4);background:rgba(62,219,160,.05)}
 .delta-cell.yellow{border-color:rgba(232,200,68,.4);background:rgba(232,200,68,.05)}
 .delta-cell.red{border-color:rgba(232,84,84,.4);background:rgba(232,84,84,.05)}
-.delta-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txd);margin-bottom:2px}
-.delta-val{font-size:28px;font-weight:800;font-family:var(--m);line-height:1.1}
+.delta-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txd);margin-bottom:3px}
+.delta-val{font-size:30px;font-weight:800;font-family:var(--m);line-height:1.1}
 .delta-val.green{color:#3edba0}.delta-val.yellow{color:#e8c844}.delta-val.red{color:#e85454}
 .delta-sub{font-size:10px;font-weight:500;color:var(--txm);margin-top:2px}
-
-/* Old comparison box — keep but restyle */
 .cmp{background:var(--sf);border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:12px}
 .cmp-h{padding:10px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:7px}
-.cmp-dot{width:7px;height:7px;border-radius:50%;background:var(--ac)}.cmp-t{font-size:11px;font-weight:600}
+.cmp-dot{width:7px;height:7px;border-radius:50%;background:var(--ac)}
+.cmp-t{font-size:11px;font-weight:600}
 .cmp-b{padding:14px}
 .carm{padding:10px;background:var(--acb);border:1px solid rgba(62,219,160,.12);border-radius:8px;margin-bottom:8px}
 .carm-l{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--acd);margin-bottom:3px}
 .carm-v{font-size:13px;font-weight:700;color:var(--ac);line-height:1.3}
-.mets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-@media(max-width:400px){.mets{grid-template-columns:1fr}}
+.cmp-g{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .met{padding:8px;background:var(--bg);border-radius:7px;border:1px solid var(--bd)}
 .met-l{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txd);margin-bottom:2px}
-.met-v{font-size:15px;font-weight:700;color:var(--ac);font-family:var(--m)}.met-u{font-size:10px;color:var(--txm);font-weight:400;margin-left:2px}
+.met-v{font-size:15px;font-weight:700;color:var(--ac);font-family:var(--m)}
+.met-u{font-size:10px;color:var(--txm);font-weight:400;margin-left:2px}
+.cup-comparison{margin-top:8px}
+.cup-comparison-title{font-size:10px;font-weight:700;color:var(--txm);text-transform:uppercase;letter-spacing:.06em;padding:10px 14px;border-bottom:1px solid var(--bd)}
+.cup-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
+.cup-cmp-card{background:var(--bg);border-radius:8px;border:1px solid var(--bd);padding:12px;text-align:center}
+.cup-cmp-val{font-size:36px;font-weight:800;font-family:var(--m);line-height:1}
+.cup-cmp-val.ok{color:#a78bfa}.cup-cmp-val.warn{color:var(--wn)}
+.cup-cmp-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txd);margin-top:4px}
+.cup-cmp-range{font-size:9px;color:var(--txd);margin-top:2px}
 
-/* Legend */
-.legend{display:flex;flex-wrap:wrap;gap:5px;padding:6px 12px;background:var(--sf2);border-top:1px solid var(--bd);font-size:8px}
-.leg-i{display:flex;align-items:center;gap:3px;color:var(--txm)}.leg-d{width:6px;height:6px;border-radius:50%}
+/* ── Bottom action bar ── */
+.action-bar{position:sticky;bottom:0;left:0;right:0;z-index:90;background:var(--sf);border-top:1px solid var(--bd);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.action-bar .btn{min-width:100px}
+.save-status{font-size:10px;color:var(--txd);flex:1;text-align:center;font-weight:500}
 
-.loader{text-align:center;padding:20px}.spin{width:22px;height:22px;border:3px solid var(--bd);border-top-color:var(--ac);border-radius:50%;margin:0 auto 8px;animation:sp .7s linear infinite}
-@keyframes sp{to{transform:rotate(360deg)}}.loader-t{font-size:11px;color:var(--txm)}
+/* ── Loader / error ── */
+.loader{text-align:center;padding:20px}
+.spin{width:22px;height:22px;border:3px solid var(--bd);border-top-color:var(--ac);border-radius:50%;margin:0 auto 8px;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.loader-t{font-size:11px;color:var(--txm)}
 .err{padding:10px;background:rgba(232,84,84,.07);border:1px solid rgba(232,84,84,.18);border-radius:8px;color:var(--dn);font-size:10px;line-height:1.4;font-family:var(--m);white-space:pre-wrap;word-break:break-word;max-height:150px;overflow-y:auto;margin-bottom:10px}
 .export-box{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:12px;margin-bottom:12px}
 .export-box h3{font-size:11px;font-weight:600;color:var(--txm);margin-bottom:6px}
-.export-count{font-size:22px;font-weight:700;color:var(--ac);font-family:var(--m)}.export-sub{font-size:10px;color:var(--txd);margin-top:2px}
-.disc{padding:8px 12px;background:var(--wnb);border:1px solid rgba(232,200,68,.12);border-radius:7px;margin-bottom:10px;font-size:9px;color:var(--wn);line-height:1.5}
+.export-count{font-size:22px;font-weight:700;color:var(--ac);font-family:var(--m)}
+.export-sub{font-size:10px;color:var(--txd);margin-top:2px}
 
-/* Accuracy Wizard */
-.wiz-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.92);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center}
+/* ── Accuracy Wizard ── */
+.wiz-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(6,10,9,.97);z-index:200;overflow-y:auto;padding:16px;display:flex;flex-direction:column;align-items:center;gap:12px}
 .wiz-header{text-align:center;padding:12px;color:var(--ac);font-size:13px;font-weight:700;letter-spacing:.02em}
 .wiz-step{font-size:10px;color:var(--txm);margin-top:2px;font-weight:400}
-.wiz-lm-name{font-size:18px;font-weight:800;margin-top:4px}
 .wiz-canvas-wrap{position:relative;width:90vw;max-width:500px;aspect-ratio:1;background:#000;border-radius:12px;overflow:hidden;border:2px solid var(--bd);touch-action:none}
-.wiz-canvas-wrap canvas{display:block;width:100%;height:100%}
 .wiz-hint{text-align:center;padding:8px;font-size:11px;color:var(--txm);line-height:1.4}
 .wiz-hint b{color:var(--ac)}
-.wiz-btns{display:flex;gap:10px;padding:12px;justify-content:center}
-.wiz-btn{padding:12px 24px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f);transition:.15s;min-width:100px}
+.wiz-btn{padding:13px 26px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f);transition:.15s;min-width:110px;min-height:48px}
 .wiz-btn-confirm{background:var(--ac);color:var(--bg)}
-.wiz-btn-confirm:active{filter:brightness(.9)}
 .wiz-btn-skip{background:var(--sf2);border:1px solid var(--bd);color:var(--txm)}
-.wiz-btn-skip:active{border-color:var(--ac)}
-.wiz-progress{display:flex;gap:6px;padding:8px;justify-content:center}
-.wiz-pip{width:8px;height:8px;border-radius:50%;background:var(--bd)}
-.wiz-pip.done{background:var(--ac)}.wiz-pip.current{background:var(--wn);box-shadow:0 0 6px rgba(232,200,68,.5)}
-.wiz-scale-opt{background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:12px;cursor:pointer;text-align:center;color:var(--tx);font-family:var(--f);transition:.15s}
-.wiz-scale-opt:hover{border-color:var(--txd)}
-.wiz-scale-opt.active{border-color:#FFEA3D;background:rgba(255,234,61,.08);}
-
-/* Mode toggle */
-.mode-bar{display:flex;gap:0;padding:10px 16px;background:var(--sf);border-bottom:1px solid var(--bd);align-items:center;gap:12px}
-.mode-toggle{display:flex;border:1px solid var(--bd);border-radius:8px;overflow:hidden}
-.mode-btn{padding:7px 20px;font-size:12px;font-weight:700;font-family:var(--f);background:transparent;color:var(--txm);border:none;cursor:pointer;transition:all .2s;letter-spacing:.03em}
-.mode-btn.active{background:var(--ac);color:#0a0f0d}
-.mode-btn.active.cup{background:#a78bfa;color:#fff}
-.mode-lbl{font-size:10px;color:var(--txd);margin-left:auto}
-
-/* Cup mode */
-.cup-mode-wrap{display:none;padding:0 0 20px}
-.cup-mode-wrap.visible{display:block}
-.cup-shot-grid{display:grid;grid-template-columns:1fr;gap:16px;padding:12px 0}
-.cup-shot-card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
-.cup-shot-card.trial{border-top:3px solid var(--warn)}
-.cup-shot-card.final{border-top:3px solid #a78bfa}
-.cup-card-hdr{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd)}
-.cup-card-title{font-size:12px;font-weight:700;color:var(--tx)}
-.cup-card-tag{font-size:9px;font-weight:700;padding:2px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.06em}
-.cup-card-tag.trial{background:rgba(232,200,68,.15);color:var(--warn)}
-.cup-card-tag.final{background:rgba(167,139,250,.15);color:#a78bfa}
-.cup-canvas-wrap{position:relative;background:#000;width:100%;height:60vh;min-height:400px;overflow:hidden;cursor:crosshair}
-.cup-canvas-wrap canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
-.cup-step-bar{padding:8px 12px;background:var(--sf2);border-top:1px solid var(--bd);font-size:11px;color:var(--txm);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.cup-step-indicator{width:20px;height:20px;border-radius:50%;background:#a78bfa;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.cup-results{padding:12px 14px;display:flex;gap:16px;flex-wrap:wrap;border-top:1px solid var(--bd)}
-.cup-result-metric{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:90px}
-.cup-result-val{font-size:36px;font-weight:800;font-family:var(--m);line-height:1}
-.cup-result-val.ok{color:#a78bfa}
-.cup-result-val.warn{color:var(--warn)}
-.cup-result-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txd)}
-.cup-result-range{font-size:9px;color:var(--txd)}
-.cup-action-bar{padding:8px 12px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--bd)}
-.cup-comparison{padding:14px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;margin-top:12px}
-.cup-comparison-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txd);margin-bottom:10px}
-.cup-compare-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center}
-.cup-compare-cell{padding:8px;background:var(--bg);border-radius:8px;border:1px solid var(--bd)}
-.cup-compare-lbl{font-size:9px;color:var(--txd);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
-.cup-compare-val{font-size:18px;font-weight:800;font-family:var(--m);color:var(--tx)}
-.cup-compare-delta{font-size:10px;color:var(--txm);margin-top:2px}
 </style>
 </head>
+
 <body>
-<div class="hdr"><div class="logo"><div class="logo-i">G</div><div><div class="logo-t">GaleyGrid</div><div class="logo-s">Intraop Analysis + Training</div></div></div><span class="badge">Prototype</span></div>
-<div class="mode-bar">
-  <div class="mode-toggle">
-    <button class="mode-btn active" id="modeAP" onclick="setMode('ap')">AP Pelvis</button>
-    <button class="mode-btn cup" id="modeCup" onclick="setMode('cup')">⊙ Cup</button>
+
+<!-- ── Header ── -->
+<div class="hdr">
+  <div class="logo">
+    <div class="logo-i">G</div>
+    <div><div class="logo-t">GaleyGrid</div><div class="logo-s">OR Analysis</div></div>
   </div>
-  <span class="mode-lbl" id="modeLbl">LLD &amp; Offset Analysis</span>
+  <button class="case-pill" id="casePillBtn" onclick="toggleCfg()">
+    <span class="case-pill-id" id="casePillId">—</span>
+    <span style="color:var(--txd)">·</span>
+    <span id="casePillSide" style="text-transform:uppercase">—</span>
+  </button>
+  <span class="badge">Prototype</span>
 </div>
 
-<!-- Cup Mode -->
-<div class="cup-mode-wrap" id="cupModeWrap">
-  <div class="main" style="padding-top:12px">
-    <div class="disc">&#9888; Research prototype — not FDA cleared. Not for clinical decisions.</div>
-    <div class="cup-shot-grid" id="cupShotGrid">
-      <!-- Trial cup card -->
-      <div class="cup-shot-card trial" id="cupCardTrial">
-        <div class="cup-card-hdr">
-          <div class="cup-card-title">Trial Cup</div>
-          <div style="display:flex;gap:4px;align-items:center;margin-left:auto;margin-right:8px">
-            <button onclick="cupZoom('trial',1.25)" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--tx);padding:2px 8px;cursor:pointer;font-size:14px">+</button>
-            <span class="cup-zoom-lbl" id="cupZoomTrial" style="font-size:10px;font-family:var(--m);color:var(--txm);min-width:28px;text-align:center">1×</span>
-            <button onclick="cupZoom('trial',0.8)" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--tx);padding:2px 8px;cursor:pointer;font-size:14px">−</button>
-            <button onclick="cupResetZoom('trial')" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--txd);padding:2px 6px;cursor:pointer;font-size:9px">1:1</button>
-          </div>
-          <span class="cup-card-tag trial">Trial</span>
-        </div>
-        <div class="cup-canvas-wrap" id="cupWrapTrial">
-          <canvas id="cupCvTrial"></canvas>
-        </div>
-        <div class="cup-step-bar" id="cupStepTrial">
-          <span>Upload a fluoro shot to begin</span>
-        </div>
-        <div class="cup-action-bar">
-          <button class="btn btn-secondary btn-sm" onclick="uploadCupImg('trial')">&#128444; Library</button>
-          <button class="btn btn-secondary btn-sm" onclick="captureCupImg('trial')">&#128247; Camera</button>
-          <input type="file" id="cupFileTrial" accept="image/*" style="display:none" onchange="loadCupImg('trial',this.files[0])">
-          <input type="file" id="cupCapTrial" accept="image/*" capture="environment" style="display:none" onchange="loadCupImg('trial',this.files[0])">
-        </div>
-        <div class="cup-results" id="cupResultsTrial" style="display:none"></div>
-        <div class="cup-action-bar" id="cupSaveTrial" style="display:none">
-          <button class="btn btn-secondary btn-sm" onclick="resetCupShot('trial')">Reset</button>
-          <button class="btn btn-primary btn-sm" onclick="saveCupShot('trial')" style="background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.5);color:#a78bfa">Save Cup Data</button>
-          <button class="btn btn-primary btn-sm" onclick="sendCupToScreen('trial')" style="background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.5);color:#a78bfa">&#9654; Send to Screen</button>
-        </div>
-      </div>
-      <!-- Final cup card -->
-      <div class="cup-shot-card final" id="cupCardFinal">
-        <div class="cup-card-hdr">
-          <div class="cup-card-title">Final Cup</div>
-          <div style="display:flex;gap:4px;align-items:center;margin-left:auto;margin-right:8px">
-            <button onclick="cupZoom('final',1.25)" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--tx);padding:2px 8px;cursor:pointer;font-size:14px">+</button>
-            <span class="cup-zoom-lbl" id="cupZoomFinal" style="font-size:10px;font-family:var(--m);color:var(--txm);min-width:28px;text-align:center">1×</span>
-            <button onclick="cupZoom('final',0.8)" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--tx);padding:2px 8px;cursor:pointer;font-size:14px">−</button>
-            <button onclick="cupResetZoom('final')" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--txd);padding:2px 6px;cursor:pointer;font-size:9px">1:1</button>
-          </div>
-          <span class="cup-card-tag final">Final</span>
-        </div>
-        <div class="cup-canvas-wrap" id="cupWrapFinal">
-          <canvas id="cupCvFinal"></canvas>
-        </div>
-        <div class="cup-step-bar" id="cupStepFinal">
-          <span>Upload a fluoro shot to begin</span>
-        </div>
-        <div class="cup-action-bar">
-          <button class="btn btn-secondary btn-sm" onclick="uploadCupImg('final')">&#128444; Library</button>
-          <button class="btn btn-secondary btn-sm" onclick="captureCupImg('final')">&#128247; Camera</button>
-          <input type="file" id="cupFileFinal" accept="image/*" style="display:none" onchange="loadCupImg('final',this.files[0])">
-          <input type="file" id="cupCapFinal" accept="image/*" capture="environment" style="display:none" onchange="loadCupImg('final',this.files[0])">
-        </div>
-        <div class="cup-results" id="cupResultsFinal" style="display:none"></div>
-        <div class="cup-action-bar" id="cupSaveFinal" style="display:none">
-          <button class="btn btn-secondary btn-sm" onclick="resetCupShot('final')">Reset</button>
-          <button class="btn btn-primary btn-sm" onclick="saveCupShot('final')" style="background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.5);color:#a78bfa">Save Cup Data</button>
-          <button class="btn btn-primary btn-sm" onclick="sendCupToScreen('final')" style="background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.5);color:#a78bfa">&#9654; Send to Screen</button>
-        </div>
+<!-- ── Collapsible config (API keys, wizard toggles) ── -->
+<div class="cfg collapsed" id="cfgPanel">
+  <div class="cfg-row">
+    <span class="cfg-lbl">API URL</span>
+    <input class="cfg-input" id="modelUrl" placeholder="https://galeygrid-api-production.up.railway.app">
+    <span class="sts no" id="apiSts">Checking…</span>
+  </div>
+  <div class="cfg-row">
+    <span class="cfg-lbl">Supabase URL</span>
+    <input class="cfg-input" id="sbUrl" placeholder="https://xxx.supabase.co">
+  </div>
+  <div class="cfg-row">
+    <span class="cfg-lbl">Key</span>
+    <input class="cfg-input" id="sbKey" placeholder="eyJ…">
+  </div>
+  <div class="cfg-row">
+    <button onclick="toggleCfg()" class="btn btn-sm btn-secondary">Close</button>
+    <button onclick="toggleWizard()" id="wizBtn" style="padding:5px 12px;border-radius:6px;font-size:9px;font-weight:600;cursor:pointer;border:1px solid var(--ac);background:var(--acb);color:var(--ac);font-family:var(--f)">Accuracy Wizard: ON</button>
+    <button onclick="toggleObTrace()" id="obTraceBtn" style="padding:5px 12px;border-radius:6px;font-size:9px;font-weight:600;cursor:pointer;border:1px solid var(--bdl);background:var(--sf2);color:var(--txd);font-family:var(--f);margin-left:4px">Obturator Trace: OFF</button>
+  </div>
+</div>
+
+<!-- ── Disclaimer ── -->
+<div class="disc">⚠ Research prototype — not FDA cleared. Not for clinical decisions.</div>
+
+<!-- ── 5-Step Progress Stepper ── -->
+<div class="stepper">
+  <div class="step-item active" id="stepItem1" onclick="goStep(1)">
+    <div class="step-dot"></div><div class="step-lbl">Setup</div>
+  </div>
+  <div class="step-conn" id="stepConn1"></div>
+  <div class="step-item" id="stepItem2" onclick="goStep(2)">
+    <div class="step-dot"></div><div class="step-lbl">Reference</div>
+  </div>
+  <div class="step-conn" id="stepConn2"></div>
+  <div class="step-item" id="stepItem3" onclick="goStep(3)">
+    <div class="step-dot"></div><div class="step-lbl">Trial</div>
+  </div>
+  <div class="step-conn" id="stepConn3"></div>
+  <div class="step-item" id="stepItem4" onclick="goStep(4)">
+    <div class="step-dot"></div><div class="step-lbl">Final</div>
+  </div>
+  <div class="step-conn" id="stepConn4"></div>
+  <div class="step-item" id="stepItem5" onclick="goStep(5)">
+    <div class="step-dot"></div><div class="step-lbl">Compare</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- STEP 1 — Case Setup                              -->
+<!-- ════════════════════════════════════════════════ -->
+<div class="step-panel active" id="panel1">
+  <div class="instr">
+    <div class="instr-step">Step 1 of 5</div>
+    <div class="instr-title">Case Setup</div>
+    <div class="instr-body">Select the operative side and confirm the case ID before starting.</div>
+  </div>
+  <div class="main">
+    <div class="op-section" style="margin-top:4px">
+      <div class="op-section-lbl">Operative Side</div>
+      <div class="op-toggle">
+        <button class="op-btn" id="opBtnLeft" onclick="setOpSide('left')">◁ Left</button>
+        <button class="op-btn active" id="opBtnRight" onclick="setOpSide('right')">Right ▷</button>
       </div>
     </div>
-    <!-- Comparison panel -->
+    <div class="case-id-row">
+      <span class="cfg-lbl">Case ID</span>
+      <input class="case-id-input" id="caseId" readonly>
+      <button onclick="$('caseId').value=genCaseId();syncCasePill()" class="btn btn-sm btn-secondary" style="margin-left:auto">New ID</button>
+    </div>
+    <div class="api-row">
+      <span class="cfg-lbl">API Status</span>
+      <span class="sts no" id="apiSts2">Checking…</span>
+      <button onclick="toggleCfg()" class="btn btn-sm btn-secondary" style="margin-left:auto;font-size:9px">Configure API</button>
+    </div>
+    <details class="demo-details">
+      <summary>Patient Details <span style="color:var(--txd);font-weight:400;margin-left:4px">(optional)</span></summary>
+      <div class="demo-inner">
+        <div class="demo-row">
+          <span class="cfg-lbl">Age</span>
+          <input class="cfg-input" id="ptAge" type="number" placeholder="yrs" style="flex:0;width:55px">
+          <span class="cfg-lbl">Sex</span>
+          <select class="cfg-input" id="ptSex" style="flex:0;width:65px"><option value="">--</option><option value="M">M</option><option value="F">F</option></select>
+          <span class="cfg-lbl">Ht (in)</span>
+          <input class="cfg-input" id="ptHtIn" type="number" placeholder="68" style="flex:0;width:50px" oninput="calcBMI()">
+          <span class="cfg-lbl">Wt (lbs)</span>
+          <input class="cfg-input" id="ptWtLbs" type="number" placeholder="180" style="flex:0;width:55px" oninput="calcBMI()">
+          <span class="cfg-lbl">BMI</span>
+          <input class="cfg-input" id="ptBMI" readonly style="flex:0;width:50px;color:var(--ac);cursor:default" placeholder="--">
+        </div>
+        <div class="demo-row">
+          <span class="cfg-lbl">Approach</span>
+          <select class="cfg-input" id="ptApproach" style="flex:0;width:110px">
+            <option value="">--</option><option value="anterior">Anterior</option>
+            <option value="anterolateral">Anterolateral</option><option value="lateral">Lateral</option>
+            <option value="posterior">Posterior</option><option value="other">Other</option>
+          </select>
+          <span class="cfg-lbl">Diagnosis</span>
+          <select class="cfg-input" id="ptDx" style="flex:0;width:100px">
+            <option value="">--</option><option value="OA">OA</option><option value="AVN">AVN</option>
+            <option value="fracture">Fracture</option><option value="revision">Revision</option><option value="other">Other</option>
+          </select>
+        </div>
+        <div class="demo-row">
+          <span class="cfg-lbl">Cup (mm)</span>
+          <input class="cfg-input" id="impCup" type="number" placeholder="mm" style="flex:0;width:55px">
+          <span class="cfg-lbl">Head</span>
+          <input class="cfg-input" id="impHead" type="number" placeholder="mm" style="flex:0;width:50px">
+          <span class="cfg-lbl">+/-</span>
+          <input class="cfg-input" id="impHeadOffset" placeholder="0,+4" style="flex:0;width:50px">
+          <span class="cfg-lbl">Stem</span>
+          <input class="cfg-input" id="impStem" placeholder="size" style="flex:0;width:55px">
+          <span class="cfg-lbl">Type</span>
+          <input class="cfg-input" id="impStemType" placeholder="Corail" style="flex:0;width:70px">
+        </div>
+        <div class="demo-row">
+          <span class="cfg-lbl">Perceived LLD (mm)</span>
+          <input class="cfg-input" id="perceivedLLD" type="number" placeholder="+5 or -3" style="flex:0;width:65px">
+          <span class="cfg-lbl">Notes</span>
+          <input class="cfg-input" id="caseNotes" placeholder="Optional">
+        </div>
+      </div>
+    </details>
+    <div class="export-box" id="exportBox" style="display:none">
+      <h3>Training Data</h3>
+      <div class="export-count" id="exportCount">0</div>
+      <div class="export-sub">labeled images saved locally</div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-secondary btn-sm" onclick="exportJSON()">Export JSON</button>
+        <button class="btn btn-sm" style="background:rgba(232,84,84,.1);border:1px solid rgba(232,84,84,.2);color:var(--dn)" onclick="clearLocal()">Clear</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- STEP 2 — Reference Shot                          -->
+<!-- ════════════════════════════════════════════════ -->
+<div class="step-panel" id="panel2">
+  <div class="instr">
+    <div class="instr-step">Step 2 of 5</div>
+    <div class="instr-title">Reference AP Pelvis</div>
+    <div class="instr-body">Photograph the pre-op AP pelvis X-ray. Tap <strong>Analyze</strong> to detect landmarks and measure leg length.</div>
+  </div>
+  <div class="main">
+    <div class="lm-hint" id="lmHint">☞ <strong>Tap &amp; drag</strong> landmarks to correct. Use <strong>⊡ Scale</strong> to calibrate with a known reference.<br><span style="font-size:9px;color:var(--txd)">PtR = patient's right (viewer's left) · PtL = patient's left (viewer's right)</span></div>
+    <div id="shotList"></div>
+    <div class="err" id="errBox" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- STEP 3 — Trial Shot                              -->
+<!-- ════════════════════════════════════════════════ -->
+<div class="step-panel" id="panel3">
+  <div class="instr">
+    <div class="instr-step">Step 3 of 5</div>
+    <div class="instr-title">Trial X-Ray</div>
+    <div class="instr-body">Photograph the trial X-ray. After analysis, place <strong>6+ cup rim points</strong> to measure inclination &amp; anteversion.</div>
+  </div>
+  <div class="main">
+    <div id="shotList3"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- STEP 4 — Final Shot                              -->
+<!-- ════════════════════════════════════════════════ -->
+<div class="step-panel" id="panel4">
+  <div class="instr">
+    <div class="instr-step">Step 4 of 5</div>
+    <div class="instr-title">Final Implant X-Ray</div>
+    <div class="instr-body">Photograph the final X-ray. Verify cup placement and compare to trial.</div>
+  </div>
+  <div class="main">
+    <div id="shotList4"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- STEP 5 — Compare                                 -->
+<!-- ════════════════════════════════════════════════ -->
+<div class="step-panel" id="panel5">
+  <div class="instr">
+    <div class="instr-step">Step 5 of 5</div>
+    <div class="instr-title">Trial vs Final Comparison</div>
+    <div class="instr-body">Review deltas between shots. Save when complete.</div>
+  </div>
+  <div class="main">
+    <div id="cmpBox"></div>
     <div class="cup-comparison" id="cupComparison" style="display:none">
-      <div class="cup-comparison-title">Trial vs Final Comparison</div>
+      <div class="cup-comparison-title">Cup Placement — Trial vs Final</div>
       <div class="cup-compare-grid" id="cupCompareGrid"></div>
     </div>
+    <div style="text-align:center;padding:30px 20px;color:var(--txd);font-size:12px;line-height:1.6" id="cmpEmpty">
+      Complete Reference and at least one intraop shot<br>to see comparison.
+    </div>
   </div>
 </div>
 
-<div class="main" id="apModeWrap">
-  <div class="disc">&#9888; Research prototype — not FDA cleared. Not for clinical decisions.</div>
-  <div class="cfg" id="cfgPanel">
-    <div class="cfg-row" style="display:none"><input class="cfg-input" id="modelUrl"></div>
-    <div class="cfg-row" style="display:flex!important"><span class="cfg-lbl">API Status</span><span class="sts no" id="apiSts">Checking...</span></div>
-    <div class="cfg-row" style="display:none"><span class="cfg-lbl">Supabase URL</span><input class="cfg-input" id="sbUrl" placeholder="https://xxx.supabase.co"><span class="cfg-lbl" style="margin-left:4px">Key</span><input class="cfg-input" id="sbKey" placeholder="eyJ..."></div>
-    <div class="cfg-row" style="display:flex!important"><span class="cfg-lbl">Op Side</span><select class="cfg-input" id="opSide" style="flex:0;width:80px"><option value="left">Left</option><option value="right">Right</option></select></div>
+<!-- ════════════════════════════════════════════════ -->
+<!-- Accuracy Wizard overlay                           -->
+<!-- ════════════════════════════════════════════════ -->
+<div id="wizOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(6,10,9,.97);z-index:200;overflow-y:auto;padding:16px;flex-direction:column;align-items:center;gap:12px">
+  <div class="wiz-header">Accuracy Wizard<div class="wiz-step" id="wizStepLbl"></div></div>
+  <div class="wiz-canvas-wrap" id="wizCanvasWrap"><canvas id="wizCv"></canvas></div>
+  <div class="wiz-hint" id="wizHint"></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+    <button class="wiz-btn wiz-btn-skip" onclick="wizSkip()">Skip</button>
+    <button class="wiz-btn wiz-btn-confirm" onclick="wizConfirm()" id="wizConfirmBtn">✓ Confirm</button>
   </div>
+  <button onclick="endWizard()" style="padding:8px 20px;border-radius:8px;font-size:12px;color:var(--txd);background:none;border:1px solid var(--bd);cursor:pointer;font-family:var(--f)">Skip All / Done</button>
+</div>
 
-  <!-- Case Demographics -->
-  <div class="cfg" id="demoPanel">
-    <div class="cfg-row" style="margin-bottom:4px">
-      <span style="font-size:11px;font-weight:700;color:var(--ac);letter-spacing:.03em">CASE INFO</span>
-      <span class="cfg-lbl" style="margin-left:auto">Case ID</span>
-      <input class="cfg-input" id="caseId" readonly style="flex:0;width:110px;color:var(--ac);font-weight:600;cursor:default">
-    </div>
-    <div class="cfg-row">
-      <span class="cfg-lbl">Age</span>
-      <input class="cfg-input" id="ptAge" type="number" placeholder="yrs" style="flex:0;width:55px">
-      <span class="cfg-lbl">Sex</span>
-      <select class="cfg-input" id="ptSex" style="flex:0;width:65px"><option value="">--</option><option value="M">M</option><option value="F">F</option></select>
-      <span class="cfg-lbl">Ht (in)</span>
-      <input class="cfg-input" id="ptHtIn" type="number" placeholder="68" style="flex:0;width:50px" oninput="calcBMI()">
-      <span class="cfg-lbl">Wt (lbs)</span>
-      <input class="cfg-input" id="ptWtLbs" type="number" placeholder="180" style="flex:0;width:55px" oninput="calcBMI()">
-      <span class="cfg-lbl">BMI</span>
-      <input class="cfg-input" id="ptBMI" readonly style="flex:0;width:50px;color:var(--ac);cursor:default" placeholder="--">
-    </div>
-    <div class="cfg-row">
-      <span class="cfg-lbl">Approach</span>
-      <select class="cfg-input" id="ptApproach" style="flex:0;width:110px">
-        <option value="">--</option>
-        <option value="anterior">Anterior</option>
-        <option value="anterolateral">Anterolateral</option>
-        <option value="lateral">Lateral</option>
-        <option value="posterior">Posterior</option>
-        <option value="other">Other</option>
-      </select>
-      <span class="cfg-lbl">Diagnosis</span>
-      <select class="cfg-input" id="ptDx" style="flex:0;width:100px">
-        <option value="">--</option>
-        <option value="OA">OA</option>
-        <option value="AVN">AVN</option>
-        <option value="fracture">Fracture</option>
-        <option value="revision">Revision</option>
-        <option value="other">Other</option>
-      </select>
-    </div>
-    <div class="cfg-row">
-      <span class="cfg-lbl">Cup Size</span>
-      <input class="cfg-input" id="impCup" type="number" placeholder="mm" style="flex:0;width:55px">
-      <span class="cfg-lbl">Head</span>
-      <input class="cfg-input" id="impHead" type="number" placeholder="mm" style="flex:0;width:50px">
-      <span class="cfg-lbl">+/-</span>
-      <input class="cfg-input" id="impHeadOffset" placeholder="0, +4" style="flex:0;width:50px">
-      <span class="cfg-lbl">Stem</span>
-      <input class="cfg-input" id="impStem" placeholder="size" style="flex:0;width:55px">
-      <span class="cfg-lbl">Type</span>
-      <input class="cfg-input" id="impStemType" placeholder="e.g. Corail" style="flex:0;width:80px">
-    </div>
-    <div class="cfg-row">
-      <span class="cfg-lbl">Perceived LLD (mm)</span>
-      <input class="cfg-input" id="perceivedLLD" type="number" placeholder="+5 or -3" style="flex:0;width:65px">
-      <span class="cfg-lbl">+ = long, - = short</span>
-      <span class="cfg-lbl" style="margin-left:auto">Notes</span>
-      <input class="cfg-input" id="caseNotes" placeholder="Optional" style="flex:1;min-width:80px">
-    </div>
-  </div>
-  <div class="lm-hint" id="lmHint">&#9758; <strong>Tap &amp; drag</strong> landmarks to correct. Use <strong>&#9906; Scale</strong> to calibrate with any known reference (ball, caliper, or implant).
-    <br><span style="font-size:9px;color:var(--txd)">Labels use patient orientation: PtR = patient's right (viewer's left) &bull; PtL = patient's left (viewer's right)</span></div>
-  <div style="text-align:center;margin-bottom:8px">
-    <button onclick="toggleWizard()" id="wizBtn" style="padding:4px 12px;border-radius:6px;font-size:9px;font-weight:600;cursor:pointer;border:1px solid var(--ac);background:var(--acb);color:var(--ac);font-family:var(--f)">Accuracy Wizard: ON</button>
-    <button onclick="toggleObTrace()" id="obTraceBtn" style="padding:4px 12px;border-radius:6px;font-size:9px;font-weight:600;cursor:pointer;border:1px solid var(--bdl);background:var(--sf2);color:var(--txd);font-family:var(--f);margin-left:4px">Obturator Trace: OFF</button>
-  </div>
-  <div id="shotList"></div>
-  <button class="add-shot" onclick="addShot()">+ Add Fluoro Shot</button>
-  <div id="cmpBox"></div>
-  <div class="err" id="errBox" style="display:none"></div>
-  <div class="export-box" id="exportBox" style="display:none">
-    <h3>Training Data</h3><div class="export-count" id="exportCount">0</div><div class="export-sub">labeled images saved</div>
-    <div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-secondary btn-sm" onclick="exportJSON()">Export JSON</button><button class="btn btn-sm" style="background:rgba(232,84,84,.1);border:1px solid rgba(232,84,84,.2);color:var(--dn)" onclick="clearLocal()">Clear</button></div>
-  </div>
-</div><!-- end apModeWrap -->
+<!-- ════════════════════════════════════════════════ -->
+<!-- Bottom action bar                                 -->
+<!-- ════════════════════════════════════════════════ -->
+<div class="action-bar">
+  <button class="btn btn-secondary" id="backBtn" onclick="prevStep()" style="display:none">← Back</button>
+  <span class="save-status" id="saveStatus"></span>
+  <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">Begin Case →</button>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/dicom-parser@1.8.21/dist/dicomParser.min.js"></script>
 <script>
 const $=id=>document.getElementById(id);
+
+// ============================================================
+// Step Management
+// ============================================================
+let currentStep=1;
+const STEP_LABELS=['Setup','Reference','Trial','Final','Compare'];
+const STEP_NEXT={1:'Begin Case →',2:'Trial Shot →',3:'Final Shot →',4:'Compare →',5:'💾 Save Case'};
+
+function goStep(n){
+  if(n<1||n>5)return;
+  currentStep=n;
+  // Move shotList to correct panel
+  const sl=$('shotList');
+  if(n===2&&sl.parentElement!==$('panel2').querySelector('.main')){
+    $('panel2').querySelector('.main').insertBefore(sl,$('errBox'));
+  }else if(n===3&&sl.parentElement!==$('panel3').querySelector('.main')){
+    $('panel3').querySelector('.main').insertBefore(sl,$('shotList3'));
+    $('shotList3').style.display='none';
+  }else if(n===4&&sl.parentElement!==$('panel4').querySelector('.main')){
+    $('panel4').querySelector('.main').insertBefore(sl,$('shotList4'));
+    $('shotList4').style.display='none';
+  }
+  // Show/hide panels
+  for(let i=1;i<=5;i++){
+    const p=$('panel'+i);
+    if(p){p.classList.toggle('active',i===n);}
+  }
+  updateStepper();
+  $('backBtn').style.display=n>1?'':'none';
+  $('nextBtn').textContent=STEP_NEXT[n]||'Next →';
+  if(n>=2&&n<=4)renderShots();
+  if(n===5){updateCmp();renderCupComparison();_updateCmpEmpty();}
+  syncCasePill();
+  window.scrollTo(0,0);
+}
+
+function nextStep(){
+  if(currentStep===5){saveCase();return;}
+  goStep(currentStep+1);
+}
+function prevStep(){if(currentStep>1)goStep(currentStep-1);}
+
+function updateStepper(){
+  for(let i=1;i<=5;i++){
+    const el=$('stepItem'+i);if(!el)continue;
+    el.classList.remove('done','active');
+    if(i<currentStep)el.classList.add('done');
+    else if(i===currentStep)el.classList.add('active');
+  }
+  for(let i=1;i<=4;i++){
+    const c=$('stepConn'+i);
+    if(c)c.classList.toggle('done',i<currentStep);
+  }
+}
+
+function setOpSide(side){
+  const inp=document.getElementById('opSide')||_makeHidden('opSide');
+  inp.value=side;
+  $('opBtnLeft').classList.toggle('active',side==='left');
+  $('opBtnRight').classList.toggle('active',side==='right');
+  syncCasePill();
+  if(shots.some(s=>Object.keys(s.landmarks||{}).length))renderShots();
+}
+
+function _makeHidden(id){
+  const inp=document.createElement('input');inp.type='hidden';inp.id=id;document.body.appendChild(inp);return inp;
+}
+
+function syncCasePill(){
+  const cid=$('caseId')?$('caseId').value:'—';
+  const side=(document.getElementById('opSide')||{value:'—'}).value;
+  if($('casePillId'))$('casePillId').textContent=cid;
+  if($('casePillSide'))$('casePillSide').textContent=side.toUpperCase();
+  // Mirror API status to step-1 display
+  const sts=$('apiSts');const sts2=$('apiSts2');
+  if(sts&&sts2){sts2.textContent=sts.textContent;sts2.className=sts.className;}
+}
+
+function toggleCfg(){$('cfgPanel').classList.toggle('collapsed');}
+
+function _updateCmpEmpty(){
+  const box=$('cmpEmpty');if(!box)return;
+  const hasRef=shots[0]&&Object.keys(shots[0].landmarks||{}).length;
+  const hasIntra=(shots[1]&&Object.keys(shots[1].landmarks||{}).length)||(shots[2]&&Object.keys(shots[2].landmarks||{}).length);
+  box.style.display=(hasRef&&hasIntra)?'none':'';
+}
+
+async function saveCase(){
+  $('saveStatus').textContent='Saving…';
+  try{
+    let saved=0;
+    for(let i=0;i<3;i++){
+      if(shots[i]?.img&&Object.keys(shots[i].landmarks||{}).length){await saveShot(i);saved++;}
+    }
+    $('saveStatus').textContent=saved?'✓ Saved':'Nothing to save';
+    setTimeout(()=>{$('saveStatus').textContent='';},3000);
+  }catch(e){$('saveStatus').textContent='Save failed';console.error(e);}
+}
+
+// ============================================================
+// renderShots — step-aware (only renders current step's shot)
+// ============================================================
+function renderShots(scrollTo){
+  const list=$('shotList');list.innerHTML='';
+  const stepToIdx={2:0,3:1,4:2};
+  const idx=stepToIdx[currentStep];
+  if(idx===undefined){list.style.display='none';return;}
+  list.style.display='';
+  const shot=shots[idx];if(!shot)return;
+  const isRef=idx===0;
+  const opSideVal=(document.getElementById('opSide')||{value:'right'}).value;
+  const opBadge=`<span class="op-badge">${opSideVal.toUpperCase()}</span>`;
+  const LABELS=['Reference AP Pelvis','Trial Shot','Final Shot'];
+  const d=document.createElement('div');
+  d.className='shot'+(isRef?' ref':'');d.id='shot'+idx;
+
+  const srcTag=shot.imageSource?`<span class="src-tag ${shot.imageSource==='dicom'?'dicom':'photo'}">${shot.imageSource}</span>`:'';
+  const dicomInfo=shot.dicomMeta&&shot.dicomMeta.pixelSpacingMm?`<span style="font-size:8px;color:var(--txd);margin-left:4px">${shot.dicomMeta.pixelSpacingMm.toFixed(2)}mm/px</span>`:'';
+  let h=`<div class="shot-h"><span class="shot-lbl">${LABELS[idx]||'Shot'}${opBadge}</span><div style="display:flex;align-items:center;gap:4px">${srcTag}${dicomInfo}</div></div>`;
+
+  if(!shot.img){
+    // Large camera + library capture buttons
+    h+=`<div class="capture-grid">
+      <label class="capture-card" for="fC${idx}">
+        <span class="capture-icon">📷</span>
+        <span class="capture-lbl">Camera</span>
+      </label>
+      <input type="file" id="fC${idx}" accept="image/*" capture="environment" style="display:none" onchange="loadShotImg(${idx},this.files[0])">
+      <label class="capture-card" for="fL${idx}">
+        <span class="capture-icon">🖼</span>
+        <span class="capture-lbl">Library</span>
+      </label>
+      <input type="file" id="fL${idx}" accept="image/*,.dcm,application/dicom" style="display:none" onchange="loadShotImg(${idx},this.files[0])">
+    </div>`;
+  }else{
+    // Canvas
+    h+=`<div class="cw" id="cw${idx}"><canvas id="cv${idx}"></canvas><div class="zoom-badge" id="zb${idx}"></div>
+      <div class="zoom-bar">
+        <button class="zoom-btn" onclick="zoomAt(${idx},1.4)">+</button>
+        <button class="zoom-btn" onclick="zoomAt(${idx},1/1.4)">−</button>
+        <button class="zoom-btn" onclick="resetZ(${idx})" style="font-size:11px">1:1</button>
+      </div></div>`;
+    // Action row
+    h+=`<div class="shot-act"><span class="fn">${shot.img.name||''}</span><div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">`;
+    if(shot.loading){
+      h+=`<div class="loader"><div class="spin"></div></div>`;
+    }else if(!Object.keys(shot.landmarks).length){
+      const apiOk=$('modelUrl')&&$('modelUrl').value.trim().startsWith('http');
+      h+=`<button class="btn btn-primary" onclick="analyzeShot(${idx})" ${apiOk?'':'disabled'}>Analyze →</button>`;
+      if(!apiOk)h+=`<span style="font-size:10px;color:var(--wn)">Configure API first</span>`;
+    }else{
+      h+=`<button class="btn btn-secondary btn-sm" onclick="saveShot(${idx})">💾 Save</button>`;
+      h+=`<button class="btn btn-primary btn-sm" onclick="sendToScreen(${idx})" style="background:rgba(62,219,160,.2);border:1px solid rgba(62,219,160,.5);color:#3edba0">▶ Screen</button>`;
+    }
+    h+=`<button class="rm-btn" onclick="resetStepShot(${idx})">✕</button></div></div>`;
+
+    // Scale bar
+    const sc=shot.scaleCal;const refType=sc.refType||'ball';const refMm=sc.refMm||25;
+    h+=`<div class="scale-bar"><button class="scale-btn${sc.active?' active':''}" onclick="toggleScale(${idx})">⊡ Scale</button>`;
+    if(sc.active){
+      h+=`<select class="scale-select" onchange="setScaleRef(${idx},this.value,'type')">
+        <option value="ball"${refType==='ball'?' selected':''}>Ball</option>
+        <option value="caliper"${refType==='caliper'?' selected':''}>Caliper</option>
+        <option value="head"${refType==='head'?' selected':''}>Fem Head</option>
+        <option value="cup"${refType==='cup'?' selected':''}>Cup</option>
+        <option value="ruler"${refType==='ruler'?' selected':''}>Ruler</option>
+        <option value="custom"${refType==='custom'?' selected':''}>Custom</option>
+      </select>
+      <input class="scale-input" type="number" value="${refMm}" placeholder="mm" onchange="setScaleRef(${idx},this.value,'mm')">
+      <span class="cfg-lbl">mm</span>`;
+      if(sc.points.length<2)h+=`<span style="font-size:10px;color:var(--txm)">Tap ${2-sc.points.length} edge point${sc.points.length===1?'':'s'}</span>`;
+    }
+    if(sc.pxPerMm)h+=`<span class="scale-val">${sc.pxPerMm.toFixed(2)} px/mm</span>`;
+    if(sc.points.length>0)h+=`<button class="scale-btn" onclick="resetScale(${idx})">Reset</button>`;
+    h+='</div>';
+
+    // Landmark legend
+    if(Object.keys(shot.landmarks).length){
+      h+=`<div class="legend">${Object.entries(LM_COLORS).map(([k,c])=>`<div class="leg-i"><div class="leg-d" style="background:${c}"></div>${LM_SHORT[k]}</div>`).join('')}</div>`;
+    }
+
+    // ── BIG RESULT CARD ──
+    if(Object.keys(shot.landmarks).length){
+      const m=calcMetrics(shot.landmarks,idx);
+      const ppm=shotPPM(idx);
+      const fmt=v=>ppm?(v/ppm).toFixed(1)+'mm':Math.round(v)+'px';
+      const tiltAbs=m.tilt!=null?Math.abs(m.tilt):null;
+      const lldAbs=m.lldTD!=null?Math.abs(m.lldTD):null;
+      // Color thresholds
+      const lldColor=lldAbs==null?'var(--txd)':ppm?(lldAbs/ppm<3?'var(--ac)':lldAbs/ppm<6?'var(--wn)':'var(--dn)'):(lldAbs<8?'var(--ac)':lldAbs<20?'var(--wn)':'var(--dn)');
+      const tiltColor=tiltAbs==null?'var(--txd)':tiltAbs<2?'var(--ac)':tiltAbs<5?'var(--wn)':'var(--dn)';
+      const cardBorder=lldAbs!=null&&(ppm?lldAbs/ppm>=6:lldAbs>=20)?'danger':lldAbs!=null&&(ppm?lldAbs/ppm>=3:lldAbs>=8)?'warn':'';
+      const lldDir=m.lldTD==null?'':m.lldTD>0?'R longer':'L longer';
+      const apClass=m.isAP===true?'ok':m.isAP===false?'bad':'unknown';
+      const apText=m.isAP===true?'✓ TRUE AP':m.isAP===false?'✗ ROTATED':'— AP';
+      h+=`<div class="result-card ${cardBorder}">
+        <div class="result-row-big">
+          <div class="metric-big">
+            <div class="metric-num" style="color:${lldColor}">${m.lldTD!=null?fmt(lldAbs):'—'}</div>
+            <div class="metric-label">LLD</div>
+            <div class="metric-sub">${lldDir}</div>
+          </div>
+          <div class="metric-big">
+            <div class="metric-num" style="color:${tiltColor}">${tiltAbs!=null?tiltAbs.toFixed(1)+'°':'—'}</div>
+            <div class="metric-label">Tilt</div>
+            <div class="metric-sub">${tiltAbs!=null?(tiltAbs<2?'Neutral':m.tilt>0?'L down':'R down'):''}</div>
+          </div>
+          <div class="metric-big" style="display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <span class="ap-badge ${apClass}">${apText}</span>
+            <div class="metric-label" style="margin-top:8px">AP Quality</div>
+            ${m.lldIT!=null?`<div class="metric-sub">IT: ${fmt(Math.abs(m.lldIT))}</div>`:''}
+          </div>
+        </div>`;
+      // Delta row (vs reference, for intra shots)
+      if(idx>0&&shots[0]&&Object.keys(shots[0].landmarks||{}).length){
+        const refM=calcMetrics(shots[0].landmarks,0);
+        const pp=ppm||shotPPM(0);
+        const fmtD=v=>pp?(v/pp).toFixed(1)+'mm':Math.round(v)+'px';
+        const opSide=(document.getElementById('opSide')||{value:'right'}).value;
+        const opL=opSide==='left'?'L':'R';
+        let lldD=null;
+        if(m.lldTD!=null&&refM.lldTD!=null)lldD=m.lldTD-refM.lldTD;
+        let offD=null,offDir='';
+        if(opSide==='left'&&m.offsetL!=null&&refM.offsetL!=null){offD=m.offsetL-refM.offsetL;offDir=Math.abs(offD)<1?'no change':offD>0?'increased':'decreased';}
+        else if(opSide==='right'&&m.offsetR!=null&&refM.offsetR!=null){offD=m.offsetR-refM.offsetR;offDir=Math.abs(offD)<1?'no change':offD>0?'increased':'decreased';}
+        const lldDColor=lldD==null?'var(--txd)':pp&&Math.abs(lldD/pp)<3?'var(--ac)':pp&&Math.abs(lldD/pp)<6?'var(--wn)':'var(--dn)';
+        const lldDDir=lldD==null?'':lldD>0?opL+' longer':opL+' shorter';
+        h+=`<div class="delta-row">
+          <div class="delta-chip">
+            <span class="delta-chip-lbl">Leg Δ vs Reference</span>
+            <span class="delta-chip-val" style="color:${lldDColor}">${lldD!=null?fmtD(Math.abs(lldD)):'—'}</span>
+            <span class="delta-chip-sub">${lldDDir}</span>
+          </div>
+          <div class="delta-chip">
+            <span class="delta-chip-lbl">${opL} Offset Δ</span>
+            <span class="delta-chip-val" style="color:var(--txm)">${offD!=null?fmtD(Math.abs(offD)):'—'}</span>
+            <span class="delta-chip-sub">${offDir}</span>
+          </div>
+        </div>`;
+      }
+      h+='</div>';// close result-card
+
+      // ── CUP INLINE (trial=1, final=2) ──
+      if(idx===1||idx===2){
+        const slot=idx===1?'trial':'final';
+        const Cap=slot.charAt(0).toUpperCase()+slot.slice(1);
+        const cs=CUP_SHOTS[slot];
+        h+=`<div class="cup-inline" id="cupInline${Cap}">
+          <div class="cup-inline-hdr">
+            <span class="cup-inline-title">⊙ Cup Placement</span>
+            <div class="cup-zoom-ctrl">
+              <button onclick="cupZoom('${slot}',1.25)" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--tx);padding:2px 8px;cursor:pointer;font-size:14px">+</button>
+              <span class="cup-zoom-lbl" id="cupZoom${Cap}" style="font-size:10px;font-family:var(--m);color:var(--txm);min-width:28px;text-align:center">1×</span>
+              <button onclick="cupZoom('${slot}',0.8)" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--tx);padding:2px 8px;cursor:pointer;font-size:14px">−</button>
+              <button onclick="cupResetZoom('${slot}')" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--txd);padding:2px 6px;cursor:pointer;font-size:9px">1:1</button>
+            </div>
+          </div>
+          <div class="cup-canvas-wrap" id="cupWrap${Cap}"><canvas id="cupCv${Cap}"></canvas></div>
+          <div class="cup-step-bar" id="cupStep${Cap}"><span>Upload a cup X-ray to begin</span></div>
+          <div class="cup-action-bar">
+            <button class="btn btn-secondary btn-sm" onclick="uploadCupImg('${slot}')">🖼 Library</button>
+            <button class="btn btn-secondary btn-sm" onclick="captureCupImg('${slot}')">📷 Camera</button>
+            <input type="file" id="cupFile${Cap}" accept="image/*" style="display:none" onchange="loadCupImg('${slot}',this.files[0])">
+            <input type="file" id="cupCap${Cap}" accept="image/*" capture="environment" style="display:none" onchange="loadCupImg('${slot}',this.files[0])">
+          </div>
+          <div class="cup-results-big" id="cupResults${Cap}" style="display:none"></div>
+          <div class="cup-action-bar" id="cupSave${Cap}" style="display:none">
+            <button class="btn btn-secondary btn-sm" onclick="resetCupShot('${slot}')">Reset</button>
+            <button class="btn btn-primary btn-sm" onclick="saveCupShot('${slot}')" style="background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.5);color:#a78bfa">💾 Save Cup</button>
+            <button class="btn btn-primary btn-sm" onclick="sendCupToScreen('${slot}')" style="background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.5);color:#a78bfa">▶ Screen</button>
+          </div>
+        </div>`;
+      }
+    }
+  }
+
+  d.innerHTML=h;
+  list.appendChild(d);
+  if(shot.img){
+    setTimeout(()=>{
+      drawShot(idx);
+      setupDrag(idx);
+      if(idx===1||idx===2){
+        const slot=idx===1?'trial':'final';
+        if(CUP_SHOTS[slot].img)drawCupCanvas(slot);
+        renderCupShot(slot);
+        setupCupCanvas(slot);
+      }
+    },10);
+  }
+  $('lmHint').style.display=shots.some(s=>Object.keys(s.landmarks||{}).length||s.scaleCal?.active)?'':'none';
+  updateCmp();
+}
+
+// Reset a step's shot slot
+function resetStepShot(idx){
+  shots[idx]={id:shots[idx]?.id||'slot'+idx,img:null,imageSource:null,landmarks:{},loading:false,
+    zoom:{s:1,vx:0,vy:0},scaleCal:{active:false,refType:null,refMm:null,points:[],pxPerMm:null},
+    cup:{active:false,points:[],ellipse:null},dicomMeta:null,analysisRaw:null};
+  renderShots();
+}
+
+// Override renderCupShot to use big result display
+const _origRenderCupShot_ref={};
+function _patchCupResults(slot){
+  const s=CUP_SHOTS[slot];
+  const Cap=slot.charAt(0).toUpperCase()+slot.slice(1);
+  const results=$('cupResults'+Cap);
+  const saveBar=$('cupSave'+Cap);
+  if(!results||!saveBar)return;
+  if(s.step===3&&s.angles){
+    const a=s.angles;
+    const incOk=a.inclination>=30&&a.inclination<=50;
+    const antOk=a.anteversion>=10&&a.anteversion<=30;
+    results.style.display='flex';
+    results.innerHTML=`
+      <div class="cup-result-metric">
+        <div class="cup-result-val ${incOk?'ok':'warn'}">${a.inclination.toFixed(1)}°</div>
+        <div class="cup-result-lbl">Inclination</div>
+        <div class="cup-result-range">Target 30–50°${incOk?'':' ⚠'}</div>
+      </div>
+      <div class="cup-result-metric">
+        <div class="cup-result-val ${antOk?'ok':'warn'}">${a.anteversion.toFixed(1)}°</div>
+        <div class="cup-result-lbl">Anteversion</div>
+        <div class="cup-result-range">Target 10–30°${antOk?'':' ⚠'}</div>
+      </div>
+      <div class="cup-result-metric">
+        <div class="cup-result-val" style="color:var(--txm);font-size:28px">${s.rimPts.length}</div>
+        <div class="cup-result-lbl">Rim Points</div>
+        <div class="cup-result-range">Ellipse fit</div>
+      </div>`;
+    saveBar.style.display='flex';
+  }else{
+    results.style.display='none';
+    saveBar.style.display='none';
+  }
+}
+
+
+// ── Original constants & helpers ──
 const LM_COLORS={right_teardrop:'#FF5C5C',left_teardrop:'#5C8AFF',right_lesser_trochanter:'#FF9E3D',left_lesser_trochanter:'#3DDFFF',right_ischial_tuberosity:'#FF5CDD',left_ischial_tuberosity:'#5CFFB0',symphysis_superior:'#FFFFFF',symphysis_inferior:'#CCCCCC',coccyx_superior:'#FFB8D9',coccyx_inferior:'#FF8ABF',right_obturator_center:'#FFB07B',left_obturator_center:'#7BFFCB'};
 const LM_SHORT={right_teardrop:'PtR-TD',left_teardrop:'PtL-TD',right_lesser_trochanter:'PtR-LT',left_lesser_trochanter:'PtL-LT',right_ischial_tuberosity:'PtR-IT',left_ischial_tuberosity:'PtL-IT',symphysis_superior:'Sym-S',symphysis_inferior:'Sym-I',coccyx_superior:'Coc-S',coccyx_inferior:'Coc-I',right_obturator_center:'PtR-Ob',left_obturator_center:'PtL-Ob'};
 
 // State
 // shot = {id, img:{el,b64,mt,name,w,h}, imageSource:'photo'|'dicom', landmarks:{}, analysisRaw, loading, 
 //          zoom:{s,vx,vy}, scaleCal:{active,refType,refMm,points:[],pxPerMm}}
-let shots=[];
-let dragging=null; // {idx,key}
 
 // ============================================================
 // URL Params + Config
 // ============================================================
-const GG_DEFAULTS={modelUrl:'https://galeygrid-api-production.up.railway.app',sbUrl:'https://qzopthbeiavsiyvcpfnx.supabase.co',sbKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6b3B0aGJlaWF2c2l5dmNwZm54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzcyNzEsImV4cCI6MjA4OTQ1MzI3MX0.tWTWDGpfJpa6yLd2avc2OLEHldyZwDr7hrUWqaCSnrM'};
-(function(){const p=new URLSearchParams(location.search);const m={model:'modelUrl',sb:'sbUrl',sbk:'sbKey'};let f=false;for(const[k,id]of Object.entries(m)){const v=p.get(k);if(v){$(id).value=v;localStorage.setItem('gg_'+id,v);f=true}}if(f&&history.replaceState)history.replaceState({},'',location.pathname)})();
-['modelUrl','sbUrl','sbKey'].forEach(id=>{const el=$(id),s=localStorage.getItem('gg_'+id)||GG_DEFAULTS[id]||'';if(s&&!el.value)el.value=s;el.addEventListener('input',()=>{localStorage.setItem('gg_'+id,el.value);if(id==='modelUrl')updSts()})});
 function updSts(){const u=$('modelUrl').value.trim();if(!u.startsWith('http')){$('apiSts').textContent='Not set';$('apiSts').className='sts no';return;}$('apiSts').textContent='Checking…';$('apiSts').className='sts';fetch(u+'/health',{method:'GET'}).then(r=>{$('apiSts').textContent=r.ok?'Ready':'Error';$('apiSts').className='sts '+(r.ok?'ok':'no')}).catch(()=>{$('apiSts').textContent='Offline';$('apiSts').className='sts no'});if($('sbUrl').value.trim().length>5)$('cfgPanel').classList.add('collapsed')}
-function toggleCfg(){$('cfgPanel').classList.toggle('collapsed')}
-updSts();
 
 // Auto-generate case ID on page load
 function genCaseId(){
@@ -392,7 +858,6 @@ function genCaseId(){
   for(let i=0;i<6;i++)id+=chars[Math.floor(Math.random()*chars.length)];
   return id;
 }
-$('caseId').value=genCaseId();
 
 function calcBMI(){
   const ht=parseFloat($('ptHtIn').value);
@@ -438,175 +903,8 @@ function addShot(){
   renderShots();
 }
 
-function renderShots(scrollTo){
-  const list=$('shotList');list.innerHTML='';
-  shots.forEach((shot,idx)=>{
-    const isRef=idx===0;
-    const d=document.createElement('div');d.className='shot'+(isRef?' ref':'');d.id='shot'+idx;
-    const label=isRef?'Reference AP Pelvis':'Shot '+(idx+1);
-    const tag=isRef?'<span class="shot-tag ref">Reference</span>':'<span class="shot-tag intra">Intraop #'+idx+'</span>';
-    const srcTag=shot.imageSource?`<span class="src-tag ${shot.imageSource==='dicom'?'dicom':'photo'}">${shot.imageSource}</span>`:'';
-    const dicomInfo=shot.dicomMeta?`<span style="font-size:8px;color:var(--txd);margin-left:4px">${shot.dicomMeta.pixelSpacingMm?shot.dicomMeta.pixelSpacingMm.toFixed(2)+'mm/px':'no spacing'}${shot.dicomMeta.magnification?' mag:'+shot.dicomMeta.magnification.toFixed(2)+'x':''}</span>`:'';
-    const opSideVal=$('opSide').value;
-    const opBadge=`<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;background:rgba(62,219,160,.15);color:#3edba0;border:1px solid rgba(62,219,160,.35);margin-left:6px;letter-spacing:.04em">${opSideVal.toUpperCase()} OP</span>`;
-    let h='<div class="shot-h"><span class="shot-lbl">'+label+opBadge+'</span><div>'+tag+srcTag+dicomInfo+'</div></div>';
 
-    if(!shot.img){
-      h+=`<div class="dz" id="dz${idx}"><div class="dz-ic">&#8853;</div><div class="dz-txt">${isRef?'Upload reference AP pelvis':'Upload fluoro shot'}</div><div class="dz-h">Photo, DICOM, or live capture</div>
-        <div class="dz-btns"><button class="dz-btn" onclick="event.stopPropagation();$('fL${idx}').click()">&#128444; Library</button><button class="dz-btn" onclick="event.stopPropagation();$('fC${idx}').click()">&#128247; Camera</button></div></div>
-        <input type="file" id="fL${idx}" accept="image/*,.dcm,application/dicom" style="display:none" onchange="loadShotImg(${idx},this.files[0])">
-        <input type="file" id="fC${idx}" accept="image/*" capture="environment" style="display:none" onchange="loadShotImg(${idx},this.files[0])">`;
-    } else {
-      h+=`<div class="cw" id="cw${idx}"><canvas id="cv${idx}"></canvas><div class="zoom-badge" id="zb${idx}"></div>
-        <div class="zoom-bar"><button class="zoom-btn" onclick="zoomAt(${idx},1.4)">+</button><button class="zoom-btn" onclick="zoomAt(${idx},1/1.4)">&minus;</button><button class="zoom-btn" onclick="resetZ(${idx})" style="font-size:11px">1:1</button></div></div>`;
-      // Actions
-      h+=`<div class="shot-act"><span class="fn">${shot.img.name}</span><div style="display:flex;gap:5px;align-items:center">`;
-      if(shot.loading){h+='<span class="loader-t">Analyzing...</span>'}
-      else if(!Object.keys(shot.landmarks).length){h+=`<button class="btn btn-primary btn-sm" onclick="analyzeShot(${idx})" ${$('modelUrl').value.trim().startsWith('http')?'':'disabled'}>Analyze</button>`}
-      else{h+=`<button class="btn btn-secondary btn-sm" onclick="saveShot(${idx})">Save</button><button class="btn btn-primary btn-sm" onclick="sendToScreen(${idx})" style="background:rgba(62,219,160,.2);border:1px solid rgba(62,219,160,.5);color:#3edba0">&#9654; Send to Screen</button>`}
-      h+=`<button class="rm-btn" onclick="rmShot(${idx})">Remove</button></div></div>`;
-      // Scale calibration bar
-      const sc=shot.scaleCal;
-      const refType=sc.refType||'ball';
-      const refMm=sc.refMm||25;
-      h+=`<div class="scale-bar">
-        <button class="scale-btn ${sc.active?'active':''}" onclick="toggleScale(${idx})">&#9906; Scale</button>`;
-      if(sc.active){
-        h+=`<select class="scale-select" onchange="setScaleRef(${idx},this.value,'type')">
-          <option value="ball" ${refType==='ball'?'selected':''}>Ball</option>
-          <option value="caliper" ${refType==='caliper'?'selected':''}>Caliper</option>
-          <option value="head" ${refType==='head'?'selected':''}>Fem Head</option>
-          <option value="cup" ${refType==='cup'?'selected':''}>Cup</option>
-          <option value="ruler" ${refType==='ruler'?'selected':''}>Ruler</option>
-          <option value="custom" ${refType==='custom'?'selected':''}>Custom</option>
-        </select>
-        <input class="scale-input" type="number" value="${refMm}" placeholder="mm" onchange="setScaleRef(${idx},this.value,'mm')">
-        <span class="cfg-lbl">mm</span>`;
-        if(sc.points.length<2)h+=`<span>Tap <strong>${2-sc.points.length}</strong> point${sc.points.length===0?'s':''} on edges</span>`;
-      }
-      if(sc.pxPerMm)h+=`<span class="scale-val">${sc.pxPerMm.toFixed(2)} px/mm</span>`;
-      if(sc.points.length>0)h+=`<button class="scale-btn" onclick="resetScale(${idx})">Reset</button>`;
-      h+='</div>';
-      // Legend
-      if(Object.keys(shot.landmarks).length){h+=`<div class="legend">${Object.entries(LM_COLORS).map(([k,c])=>`<div class="leg-i"><div class="leg-d" style="background:${c}"></div>${LM_SHORT[k]}</div>`).join('')}</div>`}
-      // Cup tool bar (only when landmarks present and scale set)
-      if(Object.keys(shot.landmarks).length){
-        const cup=shot.cup||{active:false,points:[],ellipse:null};
-        const ppm=shotPPM(idx);
-        h+=`<div class="cup-bar">`;
-        h+=`<button class="cup-btn ${cup.active?'active':''}" onclick="toggleCup(${idx})">⊙ Cup${cup.active?' (placing)':''}</button>`;
-        if(cup.active){
-          const n=cup.points.length;
-          const need=Math.max(0,5-n);
-          if(need>0)h+=`<span>Place <b>${need}</b> more rim point${need>1?'s':''} (min 5)</span>`;
-          else h+=`<span style="color:#a78bfa">${n} points placed — ${n>=5?'ellipse fit active':'need 5+'}</span>`;
-          if(n>0)h+=`<button class="cup-btn" onclick="undoCupPoint(${idx})">↩ Undo</button>`;
-          if(n>0)h+=`<button class="cup-btn" onclick="resetCup(${idx})">Clear</button>`;
-          if(cup.ellipse)h+=`<button class="cup-btn" style="border-color:var(--ac);color:var(--ac)" onclick="saveCupData(${idx})">Save Cup Data</button>`;
-        } else if(cup.ellipse){
-          const e=cup.ellipse;const ppm2=ppm||1;
-          const incOk=e.inclination>=30&&e.inclination<=50;
-          const antOk=e.anteversion>=10&&e.anteversion<=30;
-          h+=`<span class="cup-val ${incOk?'ok':'warn'}">Inc: ${e.inclination.toFixed(1)}°</span>`;
-          h+=`<span class="cup-val ${antOk?'ok':'warn'}">Ant: ${e.anteversion.toFixed(1)}°</span>`;
-          h+=`<button class="cup-btn" onclick="toggleCup(${idx})">Edit</button>`;
-        }
-        h+=`</div>`;
-        // Cup results panel
-        if(!cup.active&&cup.ellipse){
-          const e=cup.ellipse;
-          const incOk=e.inclination>=30&&e.inclination<=50;
-          const antOk=e.anteversion>=10&&e.anteversion<=30;
-          h+=`<div class="cup-panel">
-            <div class="cup-metric">
-              <div class="cup-metric-val ${incOk?'ok':'warn'}">${e.inclination.toFixed(1)}°</div>
-              <div class="cup-metric-lbl">Inclination</div>
-              <div class="cup-metric-range">Target 30–50°${incOk?'' : ' ⚠️ OUT'}</div>
-            </div>
-            <div class="cup-metric">
-              <div class="cup-metric-val ${antOk?'ok':'warn'}">${e.anteversion.toFixed(1)}°</div>
-              <div class="cup-metric-lbl">Anteversion</div>
-              <div class="cup-metric-range">Target 10–30°${antOk?'' : ' ⚠️ OUT'}</div>
-            </div>
-            <div class="cup-metric">
-              <div class="cup-metric-val" style="font-size:20px;color:var(--txm)">${e.points} pts</div>
-              <div class="cup-metric-lbl">Rim Points</div>
-              <div class="cup-metric-range">Fit confidence</div>
-            </div>
-            ${!ppm?'<span style="font-size:10px;color:var(--warn)">&#9888; Set scale for mm accuracy</span>':''}
-          </div>`;
-        }
-      }
-      // Comparison toggle + delta bar (non-reference shots with landmarks)
-      const refHasLM=shots[0]&&Object.keys(shots[0].landmarks||{}).length;
-      if(!isRef&&Object.keys(shot.landmarks).length&&refHasLM){
-        const cv=shot.cmpView||'current';
-        h+=`<div class="cmp-toggle">
-          <button class="cmp-tab ref-tab ${cv==='ref'?'active':''}" onclick="setCmpView(${idx},'ref')">Reference</button>
-          <button class="cmp-tab ${cv==='current'?'active':''}" onclick="setCmpView(${idx},'current')">Shot ${idx+1}</button>
-        </div>`;
-        // Delta bar
-        const refM=calcMetrics(shots[0].landmarks,0);
-        const curM=calcMetrics(shot.landmarks,idx);
-        const ppm=curM.ppm||refM.ppm;
-        const fmtD=v=>ppm?(v/ppm).toFixed(1)+'mm':Math.round(v)+'px';
-        
-        // LLD delta — op side aware, no color coding
-        const opSide=$('opSide').value;
-        const opLabel=opSide==='left'?'L':'R';
-        const nonOpLabel=opSide==='left'?'R':'L';
-        let lldDelta=null,lldOpSub='',lldNonOpSub='';
-        if(curM.lldTD!=null&&refM.lldTD!=null){
-          lldDelta=curM.lldTD-refM.lldTD;
-          // lldTD positive = R longer; interpret from op side perspective
-          const opChange=opSide==='right'?lldDelta:-lldDelta;
-          const opMm=ppm?(Math.abs(lldDelta)/ppm).toFixed(1)+'mm':Math.round(Math.abs(lldDelta))+'px';
-          lldOpSub=Math.abs(lldDelta)<0.5?'no change':opChange>0?opLabel+' leg +'+opMm+' longer':opLabel+' leg '+opMm+' shorter';
-          lldNonOpSub=Math.abs(lldDelta)<0.5?'':nonOpLabel+' (non-op)';
-        }
-        // Offset delta (operative side only)
-        let offDelta=null,offDir='';
-        if(opSide==='left'&&curM.offsetL!=null&&refM.offsetL!=null){
-          offDelta=curM.offsetL-refM.offsetL;
-          const mm=ppm?(Math.abs(offDelta)/ppm).toFixed(1)+'mm':Math.round(Math.abs(offDelta))+'px';
-          offDir=Math.abs(offDelta)<0.5?'no change':offDelta>0?'increased +'+mm:'decreased '+mm;
-        } else if(opSide==='right'&&curM.offsetR!=null&&refM.offsetR!=null){
-          offDelta=curM.offsetR-refM.offsetR;
-          const mm=ppm?(Math.abs(offDelta)/ppm).toFixed(1)+'mm':Math.round(Math.abs(offDelta))+'px';
-          offDir=Math.abs(offDelta)<0.5?'no change':offDelta>0?'increased +'+mm:'decreased '+mm;
-        }
-        // AP
-        const apOk=curM.isAP;
-
-        h+=`<div class="delta-bar visible">
-          <div class="delta-grid">
-            <div class="delta-cell">
-              <div class="delta-label">Leg Length Δ</div>
-              <div class="delta-val">${lldDelta!=null?fmtD(Math.abs(lldDelta)):'—'}</div>
-              <div class="delta-sub">${lldOpSub||'no data'}</div>
-              <div class="delta-sub" style="color:var(--txd);opacity:0.45;font-size:9px">${lldNonOpSub}</div>
-            </div>
-            <div class="delta-cell">
-              <div class="delta-label">${opLabel} Offset Δ (op)</div>
-              <div class="delta-val">${offDelta!=null?fmtD(Math.abs(offDelta)):'—'}</div>
-              <div class="delta-sub">${offDir||'no data'}</div>
-            </div>
-            <div class="delta-cell">
-              <div class="delta-label">AP Check</div>
-              <div class="delta-val">${apOk===true?'✓':apOk===false?'✗':'—'}</div>
-              <div class="delta-sub">${apOk===true?'True AP':apOk===false?'Rotated':'no data'}</div>
-            </div>
-          </div>
-        </div>`;
-      }
-    }
-    d.innerHTML=h;list.appendChild(d);
-    if(shot.img)setTimeout(()=>drawShot(idx),10);
-  });
-  $('lmHint').style.display=shots.some(s=>Object.keys(s.landmarks).length||s.scaleCal.active)?'':'none';
-  updateCmp();
-  if(scrollTo!=null){setTimeout(()=>{const el=$('shot'+scrollTo);if(el)el.scrollIntoView({behavior:'auto',block:'nearest'})},20)}
-}
+// ── Original core logic ──
 
 function loadShotImg(idx,file){
   if(!file)return;
@@ -756,7 +1054,6 @@ function loadShotImg(idx,file){
     img.src=e.target.result};r.readAsDataURL(file);
   }
 }
-function rmShot(idx){shots.splice(idx,1);renderShots()}
 
 // ============================================================
 // Scale Calibration (per-shot)
@@ -1967,15 +2264,7 @@ function wizSkip(){
 // Mode Toggle
 // ============================================================
 let currentMode='ap';
-function setMode(m){
-  currentMode=m;
-  $('modeAP').classList.toggle('active',m==='ap');
-  $('modeCup').classList.toggle('active',m==='cup');
-  $('apModeWrap').style.display=m==='ap'?'':'none';
-  $('cupModeWrap').classList.toggle('visible',m==='cup');
-  $('modeLbl').textContent=m==='ap'?'LLD & Offset Analysis':'Acetabular Cup Positioning';
-  if(m==='cup')renderCupMode();
-}
+
 
 // ============================================================
 // Cup Mode State
@@ -3148,7 +3437,78 @@ function endWizard(){
   }
 }
 
-addShot();
+
+// ============================================================
+// Initialization
+// ============================================================
+function mkShot(id){
+  return{id,img:null,imageSource:null,landmarks:{},loading:false,
+    zoom:{s:1,vx:0,vy:0},
+    scaleCal:{active:false,refType:null,refMm:null,points:[],pxPerMm:null},
+    cup:{active:false,points:[],ellipse:null},
+    dicomMeta:null,analysisRaw:null};
+}
+
+// Pre-create 3 fixed shot slots
+let shots=[mkShot('ref'),mkShot('trial'),mkShot('final')];
+let dragging=null;
+
+// Hidden opSide input for compatibility with existing functions
+(function(){
+  const inp=document.createElement('input');
+  inp.type='hidden';inp.id='opSide';inp.value='right';
+  document.body.appendChild(inp);
+})();
+
+// Load persisted config
+const GG_DEFAULTS={
+  modelUrl:'https://galeygrid-api-production.up.railway.app',
+  sbUrl:'https://qzopthbeiavsiyvcpfnx.supabase.co',
+  sbKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6b3B0aGJlaWF2c2l5dmNwZm54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzcyNzEsImV4cCI6MjA4OTQ1MzI3MX0.tWTWDGpfJpa6yLd2avc2OLEHldyZwDr7hrUWqaCSnrM'
+};
+
+// Apply URL params (legacy support)
+(function(){
+  const p=new URLSearchParams(location.search);
+  const m={model:'modelUrl',sb:'sbUrl',sbk:'sbKey'};
+  let f=false;
+  for(const[k,id]of Object.entries(m)){
+    const v=p.get(k);
+    if(v){const el=$(id);if(el)el.value=v;localStorage.setItem('gg_'+id,v);f=true;}
+  }
+  if(f&&history.replaceState)history.replaceState({},'',location.pathname);
+})();
+
+['modelUrl','sbUrl','sbKey'].forEach(id=>{
+  const el=$(id);if(!el)return;
+  const s=localStorage.getItem('gg_'+id)||GG_DEFAULTS[id]||'';
+  if(s&&!el.value)el.value=s;
+  el.addEventListener('input',()=>{
+    localStorage.setItem('gg_'+id,el.value);
+    if(id==='modelUrl'){updSts();syncCasePill();}
+  });
+});
+
+$('caseId').value=genCaseId();
+setOpSide('right');
+syncCasePill();
+updSts();
+
+// Restore export count
+try{
+  const ld=JSON.parse(localStorage.getItem('gg_training')||'[]');
+  if(ld.length){$('exportBox').style.display='';$('exportCount').textContent=ld.length;}
+}catch(e){}
+
+// Patch renderCupShot to call big result renderer after
+const _origRCS=window.renderCupShot;
+if(typeof _origRCS==='function'){
+  window.renderCupShot=function(slot){
+    _origRCS(slot);
+    _patchCupResults(slot);
+  };
+}
+
 </script>
 </body>
 </html>
