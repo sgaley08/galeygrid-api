@@ -418,9 +418,7 @@ details.demo-details summary::-webkit-details-marker{display:none}
     <div class="instr-body">Photograph the pre-op AP pelvis X-ray. Tap <strong>Analyze</strong> to detect landmarks and measure leg length.</div>
   </div>
   <div class="main">
-    <div class="lm-hint" id="lmHint">☞ <strong>Tap &amp; drag</strong> landmarks to correct. Use <strong>⊡ Scale</strong> to calibrate with a known reference.<br><span style="font-size:9px;color:var(--txd)">PtR = patient's right (viewer's left) · PtL = patient's left (viewer's right)</span></div>
     <div id="shotList"></div>
-    <div class="err" id="errBox" style="display:none"></div>
   </div>
 </div>
 
@@ -513,7 +511,7 @@ function goStep(n){
   // Move shotList to correct panel
   const sl=$('shotList');
   if(n===2&&sl.parentElement!==$('panel2').querySelector('.main')){
-    $('panel2').querySelector('.main').insertBefore(sl,$('errBox'));
+    $('panel2').querySelector('.main').appendChild(sl);
   }else if(n===3&&sl.parentElement!==$('panel3').querySelector('.main')){
     $('panel3').querySelector('.main').insertBefore(sl,$('shotList3'));
     $('shotList3').style.display='none';
@@ -603,6 +601,9 @@ async function saveCase(){
 // ============================================================
 function renderShots(scrollTo){
   const list=$('shotList');list.innerHTML='';
+  // Inject lmHint and errBox into shotList so they travel with it across steps
+  const hasLM=shots.some(s=>Object.keys(s.landmarks||{}).length||s.scaleCal?.active);
+  list.insertAdjacentHTML('beforeend',`<div class="lm-hint" id="lmHint" style="display:${hasLM?'':'none'}">☞ <strong>Tap &amp; drag</strong> landmarks to correct. Use <strong>⊡ Scale</strong> to calibrate with a known reference.<br><span style="font-size:9px;color:var(--txd)">PtR = patient's right (viewer's left) · PtL = patient's left (viewer's right)</span></div><div class="err" id="errBox" style="display:none"></div>`);
   const stepToIdx={2:0,3:1,4:2};
   const idx=stepToIdx[currentStep];
   if(idx===undefined){list.style.display='none';return;}
@@ -789,7 +790,6 @@ function renderShots(scrollTo){
       }
     },10);
   }
-  $('lmHint').style.display=shots.some(s=>Object.keys(s.landmarks||{}).length||s.scaleCal?.active)?'':'none';
   updateCmp();
 }
 
@@ -899,8 +899,8 @@ function shotPPM(idx){if(idx!=null&&shots[idx]?.scaleCal?.pxPerMm)return shots[i
 // Shots
 // ============================================================
 function addShot(){
-  shots.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),img:null,imageSource:null,dicomMeta:null,landmarks:{},analysisRaw:null,loading:false,zoom:{s:1,vx:0,vy:0},scaleCal:{active:false,refType:'ball',refMm:25,points:[],pxPerMm:null},cmpView:null,cup:{active:false,points:[],ellipse:null}});
-  renderShots();
+  // No-op in 5-step workflow — shots are fixed slots [ref, trial, final]
+  console.warn('[GG] addShot() called but ignored — use fixed shot slots');
 }
 
 
@@ -1764,7 +1764,7 @@ function updateCmp(){
     const td=m.tilt-refM.tilt;
     if(Math.abs(td)>1){
       const carm=`Tilt C-arm ~${Math.abs(td).toFixed(1)}\u00B0 toward ${td>0?'patient R':'patient L'}`;
-      h+=`<div class="cmp"><div class="cmp-b"><div class="carm"><div class="carm-l">Shot ${i+1} &mdash; C-Arm Correction</div><div class="carm-v">${carm}</div></div></div></div>`;
+      h+=`<div class="cmp"><div class="cmp-b"><div class="carm"><div class="carm-l">${['','Trial','Final'][i]||'Shot '+(i+1)} — C-Arm Correction</div><div class="carm-v">${carm}</div></div></div></div>`;
     }
   });
   box.innerHTML=h}
