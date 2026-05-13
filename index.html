@@ -157,10 +157,10 @@ details.demo-details summary::-webkit-details-marker{display:none}
 
 /* ── Delta chips (intra vs ref) ── */
 .delta-row{display:flex;gap:8px;padding:8px 10px;border-top:1px solid var(--bd);background:rgba(0,0,0,.2)}
-.delta-chip{flex:1;background:var(--bg);border-radius:8px;border:1px solid var(--bd);padding:8px 10px}
-.delta-chip-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txd);display:block;margin-bottom:2px}
-.delta-chip-val{font-size:24px;font-weight:800;font-family:var(--m);display:block;line-height:1.1}
-.delta-chip-sub{font-size:10px;color:var(--txm);display:block;margin-top:2px}
+.delta-chip{background:var(--bg);border-radius:10px;border:2px solid var(--bd);padding:10px 8px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.delta-chip-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txd);display:block;margin-bottom:4px}
+.delta-chip-val{font-size:30px;font-weight:800;font-family:var(--m);display:block;line-height:1.05;margin-bottom:2px}
+.delta-chip-sub{font-size:10px;font-weight:600;color:var(--txm);display:block}
 
 /* ── Legend ── */
 .legend{display:flex;flex-wrap:wrap;gap:5px;padding:5px 12px;background:var(--sf2);border-top:1px solid var(--bd);font-size:8px}
@@ -720,23 +720,46 @@ function renderShots(scrollTo){
         const fmtD=v=>pp?(v/pp).toFixed(1)+'mm':Math.round(v)+'px';
         const opSide=(document.getElementById('opSide')||{value:'right'}).value;
         const opL=opSide==='left'?'L':'R';
-        let lldD=null;
-        if(m.lldTD!=null&&refM.lldTD!=null)lldD=m.lldTD-refM.lldTD;
-        let offD=null,offDir='';
-        if(opSide==='left'&&m.offsetL!=null&&refM.offsetL!=null){offD=m.offsetL-refM.offsetL;offDir=Math.abs(offD)<1?'no change':offD>0?'increased':'decreased';}
-        else if(opSide==='right'&&m.offsetR!=null&&refM.offsetR!=null){offD=m.offsetR-refM.offsetR;offDir=Math.abs(offD)<1?'no change':offD>0?'increased':'decreased';}
-        const lldDColor=lldD==null?'var(--txd)':pp&&Math.abs(lldD/pp)<3?'var(--ac)':pp&&Math.abs(lldD/pp)<6?'var(--wn)':'var(--dn)';
-        const lldDDir=lldD==null?'':lldD>0?opL+' longer':opL+' shorter';
+        // --- LLD delta (signed: positive = operative leg lengthened) ---
+        let lldD=null,lldOpMm=null;
+        if(m.lldTD!=null&&refM.lldTD!=null){
+          lldD=m.lldTD-refM.lldTD;
+          const opChange=opSide==='right'?lldD:-lldD; // positive = operative leg longer
+          lldOpMm=pp?opChange/pp:null;
+        }
+        // --- Offset delta (signed: positive = lateral, negative = medial) ---
+        let offD=null,offMm=null;
+        if(opSide==='left'&&m.offsetL!=null&&refM.offsetL!=null)offD=m.offsetL-refM.offsetL;
+        else if(opSide==='right'&&m.offsetR!=null&&refM.offsetR!=null)offD=m.offsetR-refM.offsetR;
+        if(offD!=null)offMm=pp?offD/pp:null;
+
+        // Signed display strings
+        const lldSignStr=lldOpMm!=null?((lldOpMm>=0?'+':'')+lldOpMm.toFixed(1)+'mm'):
+          lldD!=null?((lldD>=0?'+':'')+Math.round(Math.abs(lldD))+'px'):'—';
+        const offSignStr=offMm!=null?((offMm>=0?'+':'')+offMm.toFixed(1)+'mm'):
+          offD!=null?((offD>=0?'+':'')+Math.round(Math.abs(offD))+'px'):'—';
+
+        // Sub-labels
+        const lldSubTxt=lldOpMm==null?'—':Math.abs(lldOpMm)<0.5?'no change':lldOpMm>0?opL+' leg longer':opL+' leg shorter';
+        const offSubTxt=offMm==null?(offD==null?'—':Math.abs(offD)<0.5?'no change':offD>0?'lateral ↗':'medial ↙'):
+          Math.abs(offMm)<0.5?'no change':offMm>0?'lateral ↗':'medial ↙';
+
+        // Colors: <3mm green, 3–6mm yellow, >6mm red
+        const lldAbsMm=lldOpMm!=null?Math.abs(lldOpMm):null;
+        const offAbsMm=offMm!=null?Math.abs(offMm):null;
+        const lldDColor=lldD==null?'var(--txd)':lldAbsMm==null?'var(--txm)':lldAbsMm<3?'var(--ac)':lldAbsMm<6?'var(--wn)':'var(--dn)';
+        const offDColor=offD==null?'var(--txd)':offAbsMm==null?'var(--txm)':offAbsMm<3?'var(--ac)':offAbsMm<6?'var(--wn)':'var(--dn)';
+
         h+=`<div class="delta-row">
-          <div class="delta-chip">
-            <span class="delta-chip-lbl">Leg Δ vs Reference</span>
-            <span class="delta-chip-val" style="color:${lldDColor}">${lldD!=null?fmtD(Math.abs(lldD)):'—'}</span>
-            <span class="delta-chip-sub">${lldDDir}</span>
+          <div class="delta-chip" style="border-color:${lldDColor==='var(--txd)'?'var(--bd)':lldDColor}55">
+            <span class="delta-chip-lbl">Leg Length Δ (${opL})</span>
+            <span class="delta-chip-val" style="color:${lldDColor}">${lldSignStr}</span>
+            <span class="delta-chip-sub">${lldSubTxt}</span>
           </div>
-          <div class="delta-chip">
+          <div class="delta-chip" style="border-color:${offDColor==='var(--txd)'?'var(--bd)':offDColor}55">
             <span class="delta-chip-lbl">${opL} Offset Δ</span>
-            <span class="delta-chip-val" style="color:var(--txm)">${offD!=null?fmtD(Math.abs(offD)):'—'}</span>
-            <span class="delta-chip-sub">${offDir}</span>
+            <span class="delta-chip-val" style="color:${offDColor}">${offSignStr}</span>
+            <span class="delta-chip-sub">${offSubTxt}</span>
           </div>
         </div>`;
       }
@@ -1715,32 +1738,38 @@ function calcMetrics(lm,idx){
     m.isAP=ppm?dx/ppm<10:dx<30;
   }
   
-  // LLD from teardrop line
+  // Resolve best measurement point: trace medialPoint (most medial cortex) when available,
+  // otherwise fall back to the raw lesser trochanter landmark.
+  const _ltC=typeof ltTracerCache!=='undefined'?ltTracerCache:{};
+  const _lltPt=(idx!=null&&_ltC[idx+'_left']&&_ltC[idx+'_left'].medialPoint)
+    ?_ltC[idx+'_left'].medialPoint:llt;
+  const _rltPt=(idx!=null&&_ltC[idx+'_right']&&_ltC[idx+'_right'].medialPoint)
+    ?_ltC[idx+'_right'].medialPoint:rlt;
+
+  // LLD from teardrop line — measured from most medial trace point (or LT landmark)
   if(ltd&&rtd){
-    if(llt){const p=projPt(llt.x,llt.y,rtd.x,rtd.y,ltd.x,ltd.y);m.ll_td=Math.hypot(llt.x-p.x,llt.y-p.y)}
-    if(rlt){const p=projPt(rlt.x,rlt.y,rtd.x,rtd.y,ltd.x,ltd.y);m.lr_td=Math.hypot(rlt.x-p.x,rlt.y-p.y)}
+    if(_lltPt){const p=projPt(_lltPt.x,_lltPt.y,rtd.x,rtd.y,ltd.x,ltd.y);m.ll_td=Math.hypot(_lltPt.x-p.x,_lltPt.y-p.y)}
+    if(_rltPt){const p=projPt(_rltPt.x,_rltPt.y,rtd.x,rtd.y,ltd.x,ltd.y);m.lr_td=Math.hypot(_rltPt.x-p.x,_rltPt.y-p.y)}
     if(m.ll_td!=null&&m.lr_td!=null)m.lldTD=m.lr_td-m.ll_td; // positive = R longer
   }
-  
-  // LLD from ischial line
+
+  // LLD from ischial line — measured from most medial trace point (or LT landmark)
   if(lit&&rit){
-    if(llt){const p=projPt(llt.x,llt.y,rit.x,rit.y,lit.x,lit.y);m.ll_it=Math.hypot(llt.x-p.x,llt.y-p.y)}
-    if(rlt){const p=projPt(rlt.x,rlt.y,rit.x,rit.y,lit.x,lit.y);m.lr_it=Math.hypot(rlt.x-p.x,rlt.y-p.y)}
+    if(_lltPt){const p=projPt(_lltPt.x,_lltPt.y,rit.x,rit.y,lit.x,lit.y);m.ll_it=Math.hypot(_lltPt.x-p.x,_lltPt.y-p.y)}
+    if(_rltPt){const p=projPt(_rltPt.x,_rltPt.y,rit.x,rit.y,lit.x,lit.y);m.lr_it=Math.hypot(_rltPt.x-p.x,_rltPt.y-p.y)}
     if(m.ll_it!=null&&m.lr_it!=null)m.lldIT=m.lr_it-m.ll_it;
   }
-  
-  // Offset — horizontal distance from each lesser trochanter to the ipsilateral teardrop
-  // This measures combined femoral + acetabular offset
+
+  // Offset — perpendicular distance from ipsilateral teardrop to most medial cortex point.
+  // Larger value = more lateral. Delta (current − ref): positive = moved lateral, negative = moved medial.
   if(ltd&&rtd){
-    // Project along perpendicular to teardrop line for true horizontal offset
     const tdAng=Math.atan2(ltd.y-rtd.y,ltd.x-rtd.x);
-    if(llt&&ltd){
-      const dx=llt.x-ltd.x,dy=llt.y-ltd.y;
-      // Perpendicular distance from teardrop line (lateral offset)
+    if(_lltPt&&ltd){
+      const dx=_lltPt.x-ltd.x,dy=_lltPt.y-ltd.y;
       m.offsetL=Math.abs(dx*Math.sin(tdAng)-dy*Math.cos(tdAng));
     }
-    if(rlt&&rtd){
-      const dx=rlt.x-rtd.x,dy=rlt.y-rtd.y;
+    if(_rltPt&&rtd){
+      const dx=_rltPt.x-rtd.x,dy=_rltPt.y-rtd.y;
       m.offsetR=Math.abs(dx*Math.sin(tdAng)-dy*Math.cos(tdAng));
     }
   }
