@@ -1,10 +1,14 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Header, HTTPException
+from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from ultralytics import YOLO
 from PIL import Image
 import io
 import os
 import time
+import json
+import urllib.request
+import urllib.error
 
 app = FastAPI(title="GaleyGrid API", version="1.0")
 
@@ -16,6 +20,45 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Sign-in check — /predict only answers GaleyGrid users signed in through Supabase.
+# The token is confirmed with Supabase Auth (no secret needed here) and cached briefly.
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://qzopthbeiavsiyvcpfnx.supabase.co")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6b3B0aGJlaWF2c2l5dmNwZm54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzcyNzEsImV4cCI6MjA4OTQ1MzI3MX0.tWTWDGpfJpa6yLd2avc2OLEHldyZwDr7hrUWqaCSnrM")
+REQUIRE_AUTH = os.getenv("REQUIRE_AUTH", "1") != "0"
+TOKEN_CACHE_SECONDS = 300
+_token_cache = {}  # token -> (user_id, expires_at)
+
+
+def _supabase_user_id(token):
+    req = urllib.request.Request(
+        f"{SUPABASE_URL}/auth/v1/user",
+        headers={"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {token}"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            return json.load(resp).get("id")
+    except urllib.error.HTTPError:
+        return None
+
+
+async def require_user(authorization):
+    if not REQUIRE_AUTH:
+        return None
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(status_code=401, detail="Sign in to GaleyGrid to analyze images")
+    token = authorization[7:].strip()
+    now = time.time()
+    cached = _token_cache.get(token)
+    if cached and cached[1] > now:
+        return cached[0]
+    user_id = await run_in_threadpool(_supabase_user_id, token)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Sign in to GaleyGrid to analyze images")
+    if len(_token_cache) > 1000:
+        _token_cache.clear()
+    _token_cache[token] = (user_id, now + TOKEN_CACHE_SECONDS)
+    return user_id
 
 # Load model once at startup
 MODEL_PATH = os.getenv("MODEL_PATH", "best.pt")
@@ -36,7 +79,8 @@ async def health():
     return {"status": "ok", "model": MODEL_PATH, "landmarks": len(LM_KEYS)}
 
 @app.post("/predict")
-async def predict(file: UploadFile = File(...)):
+async def predict(file: UploadFile = File(...), authorization: str | None = Header(default=None)):
+    await require_user(authorization)
     start = time.time()
     
     # Read image
